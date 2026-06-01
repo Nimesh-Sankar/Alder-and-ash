@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Category Management</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="admin-container">
+
+    <!-- SIDEBAR -->
+<!-- CATEGORY SIDEBAR -->
+
+<aside class="admin-sidebar">
+
+  <h2 class="admin-logo">
+    Alder & Ash.
+  </h2>
+
+  <ul class="admin-menu">
+
+    <li onclick="window.location.href='/admin'">
+      Dashboard
+    </li>
+    
+    <li onclick="window.location.href='/admin'">
+      Users
+    </li>
+
+    <li
+      onclick="window.location.href='/admin/products-page'"
+    >
+      Products
+    </li>
+
+    <li
+      onclick="window.location.href='/admin/brands-page'"
+    >
+      Brands
+    </li>
+
+    <li
+      class="active"
+      onclick="window.location.href='/admin/category'"
+    >
+      Category
+    </li>
+
+    <li>
+      Orders
+    </li>
+
+    <li>
+      Coupons
+    </li>
+
+    <li>
+      Banners
+    </li>
+
+    <li>
+      Reports
+    </li>
+
+    <li>
+      Settings
+    </li>
+
+  </ul>
+
+</aside>
+
+</aside>    <!-- MAIN CONTENT -->
+    <main class="admin-main">
+
+      <div class="category-header">
+        <h1>Product Categories</h1>
+        
+        <button
+  onclick="window.location.href='/admin/add-category'"
+>
+  Add Category
+</button>
+      </div>
+      <div class="category-topbar">
+
+        <input
+          type="text"
+          id="categorySearchInput"
+          placeholder="Search category..."
+        />
+      
+        <button onclick="loadCategories()">
+          Search
+        </button>
+      
+        <button onclick="clearCategorySearch()">
+          Clear
+        </button>
+      
+      </div>
+
+      <!-- CATEGORY LIST -->
+  
+<div id="categoryContainer" class="category-grid">
+
+</div>
+
+<div id="categoryPagination"></div>
+
+
+ 
+  <script src="/js/admin.js"></script>
+
+</body>
+</html>

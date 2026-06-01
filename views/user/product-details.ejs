@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>
+    Product Details
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/css/products.css"
+  >
+
+</head>
+
+<body class="home-page">
+  <%- include("../partials/products-navbar") %>
+  <div class="breadcrumb" id="breadcrumb">
+    Home / Products / Product
+  </div>
+  <div id="productDetails"></div>
+  <div class="related-section">
+
+    <h2>
+      Related Products
+    </h2>
+  
+    <div
+      id="relatedProducts"
+      class="related-products"
+    ></div>
+  
+  </div>
+
+  <script>
+
+    let selectedVariant = null;
+  
+    async function loadProduct() {
+  
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+  
+      const id =
+        params.get("id");
+  
+      try {
+  
+        const response =
+          await fetch(
+            `http://localhost:3000/admin/products/${id}`
+          );
+  
+        const data =
+          await response.json();
+  
+        const product =
+          data.product;
+  
+        if (
+          !response.ok ||
+          !product ||
+          product.isDeleted
+        ) {
+  
+          window.location.href =
+            "/api/users/products";
+  
+          return;
+  
+        }
+  
+        selectedVariant =
+          product.variants[0];
+  
+        document.getElementById(
+          "breadcrumb"
+        ).innerHTML = `
+          <a href="/">Home</a>
+          /
+          <a href="/api/users/products">Products</a>
+          /
+          <span>${product.productName}</span>
+        `;
+  
+        loadRelatedProducts(
+          product.category._id,
+          product._id
+        );
+  
+        document.getElementById(
+          "productDetails"
+        ).innerHTML = `
+  
+          <div class="product-page">
+  
+            <div class="gallery">
+  
+              <img
+                class="main-img"
+                src="http://localhost:3000${product.images[0]}"
+              >
+  
+              <div class="small-images">
+  
+                ${product.images.map((image) => `
+  
+                  <img
+                    src="http://localhost:3000${image}"
+                    onclick="changeMainImage(this.src)"
+                  >
+  
+                `).join("")}
+  
+              </div>
+  
+            </div>
+  
+            <div class="product-info">
+  
+              <h1>
+                ${product.productName}
+              </h1>
+  
+              <div class="rating-box">
+                ★★★★☆
+                <span>(24 reviews)</span>
+              </div>
+  
+              <p class="price" id="productPrice">
+                ₹${product.variants[0].price}
+              </p>
+  
+              <div class="offer-box">
+  
+                <p>
+                  Save 10% with code:
+                  <strong>ALDER10</strong>
+                </p>
+  
+              </div>
+  
+              <p class="stock-info" id="stockInfo">
+                ${
+                  product.variants[0].stock > 0
+                    ? `In Stock: ${product.variants[0].stock}`
+                    : `Out Of Stock`
+                }
+              </p>
+  
+              <p class="description">
+                ${product.description}
+              </p>
+  
+              <div class="highlights">
+  
+                <h3>Highlights</h3>
+  
+                <ul>
+                  <li>Premium quality fabric</li>
+                  <li>Comfortable fit</li>
+                  <li>Easy return available</li>
+                  <li>Fast delivery</li>
+                </ul>
+  
+              </div>
+  
+              <h3>Select Size / Color</h3>
+  
+              <div class="sizes">
+  
+                ${product.variants.map((variant, index) => `
+  
+                  <button
+                    class="variant-btn ${index === 0 ? "active-size" : ""}"
+                    onclick="
+                      selectVariant(
+                        '${variant.size}',
+                        '${variant.color}',
+                        ${variant.price},
+                        ${variant.stock},
+                        this
+                      )
+                    "
+                  >
+                    ${variant.size} / ${variant.color}
+                  </button>
+  
+                `).join("")}
+  
+              </div>
+  
+              <div class="actions">
+  
+                <button
+                id="addToCartBtn"
+                  class="cart-btn"
+                  onclick="addToCart()"
+  
+                  ${
+                    product.variants[0].stock <= 0
+                      ? "disabled"
+                      : ""
+                  }
+                >
+                  ${
+                    product.variants[0].stock <= 0
+                      ? "Out Of Stock"
+                      : "Add To Cart"
+                  }
+                </button>
+  
+              </div>
+  
+            </div>
+  
+          </div>
+  
+        `;
+  
+      } catch (error) {
+  
+        console.log(error);
+  
+      }
+  
+    }
+  
+    function selectVariant(
+  size,
+  color,
+  price,
+  stock,
+  button
+) {
+
+  selectedVariant = {
+    size,
+    color,
+    price,
+    stock
+  };
+
+  document.getElementById(
+    "productPrice"
+  ).innerText = `₹${price}`;
+
+  document.getElementById(
+    "stockInfo"
+  ).innerText =
+    stock > 0
+      ? `In Stock: ${stock}`
+      : "Out Of Stock";
+
+  const cartButton =
+    document.getElementById("cartButton");
+
+  if (stock <= 0) {
+    cartButton.disabled = true;
+    cartButton.innerText = "Out Of Stock";
+  } else {
+    cartButton.disabled = false;
+    cartButton.innerText = "Add To Cart";
+  }
+
+  document
+    .querySelectorAll(".variant-btn")
+    .forEach((btn) => {
+      btn.classList.remove("active-size");
+    });
+
+  button.classList.add("active-size");
+
+}
+  
+    async function addToCart() {
+      const user =
+  JSON.parse(
+    localStorage.getItem("user")
+  );
+
+if (!user) {
+
+  showAlert("Please login first");
+
+  window.location.href =
+    "/login";
+
+  return;
+
+}
+  
+      try {
+  
+        const params =
+          new URLSearchParams(
+            window.location.search
+          );
+  
+        const productId =
+          params.get("id");
+  
+        const response =
+          await fetch(
+            "http://localhost:3000/api/cart/add",
+            {
+              method: "POST",
+  
+              headers: {
+                "Content-Type": "application/json",
+                "userid": user.id || user._id
+              },
+  
+              body: JSON.stringify({
+                productId,
+                quantity: 1,
+                size: selectedVariant.size,
+                color: selectedVariant.color
+              })
+            }
+          );
+  
+        const data =
+          await response.json();
+  
+        alert(data.message);
+  
+        if (response.ok) {
+          window.location.href =
+            "/user/cart";
+        }
+  
+      } catch (error) {
+  
+        console.log(error);
+  
+      }
+  
+    }
+  
+    function changeMainImage(imageUrl) {
+  
+      document.querySelector(".main-img").src =
+        imageUrl;
+  
+    }
+  
+    async function loadRelatedProducts(
+      categoryId,
+      currentProductId
+    ) {
+  
+      try {
+  
+        const response =
+          await fetch(
+            `http://localhost:3000/admin/products?category=${categoryId}`
+          );
+  
+        const data =
+          await response.json();
+  
+        const container =
+          document.getElementById(
+            "relatedProducts"
+          );
+  
+        container.innerHTML = "";
+  
+        data.products
+          .filter(
+            (product) =>
+              product._id !== currentProductId
+          )
+          .slice(0, 4)
+          .forEach((product) => {
+  
+            container.innerHTML += `
+  
+              <div
+                class="related-card"
+                onclick="
+                  viewRelatedProduct('${product._id}')
+                "
+              >
+  
+                <img
+                  src="http://localhost:3000${product.images[0]}"
+                >
+  
+                <h3>
+                  ${product.productName}
+                </h3>
+  
+                <p>
+                  ₹${product.variants[0].price}
+                </p>
+  
+              </div>
+  
+            `;
+  
+          });
+  
+      } catch (error) {
+  
+        console.log(error);
+  
+      }
+  
+    }
+  
+    function viewRelatedProduct(id) {
+  
+      window.location.href =
+        `/user/product-details?id=${id}`;
+  
+    }
+  
+    loadProduct();
+  
+  </script>
+
+</body>
+</html>

@@ -32,7 +32,7 @@ export const addAddress = async (req, res) => {
       });
     }
     
-    // If this address is set as default, remove default from other addresses of this user
+    
     if (isDefault) {
       await Address.updateMany(
         { userId },
@@ -40,7 +40,7 @@ export const addAddress = async (req, res) => {
       );
     }
     
-    // Check if this is the first address for the user
+    
     const addressCount = await Address.countDocuments({ userId });
     const shouldBeDefault = addressCount === 0 ? true : isDefault || false;
     
@@ -81,7 +81,7 @@ export const updateAddress = async (req, res) => {
   try {
     const { addressId } = req.params;
     
-    // Validate addressId
+    
     if (!isValidObjectId(addressId)) {
       return res.status(400).json({
         success: false,
@@ -103,7 +103,7 @@ export const updateAddress = async (req, res) => {
       isDefault 
     } = req.body;
     
-    // First, get the current address to know which user it belongs to
+    
     const currentAddress = await Address.findById(addressId);
     
     if (!currentAddress) {
@@ -113,7 +113,7 @@ export const updateAddress = async (req, res) => {
       });
     }
     
-    // If setting as default, remove default from other addresses of this user
+    
     if (isDefault) {
       await Address.updateMany(
         { userId: currentAddress.userId },
@@ -136,9 +136,11 @@ export const updateAddress = async (req, res) => {
         country: country || "India",
         isDefault: isDefault !== undefined ? isDefault : currentAddress.isDefault,
       },
-      { new: true, runValidators: true }
+      {
+        returnDocument: "after",
+        runValidators: true
+      }
     );
-    
     res.json({
       success: true,
       message: "Address updated successfully",
@@ -159,7 +161,7 @@ export const deleteAddress = async (req, res) => {
   try {
     const { addressId } = req.params;
     
-    // Validate addressId
+    
     if (!isValidObjectId(addressId)) {
       return res.status(400).json({
         success: false,
@@ -176,12 +178,13 @@ export const deleteAddress = async (req, res) => {
       });
     }
     
+    
     const wasDefault = address.isDefault;
     const userId = address.userId;
     
     await Address.findByIdAndDelete(addressId);
     
-    // If the deleted address was default, make another address default if available
+    
     if (wasDefault) {
       const nextAddress = await Address.findOne({ userId })
         .sort({ createdAt: 1 });
@@ -202,6 +205,33 @@ export const deleteAddress = async (req, res) => {
       success: false,
       message: "Server error",
       error: error.message 
+    });
+  }
+};
+
+export const getUserAddresses = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID format"
+      });
+    }
+
+    const addresses = await Address.find({ userId }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      addresses
+    });
+
+  } catch (error) {
+    console.log("GET ADDRESSES ERROR:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
     });
   }
 };

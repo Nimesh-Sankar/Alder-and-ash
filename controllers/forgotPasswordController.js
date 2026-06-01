@@ -13,15 +13,15 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate OTP (you can reuse your OTP model)
+    // Generate OTP 
     const generateOTP = () => {
       return Math.floor(100000 + Math.random() * 900000).toString();
     };
 
     const otp = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Delete old OTPs for this email with purpose "forgotPassword"
+    
     await OTP.deleteMany({ email, purpose: "forgotPassword" });
 
     const newOTP = new OTP({
@@ -69,12 +69,12 @@ export const resetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Hash new password
+    // Hash password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
 
-    // Delete used OTP
+    // Delete OTP
     await OTP.deleteOne({ _id: otpRecord._id });
 
     res.json({

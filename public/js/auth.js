@@ -1,178 +1,733 @@
-// API Base URL
-const API_BASE = 'http://localhost:5000';
 
-// Check if user is logged in
+const API_BASE = 'http://localhost:3000';
+function showAlert(message, type = "success") {
+  const alertBox = document.getElementById("alertBox");
+
+  if (!alertBox) return;
+
+  alertBox.className =
+  `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent = message;
+
+  alertBox.classList.remove("d-none");
+
+  setTimeout(() => {
+    alertBox.classList.add("d-none");
+  }, 3000);
+}
+async function validateUser() {
+  const currentUser = JSON.parse(localStorage.getItem("user"));
+
+  if (!currentUser) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/users/check-user/${currentUser._id}`
+    );
+
+    if (!response.ok) {
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+validateUser();
+
+
+// CHECK LOGIN STATUS
+
 const currentUser = localStorage.getItem('user');
-if (currentUser) {
-    const user = JSON.parse(currentUser);
-    document.getElementById('authLinks').style.display = 'none';
-    document.getElementById('userLinks').style.display = 'block';
+
+const authLinks = document.getElementById('authLinks');
+const userLinks = document.getElementById('userLinks');
+
+
+if (currentUser && authLinks && userLinks) {
+  authLinks.style.display = 'none';
+  userLinks.style.display = 'block';
 }
+const profileLink = document.getElementById('profileLink');
 
-// Signup with OTP Flow
-let signupData = {};
-
+if (profileLink && currentUser) {
+  profileLink.href = '/user/profile';
+}
+// SIGNUP WITH OTP
+// SIGNUP WITH OTP
 if (document.getElementById('signupForm')) {
-    const signupForm = document.getElementById('signupForm');
-    const emailInput = document.getElementById('email');
-    const otpGroup = document.getElementById('otpGroup');
-    const submitBtn = document.getElementById('submitBtn');
-    let timerInterval = null;
-    
-    // Step 1: Send OTP when email is entered
-    emailInput.addEventListener('blur', async () => {
-        const email = emailInput.value;
-        if (email && !signupData.emailVerified) {
-            await sendOTP(email);
-        }
-    });
-    
-    async function sendOTP(email) {
-        try {
-            const response = await fetch(`${API_BASE}/api/otp/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, purpose: 'signup' })
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                alert('OTP sent to your email! Check console for OTP');
-                otpGroup.style.display = 'block';
-                startTimer(300); // 5 minutes timer
-                console.log('OTP:', data.otp); // For testing
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.error('Send OTP error:', error);
-            alert('Error sending OTP');
-        }
+
+  const signupForm = document.getElementById('signupForm');
+  const emailInput = document.getElementById('email');
+
+  function clearErrors() {
+
+    document.querySelectorAll('.input-error')
+      .forEach((el) => {
+
+        el.textContent = '';
+
+      });
+
+  }
+
+  function setError(id, message) {
+
+    const errorEl =
+      document.getElementById(id);
+
+    if (errorEl) {
+
+      errorEl.textContent = message;
+
     }
-    
-    function startTimer(seconds) {
-        const timerDisplay = document.getElementById('timerDisplay');
-        const resendBtn = document.getElementById('resendOtpBtn');
-        let timeLeft = seconds;
-        
-        if (timerInterval) clearInterval(timerInterval);
-        
-        timerInterval = setInterval(() => {
-            const minutes = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            timerDisplay.textContent = `OTP expires in: ${minutes}:${secs.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = 'OTP expired. Request a new one.';
-                resendBtn.style.display = 'block';
-            }
-            timeLeft--;
-        }, 1000);
-    }
-    
-    // Resend OTP
-    const resendBtn = document.getElementById('resendOtpBtn');
-    if (resendBtn) {
-        resendBtn.addEventListener('click', async () => {
-            const email = emailInput.value;
-            await sendOTP(email);
-            startTimer(300);
-            resendBtn.style.display = 'none';
+
+  }
+
+  async function sendOTP(email) {
+
+    try {
+
+      const response =
+        await fetch(`${API_BASE}/api/otp/send`, {
+
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json'
+          },
+
+          body: JSON.stringify({
+            email,
+            purpose: 'signup'
+          })
+
         });
+
+      const data = await response.json();
+
+      if (response.ok) {
+
+        localStorage.setItem(
+          'pendingEmail',
+          email
+        );
+
+        window.location.href =
+          '/otp';
+
+      } else {
+
+        setError(
+          'emailError',
+          data.message || 'Unable to send OTP'
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        'Send OTP error:',
+        error
+      );
+
+      setError(
+        'emailError',
+        'Error sending OTP'
+      );
+
     }
-    
-    // Handle form submission
-    signupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const email = emailInput.value;
-        const phone = document.getElementById('phone').value;
-        const password = document.getElementById('password').value;
-        const otp = document.getElementById('otp').value;
-        
-        if (!otp) {
-            alert('Please enter OTP');
-            return;
-        }
-        
-        try {
-            const response = await fetch(`${API_BASE}/api/otp/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp, purpose: 'signup' })
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok && data.verified) {
-                // OTP verified, now create user
-                const signupResponse = await fetch(`${API_BASE}/auth/signup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ firstName, lastName, email, phone, password })
-                });
-                
-                const signupData = await signupResponse.json();
-                
-                if (signupResponse.ok) {
-                    alert('Signup successful! Please login.');
-                    window.location.href = '/login.html';
-                } else {
-                    alert(signupData.message);
-                }
-            } else {
-                alert(data.message || 'Invalid OTP');
-            }
-        } catch (error) {
-            console.error('Verify error:', error);
-            alert('Error verifying OTP');
-        }
-    });
-}
 
-// Login
+  }
+
+  signupForm.addEventListener(
+    'submit',
+
+    async (e) => {
+
+      e.preventDefault();
+
+      clearErrors();
+
+      const firstName =
+        document.getElementById('firstName')
+          .value
+          .trim();
+
+      const lastName =
+        document.getElementById('lastName')
+          .value
+          .trim();
+
+      const email =
+        emailInput.value.trim();
+
+      const phone =
+        document.getElementById('phone')
+          .value
+          .trim();
+
+      const password =
+        document.getElementById('password')
+          .value
+          .trim();
+
+      const confirmPassword =
+        document.getElementById('confirmPassword')
+          .value
+          .trim();
+
+      let hasError = false;
+
+      if (!firstName) {
+
+        setError(
+          'firstNameError',
+          'First name is required'
+        );
+
+        hasError = true;
+
+      }
+
+      if (!email) {
+
+        setError(
+          'emailError',
+          'Email is required'
+        );
+
+        hasError = true;
+
+      }
+
+      if (!phone) {
+
+        setError(
+          'phoneError',
+          'Phone number is required'
+        );
+
+        hasError = true;
+
+      }
+
+      if (!password) {
+
+        setError(
+          'passwordError',
+          'Password is required'
+        );
+
+        hasError = true;
+
+      }
+
+      if (password !== confirmPassword) {
+
+        setError(
+          'confirmPasswordError',
+          'Passwords do not match'
+        );
+
+        hasError = true;
+
+      }
+
+      if (hasError) return;
+
+      localStorage.setItem(
+
+        'signupData',
+
+        JSON.stringify({
+
+          firstName,
+          lastName,
+          email,
+          phone,
+          password
+
+        })
+
+      );
+
+      await sendOTP(email);
+
+    }
+
+  );
+
+}
+// LOGIN
+
 if (document.getElementById('loginForm')) {
-    const loginForm = document.getElementById('loginForm');
-    
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        try {
-            const response = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                localStorage.setItem('user', JSON.stringify(data.user));
-                alert('Login successful!');
-                window.location.href = '/user/home.html';
-            } else {
-                alert(data.message);
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('Error logging in');
-        }
-    });
+  const loginForm = document.getElementById('loginForm');
+
+  function setLoginError(id, message) {
+    const errorEl = document.getElementById(id);
+    if (errorEl) {
+      errorEl.textContent = message;
+    }
+  }
+
+  function clearLoginErrors() {
+    const emailError = document.getElementById('loginEmailError');
+    const passwordError = document.getElementById('loginPasswordError');
+
+    if (emailError) emailError.textContent = '';
+    if (passwordError) passwordError.textContent = '';
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearLoginErrors();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    let hasError = false;
+
+    if (!email) {
+      setLoginError('loginEmailError', 'Email is required');
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setLoginError('loginEmailError', 'Enter a valid email');
+      hasError = true;
+    }
+
+    if (!password) {
+      setLoginError('loginPasswordError', 'Password is required');
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/';
+      } else {
+        setLoginError('loginPasswordError', data.message || 'Login failed');
+      }
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginError('loginPasswordError', 'Something went wrong');
+    }
+  });
 }
 
-// Logout
+// =========================
+// FORGOT PASSWORD
+// =========================
+if (document.getElementById('forgotPasswordForm')) {
+  const forgotForm = document.getElementById('forgotPasswordForm');
+
+  forgotForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('forgotEmail').value.trim();
+    const errorEl = document.getElementById('forgotEmailError');
+
+    errorEl.textContent = '';
+
+    if (!email) {
+      errorEl.textContent = 'Email is required';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/forgot-password/forgot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('resetEmail', email);
+        window.location.href = '/passwordotp';
+      } else {
+        errorEl.textContent = data.message || 'Unable to send OTP';
+      }
+
+    } catch (error) {
+      console.error(error);
+      errorEl.textContent = 'Something went wrong';
+    }
+  });
+}
+
+// =========================
+// VERIFY RESET OTP
+// =========================
+if (document.getElementById('verifyResetOtpForm')) {
+  const otpForm = document.getElementById('verifyResetOtpForm');
+
+  otpForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const otp = document.getElementById('resetOtp').value.trim();
+    const errorEl = document.getElementById('resetOtpError');
+
+    errorEl.textContent = '';
+
+    if (!otp) {
+      errorEl.textContent = 'Please enter OTP';
+      return;
+    }
+
+    localStorage.setItem('resetOtp', otp);
+    window.location.href = '/reset-password';
+  });
+}
+
+// =========================
+// RESET PASSWORD
+// =========================
+if (document.getElementById('resetPasswordForm')) {
+  const resetForm = document.getElementById('resetPasswordForm');
+
+  resetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = localStorage.getItem('resetEmail');
+    const code = localStorage.getItem('resetOtp');
+
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmNewPassword').value.trim();
+
+    const newPasswordError = document.getElementById('newPasswordError');
+    const confirmPasswordError = document.getElementById('confirmNewPasswordError');
+
+    newPasswordError.textContent = '';
+    confirmPasswordError.textContent = '';
+
+    if (!newPassword) {
+      newPasswordError.textContent = 'Password is required';
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      newPasswordError.textContent = 'Minimum 6 characters';
+      return;
+    }
+
+    if (!confirmPassword) {
+      confirmPasswordError.textContent = 'Please confirm password';
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      confirmPasswordError.textContent = 'Passwords do not match';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/forgot-password/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          otp: code,
+          newPassword,
+          confirmPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.removeItem('resetEmail');
+        localStorage.removeItem('resetOtp');
+        window.location.href = '/login';
+      } else {
+        confirmPasswordError.textContent = data.message || 'Reset failed';
+      }
+
+    } catch (error) {
+      console.error(error);
+      confirmPasswordError.textContent = 'Something went wrong';
+    }
+  });
+}// =========================
+// USER PROFILE
+// =========================
+if (document.getElementById('profileFirstName')) {
+  const currentUser = JSON.parse(localStorage.getItem('user'));
+
+  if (!currentUser || !currentUser._id) {
+    window.location.href = '/login';
+  }
+}
+// =========================
+// SIGNUP OTP VERIFY
+// =========================
+
+async function verifySignupOtp() {
+
+  const otp =
+    document.getElementById("otp").value.trim();
+
+  const email =
+    localStorage.getItem("pendingEmail");
+
+  const signupData =
+    JSON.parse(localStorage.getItem("signupData"));
+
+  const message =
+    document.getElementById("otpMessage");
+
+  message.textContent = "";
+
+  if (!otp) {
+
+    message.textContent =
+      "Please enter OTP";
+
+    return;
+  }
+
+  try {
+
+    const res = await fetch(
+      `${API_BASE}/api/otp/verify`,
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          email,
+          otp,
+          purpose: "signup"
+
+        })
+
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.verified) {
+
+      message.textContent =
+        data.message || "Invalid OTP";
+
+      return;
+    }
+
+    // CREATE USER AFTER OTP VERIFIED
+
+    const signupResponse =
+      await fetch(`${API_BASE}/auth/signup`, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(signupData)
+
+      });
+
+    const signupResult =
+      await signupResponse.json();
+
+    if (!signupResponse.ok) {
+
+      message.textContent =
+        signupResult.message || "Signup failed";
+
+      return;
+    }
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(signupResult.user)
+    );
+
+    localStorage.removeItem("pendingEmail");
+    localStorage.removeItem("signupData");
+
+    window.location.href = "/";
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.textContent =
+      "Something went wrong";
+
+  }
+
+}
+
+// =========================
+// OTP PAGE
+// =========================
+
+if (document.getElementById("otpForm")) {
+
+  const otpForm =
+    document.getElementById("otpForm");
+
+  const resendBtn =
+    document.getElementById("resendOtpBtn");
+
+  const timerDisplay =
+    document.getElementById("timerDisplay");
+
+  let timeLeft = 30;
+  let timer;
+
+  function startTimer() {
+
+    resendBtn.style.display = "none";
+
+    timer = setInterval(() => {
+
+      timerDisplay.textContent =
+        `Resend OTP in ${timeLeft}s`;
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+
+        clearInterval(timer);
+
+        timerDisplay.textContent =
+          "OTP expired";
+
+        resendBtn.style.display =
+          "inline-block";
+      }
+
+    }, 1000);
+  }
+
+  startTimer();
+
+  // VERIFY OTP
+  otpForm.addEventListener(
+    "submit",
+
+    async (e) => {
+
+      e.preventDefault();
+
+      await verifySignupOtp();
+
+    }
+  );
+
+  // RESEND OTP
+  resendBtn.addEventListener(
+    "click",
+
+    async () => {
+
+      const email =
+        localStorage.getItem(
+          "pendingEmail"
+        );
+
+      const message =
+        document.getElementById(
+          "otpMessage"
+        );
+
+      message.textContent = "";
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE}/api/otp/resend`,
+            {
+
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+
+                email,
+                purpose: "signup"
+
+              })
+
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+
+          message.textContent =
+            data.message ||
+            "Failed to resend OTP";
+
+          return;
+        }
+
+        clearInterval(timer);
+
+        timeLeft = 30;
+
+        startTimer();
+
+        message.textContent =
+          "OTP resent successfully";
+
+      } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+          "Something went wrong";
+
+      }
+
+    }
+  );
+
+}
+
+
+// LOGOUT
 const logoutBtn = document.getElementById('logoutBtn');
+
 if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('user');
-        window.location.href = '/';
-    });
+  logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('user');
+    window.location.href = '/';
+  });
 }

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart</title>
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css"
+  >
+</head>
+
+<body>
+
+  <nav class="cart-navbar">
+    <div class="logo">
+      Alder & Ash.
+    </div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/api/users/products">Products</a>
+    </div>
+  </nav>
+
+  <div class="cart-page">
+
+    <div class="cart-items-box">
+      <h2>Shopping Cart</h2>
+
+      <div id="cartItems"></div>
+
+      <button class="checkout-btn">
+        Go to Checkout →
+      </button>
+    </div>
+
+    <div class="summary-box">
+      <h2>Order Summary</h2>
+
+      <p>
+        Subtotal
+        <span id="subTotal">₹0</span>
+      </p>
+
+      <p>
+        Tax
+        <span id="tax">₹0</span>
+      </p>
+
+      <p>
+        Delivery Fee
+        <span id="shipping">₹0</span>
+      </p>
+
+      <hr>
+
+      <p class="total">
+        Total
+        <span id="grandTotal">₹0</span>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+
+    async function loadCart() {
+
+      try {
+
+        const user =
+  JSON.parse(
+    localStorage.getItem("user")
+  );
+
+const response =
+  await fetch(
+    "http://localhost:3000/api/cart",
+    {
+      headers: {
+        "userid": user.id || user._id
+      }
+    }
+  );
+
+        const cart =
+          await response.json();
+
+        const container =
+          document.getElementById("cartItems");
+
+        container.innerHTML = "";
+
+        if (!cart.items || cart.items.length === 0) {
+
+          container.innerHTML = `
+            <p class="empty-cart">
+              Your cart is empty
+            </p>
+          `;
+
+          return;
+        }
+
+        cart.items.forEach((item) => {
+
+          container.innerHTML += `
+
+            <div class="cart-item">
+
+              <img
+                src="http://localhost:3000${item.product.images[0]}"
+              >
+
+              <div class="item-info">
+
+                <h3>
+                  ${item.product.productName}
+                </h3>
+
+                <p>
+                  Color: ${item.color}
+                </p>
+
+                <p>
+                  Size: ${item.size}
+                </p>
+
+                <h4>
+                  ₹${item.price}
+                </h4>
+
+              </div>
+
+              <div class="quantity-box">
+
+                <button onclick="
+                  updateQuantity(
+                    '${item._id}',
+                    ${item.quantity - 1}
+                  )
+                ">
+                  -
+                </button>
+
+                <span>
+                  ${item.quantity}
+                </span>
+
+                <button onclick="
+                  updateQuantity(
+                    '${item._id}',
+                    ${item.quantity + 1}
+                  )
+                ">
+                  +
+                </button>
+
+              </div>
+
+              <button
+                class="remove-btn"
+                onclick="removeItem('${item._id}')"
+              >
+                🗑
+              </button>
+
+            </div>
+
+          `;
+
+        });
+
+        document.getElementById("subTotal").innerText =
+          `₹${cart.subTotal}`;
+
+        document.getElementById("tax").innerText =
+          `₹${cart.tax}`;
+
+        document.getElementById("shipping").innerText =
+          `₹${cart.shipping}`;
+
+        document.getElementById("grandTotal").innerText =
+          `₹${cart.grandTotal}`;
+          const hasOutOfStock =
+  cart.items.some((item) => {
+
+    const variant =
+      item.product.variants.find(
+        (variant) =>
+          variant.size === item.size &&
+          variant.color === item.color
+      );
+
+    return (
+      !variant ||
+      variant.stock < item.quantity ||
+      item.product.isDeleted
+    );
+
+  });
+
+const checkoutBtn =
+  document.querySelector(".checkout-btn");
+
+if (hasOutOfStock) {
+
+  checkoutBtn.disabled = true;
+
+  checkoutBtn.innerText =
+    "Remove unavailable items";
+
+} else {
+
+  checkoutBtn.disabled = false;
+
+  checkoutBtn.innerText =
+    "Go to Checkout →";
+
+}
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+    async function updateQuantity(itemId, quantity) {
+
+if (quantity < 1) return;
+
+const user =
+  JSON.parse(
+    localStorage.getItem("user")
+  );
+
+const response =
+  await fetch(
+    `http://localhost:3000/api/cart/items/${itemId}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Content-Type": "application/json",
+        "userid": user.id || user._id
+      },
+
+      body: JSON.stringify({
+        quantity
+      })
+    }
+  );
+
+const data =
+  await response.json();
+
+if (!response.ok) {
+  alert(data.message);
+  return;
+}
+
+loadCart();
+
+}
+
+async function removeItem(itemId) {
+
+const user =
+  JSON.parse(
+    localStorage.getItem("user")
+  );
+
+await fetch(
+  `http://localhost:3000/api/cart/items/${itemId}`,
+  {
+    method: "DELETE",
+
+    headers: {
+      "userid": user.id || user._id
+    }
+  }
+);
+
+loadCart();
+
+}
+
+    loadCart();
+
+  </script>
+
+</body>
+</html>

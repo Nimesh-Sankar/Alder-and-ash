@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brands</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="admin-container">
+
+    
+    <!-- BRANDS SIDEBAR -->
+
+<aside class="admin-sidebar">
+
+  <h2 class="admin-logo">
+    Alder & Ash.
+  </h2>
+
+  <ul class="admin-menu">
+
+    <li
+      onclick="window.location.href='/admin'"
+    >
+      Dashboard
+    </li>
+
+    <li
+      onclick="window.location.href='/admin'"
+    >
+      Users
+    </li>
+
+    <li
+      onclick="window.location.href='/admin/products-page'"
+    >
+      Products
+    </li>
+
+    <li
+      class="active"
+      onclick="window.location.href='/admin/brands-page'"
+    >
+      Brands
+    </li>
+
+    <li
+      onclick="window.location.href='/admin/category'"
+    >
+      Category
+    </li>
+
+    <li>
+      Orders
+    </li>
+
+    <li>
+      Coupons
+    </li>
+
+    <li>
+      Banners
+    </li>
+
+    <li>
+      Reports
+    </li>
+
+    <li>
+      Settings
+    </li>
+
+  </ul>
+
+</aside>
+    <!-- MAIN -->
+    <main class="admin-main">
+
+      <div class="category-header">
+
+        <h1>Brand Management</h1>
+
+        <button
+          onclick="window.location.href='/admin/add-brand'"
+        >
+          Add Brand
+        </button>
+
+      </div>
+
+      <!-- SEARCH -->
+      <div class="category-topbar">
+
+        <input
+          type="text"
+          id="brandSearchInput"
+          placeholder="Search brand..."
+        />
+
+        <button onclick="loadBrands()">
+          Search
+        </button>
+
+        <button onclick="clearBrandSearch()">
+          Clear
+        </button>
+
+      </div>
+
+      <!-- BRAND LIST -->
+      <div
+        id="brandContainer"
+        class="category-grid"
+      >
+
+      </div>
+
+      <!-- PAGINATION -->
+      <div id="brandPagination"></div>
+
+    </main>
+
+  </div>
+  
+  <script src="/js/admin.js"></script>
+
+</body>
+</html>

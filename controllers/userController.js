@@ -35,7 +35,7 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { firstName, lastName, phone, profileImage } = req.body;
+    const { firstName, lastName, phone, email, profileImage } = req.body;
     
     const user = await User.findByIdAndUpdate(
       userId,
@@ -43,9 +43,13 @@ export const updateProfile = async (req, res) => {
         firstName,
         lastName,
         phone,
+        email,
         profileImage,
       },
-      { new: true, runValidators: true }
+      {
+        returnDocument: "after",
+        runValidators: true
+      }
     ).select("-password");
     
     if (!user) {
@@ -97,23 +101,22 @@ export const sendEmailVerification = async (req, res) => {
   try {
     const { userId, newEmail } = req.body;
     
-    // Check if email already exists
+    
     const existingUser = await User.findOne({ email: newEmail });
     if (existingUser && existingUser._id.toString() !== userId) {
       return res.status(400).json({ message: "Email already in use" });
     }
     
-    // Generate OTP (you can reuse the OTP model)
+    // OTP generate
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store OTP temporarily (you might want to create a temp table or use the OTP model)
-    // For now, we'll store in a global object or use the OTP model with purpose 'emailChange'
+  
     
     console.log(`Email verification OTP for new email ${newEmail}: ${otp}`);
     
     res.json({ 
       message: "Verification OTP sent to new email",
-      otp: otp // Remove in production
+      otp: otp 
     });
   } catch (error) {
     console.log("SEND EMAIL VERIFICATION ERROR:", error.message);
@@ -121,18 +124,16 @@ export const sendEmailVerification = async (req, res) => {
   }
 };
 
-// Verify email change with OTP
 export const verifyEmailChange = async (req, res) => {
   try {
     const { userId, newEmail, otp } = req.body;
     
-    // Verify OTP logic here
-    // For demo, we'll just update the email
+
     
     const user = await User.findByIdAndUpdate(
       userId,
       { email: newEmail, isEmailVerified: true },
-      { new: true }
+      { returnDocument: "after" }
     ).select("-password");
     
     res.json({

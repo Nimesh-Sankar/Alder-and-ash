@@ -10,7 +10,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // 🔐 hash password
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    // ❌ don’t send password
+  
     res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -45,26 +45,30 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. check user exists
+    
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 2. check if blocked
+    
     if (user.isBlocked) {
       return res.status(403).json({ message: "User is blocked" });
     }
 
-    // 3. compare password
+  
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    req.session.user = {
+      id: user._id,
+      email: user.email,
+    };
 
-    // 4. success response
+    
     res.status(200).json({
       message: "Login successful",
       user: {

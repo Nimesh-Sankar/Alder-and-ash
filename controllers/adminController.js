@@ -1,10 +1,11 @@
 import User from "../models/userModel.js";
+import bcrypt from "bcrypt";
 
-// Block/Unblock user with confirmation
+// Block/Unblock 
 export const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { action } = req.body; // 'block' or 'unblock'
+    const { action } = req.body; 
 
     const user = await User.findById(userId);
     if (!user) {
@@ -28,7 +29,7 @@ export const toggleBlockUser = async (req, res) => {
   }
 };
 
-// Get users with search, pagination, sorting (already descending from your getUsers)
+
 export const getUsersWithFilters = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -36,7 +37,7 @@ export const getUsersWithFilters = async (req, res) => {
     const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
-    // Build search query
+    
     let query = {};
     if (search) {
       query = {
@@ -50,7 +51,7 @@ export const getUsersWithFilters = async (req, res) => {
 
     const users = await User.find(query)
       .select("-password")
-      .sort({ createdAt: -1 }) // Descending order (latest first)
+      .sort({ createdAt: -1 }) 
       .skip(skip)
       .limit(limit);
 
@@ -70,7 +71,7 @@ export const getUsersWithFilters = async (req, res) => {
   }
 };
 
-// Admin sign in (separate from user login)
+
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -84,6 +85,10 @@ export const adminLogin = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    req.session.admin = {
+      id: admin._id,
+      email: admin.email,
+    };
 
     res.json({
       message: "Admin login successful",
