@@ -1,27 +1,30 @@
 import Category from "../models/categoryModel.js";
 
-// ADD CATEGORY
 export const addCategory = async (req, res) => {
 
   try {
 
     const { name, description } = req.body;
 
-    const existingCategory = await Category.findOne({
-      name: name.trim(),
-      isDeleted: false
-    });
+    const trimmedName = name.trim();
+
+    const existingCategory =
+      await Category.findOne({
+        name: {
+          $regex: `^${trimmedName}$`,
+          $options: "i"
+        },
+        isDeleted: false
+      });
 
     if (existingCategory) {
-
       return res.status(400).json({
         message: "Category already exists"
       });
-
     }
 
     const category = new Category({
-      name,
+      name: trimmedName,
       description
     });
 
@@ -56,29 +59,45 @@ export const updateCategory = async (req, res) => {
 
     const { name, description } = req.body;
 
+    const { id } = req.params;
+
+    const trimmedName = name.trim();
+
+    const existingCategory =
+      await Category.findOne({
+        name: {
+          $regex: `^${trimmedName}$`,
+          $options: "i"
+        },
+        _id: {
+          $ne: id
+        },
+        isDeleted: false
+      });
+
+    if (existingCategory) {
+      return res.status(400).json({
+        message: "Category already exists"
+      });
+    }
+
     const updatedCategory =
       await Category.findByIdAndUpdate(
-
-        req.params.id,
-
+        id,
         {
-          name,
+          name: trimmedName,
           description
         },
-
         {
           returnDocument: "after",
           runValidators: true
         }
-
       );
 
     if (!updatedCategory) {
-
       return res.status(404).json({
         message: "Category not found"
       });
-
     }
 
     res.json({

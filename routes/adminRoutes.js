@@ -2,7 +2,7 @@ import express from "express";
 import { toggleBlockUser, getUsersWithFilters, adminLogin } from "../controllers/adminController.js";
 import {addCategory,getCategories,updateCategory,deleteCategory} from "../controllers/categoryController.js";
 import {addBrand,getBrands,updateBrand,toggleBrandStatus,deleteBrand} from "../controllers/brandController.js";
-import {addProduct,getProducts,getSingleProduct,updateProduct,deleteProduct} from "../controllers/productController.js";
+import {addProduct,getProducts,getSingleProduct,updateProduct,deleteProduct,toggleProductStatus} from "../controllers/productController.js";
 import upload from "../config/multer.js";
 const router = express.Router();
 
@@ -51,6 +51,10 @@ router.patch(
 router.patch(
   "/products/delete/:id",
   deleteProduct
+);
+router.patch(
+  "/products/:productId/status",
+  toggleProductStatus
 );
 
 

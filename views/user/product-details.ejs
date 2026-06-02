@@ -53,7 +53,7 @@
   
         const response =
           await fetch(
-            `http://localhost:3000/admin/products/${id}`
+            `/admin/products/${id}`
           );
   
         const data =
@@ -103,7 +103,7 @@
   
               <img
                 class="main-img"
-                src="http://localhost:3000${product.images[0]}"
+                src="${product.images[0]}"
               >
   
               <div class="small-images">
@@ -111,7 +111,7 @@
                 ${product.images.map((image) => `
   
                   <img
-                    src="http://localhost:3000${image}"
+                    src="${image}"
                     onclick="changeMainImage(this.src)"
                   >
   
@@ -307,7 +307,7 @@ if (!user) {
   
         const response =
           await fetch(
-            "http://localhost:3000/api/cart/add",
+            "/api/cart/add",
             {
               method: "POST",
   
@@ -359,7 +359,7 @@ if (!user) {
   
         const response =
           await fetch(
-            `http://localhost:3000/admin/products?category=${categoryId}`
+            `/admin/products?category=${categoryId}`
           );
   
         const data =
@@ -390,7 +390,7 @@ if (!user) {
               >
   
                 <img
-                  src="http://localhost:3000${product.images[0]}"
+                  src="${product.images[0]}"
                 >
   
                 <h3>

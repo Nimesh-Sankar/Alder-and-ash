@@ -133,7 +133,7 @@ try {
 
   const response =
     await fetch(
-      "http://localhost:3000/admin/categories"
+      "/admin/categories"
     );
 
   const data =
@@ -253,7 +253,7 @@ try {
 
   const response =
     await fetch(
-      "http://localhost:3000/admin/brands"
+      "/admin/brands"
     );
 
   const data =
@@ -315,7 +315,7 @@ try {
 
   const response =
     await fetch(
-`http://localhost:3000/admin/products?search=${currentSearch}&category=${currentCategory}&sort=${currentSort}&minPrice=${currentMinPrice}&maxPrice=${currentMaxPrice}&page=${currentPage}&brand=${currentBrand}`
+`/admin/products?search=${currentSearch}&category=${currentCategory}&sort=${currentSort}&minPrice=${currentMinPrice}&maxPrice=${currentMaxPrice}&page=${currentPage}&brand=${currentBrand}`
     );
 
   const data =
@@ -342,8 +342,10 @@ document.getElementById("nextBtn").disabled =
   container.innerHTML = `<p>No products found.</p>`;
     return;
   }
-  data.products.forEach(
-    (product) => {
+  data.products.filter(
+    (product) => product.isListed!==false
+  )
+  .forEach((product) => {
 
       container.innerHTML += `
 
@@ -355,7 +357,7 @@ onclick="
 >
 
 <img
-  src="http://localhost:3000${product.images[0]}"
+  src="${product.images[0]}"
 >
 
 <h3>

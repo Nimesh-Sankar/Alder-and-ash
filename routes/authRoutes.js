@@ -23,7 +23,7 @@ router.get(
       JSON.stringify(req.user)
     );
   
-    res.redirect(`/user/profile.html?googleUser=${userData}`);
+    res.redirect(`/user/profile?googleUser=${userData}`);
   }
 );
 

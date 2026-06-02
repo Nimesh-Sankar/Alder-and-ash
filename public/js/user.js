@@ -1,6 +1,6 @@
 console.log("USER JS LOADED");
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = "";
 const urlParams = new URLSearchParams(window.location.search);
 
 const googleUser = urlParams.get("googleUser");

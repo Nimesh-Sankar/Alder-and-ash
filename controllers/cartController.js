@@ -50,6 +50,11 @@ export const addToCart = async (req, res) => {
         message: "Variant not found"
       });
     }
+    if(variant.stock <= 0) {
+      return res.status(400).json({
+        message: "Out of stock"
+      });
+    }
 
     if (quantity > variant.stock) {
       return res.status(400).json({
@@ -138,6 +143,8 @@ export const getCart = async (req, res) => {
       user: userId
     }).populate("items.product");
 
+   
+
     if (!cart) {
       return res.status(200).json({
         items: [],
@@ -147,6 +154,19 @@ export const getCart = async (req, res) => {
         grandTotal: 0
       });
     }
+    for(const item of cart.items) {
+      const product = item.product;
+      const variant = product.variants.find(
+        (variant) =>
+          variant.size === item.size &&
+          variant.color === item.color
+      );
+      if(variant&& item.quantity > variant.stock) {
+        item.quantity = variant.stock;
+      }
+    }
+    calculateTotals(cart);
+    await cart.save();
 
     res.status(200).json(cart);
 
@@ -218,6 +238,11 @@ export const updateCartItem = async (req, res) => {
     if (!variant) {
       return res.status(404).json({
         message: "Variant not found"
+      });
+    }
+    if(variant.stock <= 0) {
+      return res.status(400).json({
+        message: "Out of stock"
       });
     }
 

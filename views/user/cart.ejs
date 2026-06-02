@@ -76,7 +76,7 @@
 
 const response =
   await fetch(
-    "http://localhost:3000/api/cart",
+    "/api/cart",
     {
       headers: {
         "userid": user.id || user._id
@@ -110,7 +110,7 @@ const response =
             <div class="cart-item">
 
               <img
-                src="http://localhost:3000${item.product.images[0]}"
+                src="${item.product.images[0]}"
               >
 
               <div class="item-info">
@@ -239,7 +239,7 @@ const user =
 
 const response =
   await fetch(
-    `http://localhost:3000/api/cart/items/${itemId}`,
+    `/api/cart/items/${itemId}`,
     {
       method: "PATCH",
 
@@ -274,7 +274,7 @@ const user =
   );
 
 await fetch(
-  `http://localhost:3000/api/cart/items/${itemId}`,
+  `/api/cart/items/${itemId}`,
   {
     method: "DELETE",
 

@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3000";
+const API_BASE = "";
 
 function showAlert(message, type = "success") {
   const alertBox = document.getElementById("alertBox");
@@ -57,7 +57,7 @@ if (adminLoginForm) {
 
     try {
 
-      const res = await fetch(`${API_BASE}/admin/login`, {
+      const res = await fetch("/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -483,7 +483,7 @@ if (editForm) {
 
   async function loadCategory() {
 
-    const response = await fetch("http://localhost:3000/admin/categories");
+    const response = await fetch("/admin/categories");
 
     const data = await response.json();
 
@@ -511,7 +511,7 @@ if (editForm) {
       document.getElementById("categoryDescription").value;
 
     const response = await fetch(
-      `http://localhost:3000/admin/categories/${categoryId}`,
+      `/admin/categories/${categoryId}`,
       {
         method: "PATCH",
         headers: {
@@ -526,7 +526,7 @@ if (editForm) {
 
     const data = await response.json();
 
-    alert(data.message);
+    showAlert(data.message,"success");
 
     window.location.href = "/admin/category";
   });
@@ -572,12 +572,14 @@ if (addCategoryForm) {
 
         const data = await response.json();
 
-        alert(data.message);
+        showAlert(data.message,"success");
 
         if (response.ok) {
 
-          window.location.href =
-            "/admin/category";
+          showAlert(data.message,"success");
+          setTimeout(() => {window.location.href = "/admin/category";}, 1000);
+        } else {
+          showAlert(data.message,"danger");
 
         }
 
@@ -716,7 +718,7 @@ async function toggleBrandStatus(id) {
 
     const data = await response.json();
 
-    alert(data.message);
+    showAlert(data.message,"success");
 
     loadBrands();
 
@@ -787,14 +789,14 @@ if (addBrandForm) {
 
         if (response.ok) {
 
-          alert(data.message);
+          showAlert(data.message,"success");
 
           window.location.href =
             "/admin/brands-page";
 
         } else {
 
-          alert(data.message);
+          showAlert(data.message,"danger");
 
         }
 
@@ -909,7 +911,7 @@ if (editBrandForm) {
         const data =
           await response.json();
 
-        alert(data.message);
+        showAlert(data.message,"success");
 
         window.location.href =
           "/admin/brands-page";
@@ -946,7 +948,7 @@ async function deleteBrand(id) {
     const data =
       await response.json();
 
-    alert(data.message);
+    showAlert(data.message,"success");
 
     loadBrands();
 
@@ -1034,6 +1036,15 @@ async function loadProducts(page = 1) {
             >
               Edit
             </button>
+          
+            <button
+              onclick="toggleProductStatus('${product._id}')"
+            >
+              ${product.isListed
+                ? "Unlist"
+                : "List"}
+            </button>
+      
 
             <button
               onclick="deleteProduct('${product._id}')"
@@ -1196,6 +1207,8 @@ if (
 
 }
 let variants = [];
+let croppedImages=[];
+let cropper;
 
 function addVariant() {
 
@@ -1303,6 +1316,13 @@ function renderVariants() {
 
           <div class="category-actions">
 
+          <button
+          type="button"
+          onclick="editVariant(${index})"
+        >
+          Edit
+        </button>
+
             <button
               onclick="removeVariant(${index})"
             >
@@ -1327,6 +1347,24 @@ function removeVariant(index) {
   renderVariants();
 
 }
+function editVariant(index) {
+
+  const variant = variants[index];
+  document.getElementById("variantSize").value = variant.size;
+  document.getElementById(
+    "variantColor"
+  ).value = variant.color;
+  document.getElementById(
+    "variantPrice"
+  ).value = variant.price;
+  document.getElementById(
+    "variantStock"
+  ).value = variant.stock;
+  
+  variants.splice(index, 1);
+
+  renderVariants();
+}
 
 // =========================
 // ADD PRODUCT
@@ -1344,6 +1382,7 @@ if (addProductForm) {
     async (e) => {
 
       e.preventDefault();
+      console.log("add product submit");
 
       try {
 
@@ -1405,20 +1444,26 @@ formData.append(
   JSON.stringify(variants)
 );
 
-const images =
-  document.getElementById(
-    "productImages"
-  ).files;
+console.log("cropped before if:", croppedImages.length);
 
-for (
-  let i = 0;
-  i < images.length;
-  i++
-) {
+
+if (croppedImages.length < 3) {
+
+  showAlert(
+    "Save at least 3 cropped images",
+    "danger"
+  );
+
+  return;
+
+}
+
+for (const image of croppedImages) {
 
   formData.append(
     "images",
-    images[i]
+    image,
+    `cropped-${Date.now()}.jpg`
   );
 
 }
@@ -1434,6 +1479,8 @@ const response =
 
     }
   );
+  console.log("add product response:", response.status);
+  console.log("cropped images:", croppedImages.length);
 
         const data =
           await response.json();
@@ -1449,7 +1496,7 @@ const response =
 
         } else {
 
-          alert(data.message);
+          showAlert(data.message,"danger");
 
         }
 
@@ -1694,7 +1741,7 @@ if (editProductForm) {
         const data =
           await response.json();
 
-        alert(data.message);
+        showAlert(data.message,"success");
 
         window.location.href =
           "/admin/products-page";
@@ -1749,3 +1796,83 @@ async function deleteProduct(id) {
   }
 
 }
+async function toggleProductStatus(id) {
+  console.log(id);
+const response = await fetch(
+  `/admin/products/${id}/status`,
+  {
+    method: "PATCH"
+  }
+);
+const data = await response.json();
+
+showAlert(data.message,"success");
+
+loadProducts();
+};
+
+
+
+const imageInput =
+  document.getElementById("productImages");
+
+if (imageInput) {
+
+  imageInput.addEventListener("change", function (event) {
+
+    const file =
+      event.target.files[0];
+
+    if (!file) return;
+
+    const preview =
+      document.getElementById("imagePreview");
+
+    preview.src =
+      URL.createObjectURL(file);
+
+    preview.style.display =
+      "block";
+
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    cropper =
+      new Cropper(preview, {
+        aspectRatio: 1,
+        viewMode: 1
+      });
+
+  });
+
+}
+
+window.saveCroppedImage = function () {
+
+  if (!cropper) {
+    showAlert("Select image first", "danger");
+    return;
+  }
+
+  cropper.getCroppedCanvas({
+    width: 800,
+    height: 800
+  }).toBlob(function (blob) {
+
+    croppedImages.push(blob);
+
+    document.getElementById("croppedImagesList").innerHTML += `
+      <p>Image ${croppedImages.length} saved</p>
+    `;
+
+    document.getElementById("productImages").value = "";
+
+    showAlert(
+      `Image ${croppedImages.length} saved`,
+      "success"
+    );
+
+  }, "image/jpeg", 0.8);
+
+};

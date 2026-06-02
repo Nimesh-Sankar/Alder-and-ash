@@ -1,5 +1,25 @@
+import e from "express";
 import Product from "../models/productModel.js";
 import sharp from "sharp";
+
+function validateImageFiles(files) {
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+  for (const file of files) {
+    if (!allowedTypes.includes(file.mimetype)) {
+      return "Only JPEG, PNG, and WEBP images are allowed";
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      return "Each image must be less than 2MB";
+    }
+  }
+  return null;
+}
+
+
 
 export const addProduct = async (req, res) => {
 
@@ -26,6 +46,15 @@ export const addProduct = async (req, res) => {
       });
 
     }
+    const imageError =
+      validateImageFiles(req.files);
+    if (imageError) {
+
+      return res.status(400).json({
+        message: imageError
+      });
+    }
+
 
     const existingProduct =
       await Product.findOne({
@@ -136,6 +165,7 @@ export const getProducts = async (req, res) => {
       const query = {
 
         isDeleted: false,
+        
       
         productName: {
           $regex: search,
@@ -300,6 +330,15 @@ export const updateProduct = async (req, res) => {
       req.files.length > 0
     ) {
 
+      const imageError =
+        validateImageFiles(req.files);
+      if (imageError) {
+        return res.status(400).json({
+          message: imageError
+        });
+       }
+
+
       for (const file of req.files) {
 
         const resizedFilename =
@@ -406,4 +445,34 @@ export const deleteProduct = async (req, res) => {
 
   }
 
+};
+
+export const toggleProductStatus = async (req, res) => {
+
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found"
+      });
+    }
+    product.isListed = !product.isListed;
+    await product.save();
+    res.status(200).json({
+      message: product.isListed
+        ? "Product activated"
+        : "Product deactivated",
+      product
+    });
+  } catch (error) {
+    console.log(
+      "TOGGLE PRODUCT STATUS ERROR:",
+      error.message
+    );
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
 };

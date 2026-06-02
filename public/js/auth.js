@@ -1,5 +1,5 @@
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = '';
 function showAlert(message, type = "success") {
   const alertBox = document.getElementById("alertBox");
 
