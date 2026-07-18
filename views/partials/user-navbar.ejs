@@ -3,16 +3,21 @@
 
   <nav>
     <a href="/">Home</a>
-    <a href="/shop">Shop</a>
+    <a href="/api/users/products">Shop</a>
     <a href="#">New</a>
     <a href="#">Sale</a>
+    <a href="/api/orders/my-orders">My Orders</a>
     <a href="#">Contact</a>
   </nav>
   <div class="nav-icon">
-    <span>♡</span>
+    <a href="/user/wishlist" class="wishlist-nav">♡</a>
     <a href="/user/cart">
       🛒
     </a>
-    <a id="profileLink" href="/login">👤</a>
+    <% if(user){ %>
+      <a href="/user/profile">👤</a>
+  <% } else { %>
+      <a href="/login">👤</a>
+  <% } %>
   </div>
  </header>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders</title>
+    <link rel="stylesheet" href="/css/orders.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+<body>
+
+<%- include("../partials/products-navbar") %>
+
+<div class="orders-container">
+
+    <h1 class="page-title">
+        My Orders
+    </h1>
+
+    <% orders.forEach(order => { %>
+
+        <div class="orders-card">
+
+            <h3>
+                <%= order.orderId %>
+            </h3>
+
+            <p>
+                Date:
+                <%= order.createdAt.toDateString() %>
+            </p>
+
+            <p>
+                Status:
+                <span class="status">
+                    <%= order.status %>
+                </span>
+            </p>
+
+            <p>
+                Total:
+                ₹<%= order.grandTotal %>
+            </p>
+
+            <a
+                href="/api/orders/details/<%= order.orderId %>"
+                class="orders-btn">
+
+                View Details
+
+            </a>
+
+        </div>
+
+    <% }) %>
+
+</div>
+
+</body>
+</html>

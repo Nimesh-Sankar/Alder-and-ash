@@ -21,7 +21,7 @@
 </head>
 
 <body>
-  <div>
+  
     <div id="alertBox"
       class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
       role="alert"
@@ -32,9 +32,7 @@
   <div class="admin-container">
 
   
-   <!-- SIDEBAR -->
-
-<!-- PRODUCTS SIDEBAR -->
+   
 
 <aside class="admin-sidebar">
 
@@ -75,7 +73,7 @@
       Category
     </li>
 
-    <li>
+    <li onclick="window.location.href='/api/orders/admin/orders'">
       Orders
     </li>
 
@@ -163,12 +161,16 @@
                 type="number"
                 id="variantPrice"
                 placeholder="Price"
+                min="1"
+                step="1"
               />
           
               <input
                 type="number"
                 id="variantStock"
                 placeholder="Stock"
+                min="0"
+                step="1"
               />
           
               <button
@@ -188,7 +190,7 @@
           <input
         type="file"
          id="productImages"
-          accept="image/*"
+          accept=".jpg,.jpeg,.png,.webp"
           />
           <div id="cropContainer">
             <img id="imagePreview"

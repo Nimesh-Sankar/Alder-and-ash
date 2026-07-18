@@ -716,34 +716,299 @@ body{
 .product-page{
   margin-top: 30px;
 }
-.products-navbar {
-  width: 90%;
-  margin: 20px auto;
-  padding: 18px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.out-of-stock-card {
+  opacity: 0.7;
+  position: relative;
 }
 
-.products-logo {
-  font-size: 28px;
-  font-weight: bold;
+.stock-badge {
+
+  position: absolute;
+
+  top: 10px;
+
+  left: 10px;
+
+  background: #111;
+
+  color: white;
+
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  z-index: 10;
+
+}
+
+.cart-btn:disabled {
+
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+}
+.confirm-modal {
+
+  display: none;
+  
+  position: fixed;
+  
+  top: 0;
+  
+  left: 0;
+  
+  width: 100%;
+  
+  height: 100%;
+  
+  background:
+  rgba(
+  0,
+  0,
+  0,
+  0.45
+  );
+  
+  justify-content: center;
+  
+  align-items: center;
+  
+  z-index: 9999;
+  
+  }
+  
+  .confirm-box {
+  
+  background: white;
+  
+  padding: 30px;
+  
+  border-radius: 18px;
+  
+  width: 340px;
+  
+  text-align: center;
+  
+  box-shadow:
+  0 10px 30px
+  rgba(
+  0,
+  0,
+  0,
+  0.15
+  );
+  
+  }
+  
+  .confirm-box h3 {
+  
+  margin-bottom: 12px;
+  
+  }
+  
+  .confirm-box button {
+  
+  padding:
+  10px 18px;
+  
+  margin:
+  10px;
+  
+  border: none;
+  
+  border-radius: 10px;
+  
   cursor: pointer;
+  
+  }
+  
+  #confirmDelete {
+  
+  background: #111;
+  
+  color: white;
+  
+  }
+  
+  #cancelDelete {
+  
+  background: #eee;
+  
+  }
+  
+    .product-meta{
+      font-size: 12px;
+      color:#888;
+      margin-top: 8px;
+      margin-bottom:6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .product-card h3{
+      margin-top: 0;
+    }
+    .zoom-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .zoomed-image {
+      max-width: 85%;
+      max-height: 85%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    
+    .zoom-close {
+      position: absolute;
+      top: 25px;
+      right: 40px;
+      color: white;
+      font-size: 42px;
+      cursor: pointer;
+    }
+    
+    .main-img {
+      cursor: zoom-in;
+    }
+    .product-card{
+      position:relative;
+  }
+  
+  .wishlist-btn{
+  
+      position:absolute;
+  
+      top:10px;
+  
+      right:10px;
+  
+      width:40px;
+  
+      height:40px;
+  
+      background:white;
+  
+      border-radius:50%;
+  
+      display:flex;
+  
+      justify-content:center;
+  
+      align-items:center;
+  
+      cursor:pointer;
+  
+      font-size:22px;
+  
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
+  
+      transition:.2s;
+  }
+  
+  .wishlist-btn:hover{
+  
+      transform:scale(1.1);
+  
+  }
+  .wishlist-btn{
+
+    margin-top:12px;
+
+    padding:12px 20px;
+
+    border:1px solid #000;
+
+    border-radius:10px;
+
+    background:#fff;
+
+    color:#000;
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
 }
 
-.products-nav-links {
-  display: flex;
-  gap: 30px;
-}
+.wishlist-btn:hover{
 
-.products-nav-links a,
-.products-nav-icons a {
-  text-decoration: none;
+    background:#000;
+
+    color:#fff;
+
+}
+.wishlist-detail-btn{
+  width: calc(100% - 30px);
+  margin:0 15px 15px;
+  padding:12px;
+  border: 1px solid #000;
+  background: white;
   color: black;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: .3s;
+}
+.wishlist-detail-btn:hover{
+  background: #000;
+  color: #fff;
 }
 
-.products-nav-icons {
+
+
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.wishlist-btn{
+  width:100%;
+  padding:14px;
+  border:1px solid #000;
+  border-radius:8px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.wishlist-btn:hover{
+  background:#000;
+  color:#fff;
+}
+.wishlist-btn{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
   display: flex;
-  gap: 15px;
+  justify-content: center;
   align-items: center;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: .2s;
+  z-index: 10;
+}
+
+.wishlist-btn:hover{
+  transform: scale(1.1);
+}
+
+.product-card{
+  position: relative;
 }

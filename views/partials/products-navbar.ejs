@@ -4,17 +4,25 @@
   </div>
 <nav class="products-nav-links">
   <a href="/">Home</a>
-  <a href="#">Products</a>
+  <a href="/api/users/products">Products</a>
   <a href="#">New</a>
   <a href="#">Sale</a>
   <a href="#">Contact</a>
 </nav>
 <div class="products-nav-icons">
-  <span>♡</span>
-  <a href="/user/cart">
-    🛒
-  </a>
-  <a id="profileLink" href="/login">👤</a>
+  <a href="/user/wishlist" class="wishlist-nav">♡</a>
+
+  <% if(typeof hideCart==="undefined"||!hideCart){%>
+    <a href="/user/cart">
+      🛒
+    </a>
+  <%}%>
+  
+  <% if(user){ %>
+    <a href="/user/profile">👤</a>
+<% } else { %>
+    <a href="/login">👤</a>
+<% } %>
 </div>
 
 </header>

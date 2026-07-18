@@ -26,8 +26,7 @@
     style="z-index: 9999;"></div>
 
   <div class="admin-container">
-    <!-- SIDEBAR -->
-<!-- PRODUCTS SIDEBAR -->
+
 
 <aside class="admin-sidebar">
 
@@ -64,7 +63,7 @@
       Category
     </li>
 
-    <li>
+    <li onclick="window.location.href='/api/orders/admin/orders'">
       Orders
     </li>
 
@@ -107,6 +106,13 @@
       <!-- SEARCH -->
       <div class="category-topbar">
 
+        <input type="date"
+        id="fromDate">
+
+        <input type="date"
+        id="toDate"
+        >
+
         <input
           type="text"
           id="productSearchInput"
@@ -124,12 +130,26 @@
       </div>
 
       <!-- PRODUCTS -->
-      <div
-        id="productContainer"
-        class="category-grid"
-      >
+      <table class="product-table">
 
-      </div>
+        <thead>
+          <tr>
+              <th>#</th>
+              <th>Image</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Brand</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+    
+        <tbody id="productContainer">
+    
+        </tbody>
+    
+    </table>
 
       <!-- PAGINATION -->
       <div id="productPagination">
@@ -142,6 +162,39 @@
       
   
   <script src="/js/admin.js"></script>
-
+  <div
+  id="confirmModal"
+  class="confirm-modal"
+  >
+  
+  <div class="confirm-box">
+  
+  <h3>
+  Confirm Delete
+  </h3>
+  
+  <p id="confirmText">
+  Are you sure?
+  </p>
+  
+  <div>
+  
+  <button
+  id="cancelDelete"
+  >
+  Cancel
+  </button>
+  
+  <button
+  id="confirmDelete"
+  >
+  Delete
+  </button>
+  
+  </div>
+  
+  </div>
+  
+  </div>
 </body>
 </html>

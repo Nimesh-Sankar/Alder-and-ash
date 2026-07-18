@@ -36,7 +36,7 @@
               id="firstName"
               name="firstName"
               placeholder="First name"
-              required
+              
             >
             <small class="input-error" id="firstNameError"></small>
           </div>
@@ -58,7 +58,7 @@
             id="email"
             name="email"
             placeholder="Enter your email"
-            required
+            
           >
           <small class="input-error" id="emailError"></small>
         </div>
@@ -69,31 +69,59 @@
             id="phone"
             name="phone"
             placeholder="Enter your phone number"
-            required
+            
           >
           <small class="input-error" id="phoneError"></small>
         </div>
 
         <div class="signup-field">
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Create password"
-            required
-          >
-          <small class="input-error" id="passwordError"></small>
-        </div>
+
+          <div class="password-box">
         
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create password"
+            >
+        
+            <span
+              id="toggleSignupPassword"
+              class="eye-icon"
+            >
+              <>
+            </span>
+        
+          </div>
+        
+          <small class="input-error" id="passwordError"></small>
+        
+        </div>
         <div class="signup-field">
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="Confirm password"
-            required
-          >
-          <small class="input-error" id="confirmPasswordError"></small>
+
+          <div class="password-box">
+        
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm password"
+            >
+        
+            <span
+              id="toggleConfirmPassword"
+              class="eye-icon"
+            >
+              <>
+            </span>
+        
+          </div>
+        
+          <small
+            class="input-error"
+            id="confirmPasswordError"
+          ></small>
+        
         </div>
 
         <div id="otpGroup" style="display:none;">

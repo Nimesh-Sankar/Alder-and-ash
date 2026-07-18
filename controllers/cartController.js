@@ -13,8 +13,7 @@ function calculateTotals(cart) {
 
   cart.shipping =
     cart.subTotal > 1000 || cart.subTotal === 0
-      ? 0
-      : 100;
+      ? 0 : 100;
 
   cart.grandTotal =
     cart.subTotal + cart.tax + cart.shipping;
@@ -67,8 +66,9 @@ export const addToCart = async (req, res) => {
         message:
           `Maximum ${MAX_CART_QUANTITY} quantity allowed`
       });
-    
+      
     }
+
 
     let cart = await Cart.findOne({
       user: userId
@@ -154,16 +154,36 @@ export const getCart = async (req, res) => {
         grandTotal: 0
       });
     }
-    for(const item of cart.items) {
+    for (const item of cart.items) {
+
+      if (item.quantity < 1) {
+        item.quantity = 1;
+      }
+    
       const product = item.product;
+    
+      if (!product || product.isDeleted||product.isListed===false) {
+        item._doc.isUnavailable=true;
+        item._doc.unavailableReason="Product unavailable"
+        continue;
+      }
+    
       const variant = product.variants.find(
         (variant) =>
           variant.size === item.size &&
           variant.color === item.color
       );
-      if(variant&& item.quantity > variant.stock) {
+    
+      if (!variant || variant.stock <= 0) {
+        item._doc.isUnavailable=true;
+        item._doc.unavailableReason="out of stock"
+        continue;
+      }
+    
+      if (item.quantity > variant.stock) {
         item.quantity = variant.stock;
       }
+    
     }
     calculateTotals(cart);
     await cart.save();

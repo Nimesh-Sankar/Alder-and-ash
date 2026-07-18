@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Alder & Ash</title>
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body>
+
+<%- include("../partials/products-navbar") %>
+
+<main class="order-success-container">
+    <div class="success-icon">✓</div>
+
+    <h1 class="success-title">Order placed successfully!</h1>
+    <p class="success-subtitle">
+        Thanks for shopping with Alder & Ash. We'll start preparing your order shortly.
+    </p>
+
+    <div class="success-grid">
+        <section class="success-card">
+            <h3>Payment details</h3>
+            <p><span>Order ID</span><strong><%= order.orderId %></strong></p>
+            <p><span>Total paid</span><strong>₹<%= order.grandTotal %></strong></p>
+            <p><span>Payment method</span><strong><%= order.paymentMethod %></strong></p>
+            <p>
+                <span>Order status</span>
+                <span class="status status-delivered">PLACED</span>
+            </p>
+        </section>
+
+        <section class="success-card">
+            <h3>Order summary</h3>
+            <% order.items.forEach(item => { %>
+                <div class="success-item">
+                    <div>
+                        <strong><%= item.product.productName %></strong>
+                        <span>Qty: <%= item.quantity %></span>
+                    </div>
+                    <strong>₹<%= item.price * item.quantity %></strong>
+                </div>
+            <% }) %>
+            <h3 class="order-total">Total: ₹<%= order.grandTotal %></h3>
+        </section>
+    </div>
+
+    <section class="delivery-card">
+        <h3>Delivery information</h3>
+        <p><%= order.address.fullName %></p>
+        <p><%= order.address.line1 %>, <%= order.address.street %></p>
+        <% if (order.address.line2) { %>
+            <p><%= order.address.line2 %></p>
+        <% } %>
+        <p><%= order.address.city %>, <%= order.address.state %> — <%= order.address.pincode %></p>
+        <p><%= order.address.country %> · <%= order.address.phone %></p>
+    </section>
+
+    <div class="success-actions">
+        <a href="/api/orders/details/<%= order.orderId %>" class="success-btn">View order details</a>
+        <a href="/api/users/products" class="success-btn secondary">Continue shopping</a>
+    </div>
+</main>
+
+</body>
+</html>

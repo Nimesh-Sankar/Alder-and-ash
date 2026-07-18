@@ -13,10 +13,20 @@
     rel="stylesheet"
     href="/css/products.css"
   >
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
 </head>
 
 <body class="home-page">
+
+  <div id="alertBox"
+      class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
+      role="alert"
+      style="z-index: 9999;">
+    </div>
+
   <%- include("../partials/products-navbar") %>
   <div class="breadcrumb" id="breadcrumb">
     Home / Products / Product
@@ -36,6 +46,18 @@
   </div>
 
   <script>
+
+    function showAlert(message, type="success") {
+      const alertBox =
+        document.getElementById("alertBox");
+        if(!alertBox) return;
+        alertBox.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+      alertBox.innerText = message;
+      alertBox.classList.remove("d-none");
+      setTimeout(() => {
+        alertBox.classList.add("d-none");
+      }, 3000);
+    }
 
     let selectedVariant = null;
   
@@ -104,6 +126,7 @@
               <img
                 class="main-img"
                 src="${product.images[0]}"
+                onclick="openImageZoom(this.src)"
               >
   
               <div class="small-images">
@@ -194,34 +217,37 @@
                 `).join("")}
   
               </div>
-  
-              <div class="actions">
-  
-                <button
-                id="addToCartBtn"
-                  class="cart-btn"
-                  onclick="addToCart()"
-  
-                  ${
-                    product.variants[0].stock <= 0
-                      ? "disabled"
-                      : ""
-                  }
-                >
-                  ${
-                    product.variants[0].stock <= 0
-                      ? "Out Of Stock"
-                      : "Add To Cart"
-                  }
-                </button>
-  
-              </div>
-  
-            </div>
-  
-          </div>
-  
-        `;
+              
+             <div class="actions">
+
+    <button
+      id="addToCartBtn"
+      class="cart-btn"
+      onclick="addToCart()"
+      ${
+        product.variants[0].stock <= 0
+          ? "disabled"
+          : ""
+      }
+    >
+      ${
+        product.variants[0].stock <= 0
+          ? "Out Of Stock"
+          : "Add To Cart"
+      }
+    </button>
+
+    <button
+      class="wishlist-detail-btn"
+      onclick="addToWishlist('${product._id}')" >
+      ❤️ Add to Wishlist
+    </button>
+
+</div>
+
+</div> 
+</div>   
+`;
   
       } catch (error) {
   
@@ -258,7 +284,7 @@
       : "Out Of Stock";
 
   const cartButton =
-    document.getElementById("cartButton");
+    document.getElementById("addToCartBtn");
 
   if (stock <= 0) {
     cartButton.disabled = true;
@@ -286,16 +312,22 @@
 
 if (!user) {
 
-  showAlert("Please login first");
+  showAlert(
+  "Please login first",
+  "danger"
+);
+
+setTimeout(() => {
 
   window.location.href =
     "/login";
 
-  return;
+}, 900);
+
+return;
 
 }
-  
-      try {
+ try {
   
         const params =
           new URLSearchParams(
@@ -328,7 +360,10 @@ if (!user) {
         const data =
           await response.json();
   
-        alert(data.message);
+        showAlert(
+          data.message,
+          response.ok?"success":"danger"
+        );
   
         if (response.ok) {
           window.location.href =
@@ -342,12 +377,44 @@ if (!user) {
       }
   
     }
+async function addToWishlist(productId) {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if(!user){
+    showAlert("Please login first", "danger");
+    return;
+  }
+  const response= await fetch("/api/wishlist/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "userid": user.id || user._id
+    },
+    body: JSON.stringify({ productId })
+  });
+  const data=await response.json();
+  showAlert(data.message, response.ok?"success":"danger");  
+  
+}
+
   
     function changeMainImage(imageUrl) {
   
       document.querySelector(".main-img").src =
         imageUrl;
   
+    }
+    function openImageZoom(imageUrl){
+      const modal=
+      document.getElementById("imageZoomModal");
+      const zoomedImage=
+      document.getElementById("zoomedImage");
+      zoomedImage.src=imageUrl;
+      modal.style.display="flex";
+
+    }
+    function closeImageZoom(){
+      document.getElementById("imageZoomModal").style.display="none";
     }
   
     async function loadRelatedProducts(
@@ -425,6 +492,13 @@ if (!user) {
     loadProduct();
   
   </script>
+<div id="imageZoomModal" class="zoom-modal">
+  <span class="zoom-close" onclick="closeImageZoom()">
+    &times;
+  </span>
+<img id="zoomedImage" class="zoomed-images">
+</div>
+
 
 </body>
 </html>

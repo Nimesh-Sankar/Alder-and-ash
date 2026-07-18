@@ -15,10 +15,20 @@
     rel="stylesheet"
     href="/css/style.css"
   />
-
-</head>
+ 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+ </head>
+ <link
+ rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+ />
 
 <body>
+  <div id="alertBox"
+    class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
+    role="alert"
+    style="z-index: 9999;">
+  </div>
 
   <div class="admin-container">
 
@@ -66,7 +76,7 @@
       Category
     </li>
 
-    <li>
+    <li onclick="window.location.href='/api/orders/admin/orders'">
       Orders
     </li>
 
@@ -154,12 +164,16 @@
                 type="number"
                 id="variantPrice"
                 placeholder="Price"
+                min="1"
+                step="1"
               />
           
               <input
                 type="number"
                 id="variantStock"
                 placeholder="Stock"
+                min="0"
+                step="1"
               />
           
               <button
@@ -183,11 +197,25 @@
             </label>
           
             <input
-              type="file"
-              id="productImages"
-              multiple
-              accept="image/*"
-            />
+    type="file"
+    id="productImages"
+    accept=".jpg,.jpeg,.png,.webp"
+/>
+
+<div id="cropContainer">
+    <img
+        id="imagePreview"
+        style="max-width:300px; display:none;"
+    >
+</div>
+
+<button
+    type="button"
+    onclick="saveCroppedImage()">
+    Save Cropped Image
+</button>
+
+<div id="croppedImagesList"></div>
           
           </div>
           
@@ -210,7 +238,7 @@
     </main>
 
   </div>
- 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
   <script src="/js/admin.js"></script>
 
 </body>

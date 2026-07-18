@@ -57,7 +57,6 @@ if (profileLink && currentUser) {
   profileLink.href = '/user/profile';
 }
 // SIGNUP WITH OTP
-// SIGNUP WITH OTP
 if (document.getElementById('signupForm')) {
 
   const signupForm = document.getElementById('signupForm');
@@ -378,25 +377,69 @@ if (document.getElementById('forgotPasswordForm')) {
 // =========================
 // VERIFY RESET OTP
 // =========================
-if (document.getElementById('verifyResetOtpForm')) {
-  const otpForm = document.getElementById('verifyResetOtpForm');
+if (document.getElementById("verifyResetOtpForm")) {
 
-  otpForm.addEventListener('submit', (e) => {
+  const otpForm =
+    document.getElementById("verifyResetOtpForm");
+
+  const resendBtn =
+    document.getElementById("resendResetOtpBtn");
+
+  const timerDisplay =
+    document.getElementById("resetTimerDisplay");
+
+  let timeLeft = 30;
+  let timer;
+
+  function startResetOtpTimer() {
+
+    resendBtn.style.display = "none";
+
+    timer = setInterval(() => {
+
+      timerDisplay.textContent =
+        `Resend OTP in ${timeLeft}s`;
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+
+        clearInterval(timer);
+
+        timerDisplay.textContent =
+          "OTP expired";
+
+        resendBtn.style.display =
+          "inline-block";
+
+      }
+
+    }, 1000);
+
+  }
+
+  startResetOtpTimer();
+
+  otpForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const otp = document.getElementById('resetOtp').value.trim();
-    const errorEl = document.getElementById('resetOtpError');
+    const otp =
+      document.getElementById("resetOtp").value.trim();
 
-    errorEl.textContent = '';
+    const errorEl =
+      document.getElementById("resetOtpError");
+
+    errorEl.textContent = "";
 
     if (!otp) {
-      errorEl.textContent = 'Please enter OTP';
+      errorEl.textContent = "Please enter OTP";
       return;
     }
 
-    localStorage.setItem('resetOtp', otp);
-    window.location.href = '/reset-password';
+    localStorage.setItem("resetOtp", otp);
+    window.location.href = "/reset-password";
   });
+
 }
 
 // =========================
@@ -480,8 +523,20 @@ if (document.getElementById('profileFirstName')) {
 // =========================
 // SIGNUP OTP VERIFY
 // =========================
-
+let isVerifyingOtp=false;
 async function verifySignupOtp() {
+
+  if(isVerifyingOtp){
+    return
+  }
+  isVerifyingOtp=true;
+  const verifyBtn =
+  document.getElementById("verifyOtpBtn");
+
+if (verifyBtn) {
+  verifyBtn.disabled = true;
+  verifyBtn.innerText = "Verifying...";
+}
 
   const otp =
     document.getElementById("otp").value.trim();
@@ -534,6 +589,7 @@ async function verifySignupOtp() {
 
       message.textContent =
         data.message || "Invalid OTP";
+        isVerifyingOtp=false;
 
       return;
     }
@@ -572,11 +628,12 @@ async function verifySignupOtp() {
     localStorage.removeItem("pendingEmail");
     localStorage.removeItem("signupData");
 
-    window.location.href = "/";
+    window.location.replace("/");
 
   } catch (error) {
 
     console.error(error);
+    isVerifyingOtp=false;
 
     message.textContent =
       "Something went wrong";
@@ -590,6 +647,13 @@ async function verifySignupOtp() {
 // =========================
 
 if (document.getElementById("otpForm")) {
+  if(!localStorage.getItem(
+    "pendingEmail"
+  ) ){
+    window.location.replace(
+      "/signup"
+    );
+  }
 
   const otpForm =
     document.getElementById("otpForm");
@@ -653,13 +717,19 @@ if (document.getElementById("otpForm")) {
         localStorage.getItem(
           "pendingEmail"
         );
-
+        
       const message =
-        document.getElementById(
-          "otpMessage"
-        );
+      document.getElementById(
+        "otpMessage"
+      );
 
-      message.textContent = "";
+    message.textContent = "";
+    
+        if(!email){
+          message.textContent="Email not found"
+          return;
+        }
+
 
       try {
 
@@ -728,6 +798,95 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    window.location.href = '/';
+    localStorage.removeItem("pendingEmail")
+    localStorage.removeItem("signupData")
+    window.location.replace('/');
   });
+}
+const togglePassword =
+document.getElementById(
+"togglePassword"
+);
+
+const passwordInput =
+document.getElementById(
+"password"
+);
+
+if (togglePassword && passwordInput) {
+  togglePassword.addEventListener("click", () => {
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      togglePassword.innerText = "><";
+    } else {
+      passwordInput.type = "password";
+      togglePassword.innerText = "<>";
+    }
+  });
+}
+
+const signupPassword =
+  document.getElementById("password");
+
+const confirmPassword =
+  document.getElementById("confirmPassword");
+
+const toggleSignupPassword =
+  document.getElementById("toggleSignupPassword");
+
+const toggleConfirmPassword =
+  document.getElementById("toggleConfirmPassword");
+
+if (
+  toggleSignupPassword &&
+  signupPassword
+) {
+  toggleSignupPassword.addEventListener(
+    "click",
+    () => {
+      if (
+        signupPassword.type ===
+        "password"
+      ) {
+        signupPassword.type =
+          "text";
+
+        toggleSignupPassword.innerText =
+          "><";
+      } else {
+        signupPassword.type =
+          "password";
+
+        toggleSignupPassword.innerText =
+          "<>";
+      }
+    }
+  );
+}
+
+if (
+  toggleConfirmPassword &&
+  confirmPassword
+) {
+  toggleConfirmPassword.addEventListener(
+    "click",
+    () => {
+      if (
+        confirmPassword.type ===
+        "password"
+      ) {
+        confirmPassword.type =
+          "text";
+
+        toggleConfirmPassword.innerText =
+          "><";
+      } else {
+        confirmPassword.type =
+          "password";
+
+        toggleConfirmPassword.innerText =
+          "<>";
+      }
+    }
+  );
 }

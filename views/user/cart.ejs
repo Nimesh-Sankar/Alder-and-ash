@@ -6,22 +6,25 @@
 
   <link
     rel="stylesheet"
-    href="/css/style.css"
-  >
+    href="/css/style.css">
+  <link rel="stylesheet" href="/css/products.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 
 <body>
-
-  <nav class="cart-navbar">
-    <div class="logo">
-      Alder & Ash.
+  
+  <div id="alertBox"
+      class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
+      role="alert"
+      style="z-index: 9999;">
     </div>
-
-    <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="/api/users/products">Products</a>
-    </div>
-  </nav>
+    <%- include("../partials/products-navbar",
+    {
+      hideCart:true
+    }) %>
+  
 
   <div class="cart-page">
 
@@ -30,8 +33,10 @@
 
       <div id="cartItems"></div>
 
-      <button class="checkout-btn">
-        Go to Checkout →
+      <button
+        onclick="location.href='/user/checkout'"
+      class="checkout-btn">
+        Proceed to Checkout →
       </button>
     </div>
 
@@ -64,6 +69,17 @@
   </div>
 
   <script>
+    function showAlert(message, type="success") {
+      const alertBox =
+        document.getElementById("alertBox");
+        if(!alertBox) return;
+        alertBox.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+      alertBox.innerText = message;
+      alertBox.classList.remove("d-none");
+      setTimeout(() => {
+        alertBox.classList.add("d-none");
+      }, 3000);
+    }
 
     async function loadCart() {
 
@@ -86,6 +102,11 @@ const response =
 
         const cart =
           await response.json();
+          if (!response.ok) {
+            showAlert(cart.message,"danger");
+
+            return;
+          }
 
         const container =
           document.getElementById("cartItems");
@@ -104,19 +125,25 @@ const response =
         }
 
         cart.items.forEach((item) => {
+          const isUnavailable=
+          item.isUnavailable||!item.product||item.product.isDeleted||item.product.isListed===false;
+          const image=
+          item.product?.images?.[0]||"/images/no-image.png";
+          const productName=
+          item.product?.productName||"unavailable product"
 
           container.innerHTML += `
 
-            <div class="cart-item">
+            <div class="cart-item ${isUnavailable?"unavailable-cart-item":""}">
 
               <img
-                src="${item.product.images[0]}"
+                src="${image}"
               >
 
               <div class="item-info">
 
                 <h3>
-                  ${item.product.productName}
+                  ${productName}
                 </h3>
 
                 <p>
@@ -130,13 +157,19 @@ const response =
                 <h4>
                   ₹${item.price}
                 </h4>
+                ${isUnavailable?`<p class="unavailable-text">
+                  ${item.unavailableReason||"this item is unavailable"}
+                  </p>`
+                :""}
 
               </div>
 
               <div class="quantity-box">
 
-                <button onclick="
-                  updateQuantity(
+                <button
+                ${isUnavailable ? "disabled" : ""}
+                  onclick="
+                        updateQuantity(
                     '${item._id}',
                     ${item.quantity - 1}
                   )
@@ -148,8 +181,10 @@ const response =
                   ${item.quantity}
                 </span>
 
-                <button onclick="
-                  updateQuantity(
+                <button
+                    ${isUnavailable ? "disabled" : ""}
+                    onclick="
+                    updateQuantity(
                     '${item._id}',
                     ${item.quantity + 1}
                   )
@@ -183,20 +218,16 @@ const response =
 
         document.getElementById("grandTotal").innerText =
           `₹${cart.grandTotal}`;
-          const hasOutOfStock =
+          
+          
+          const hasUnavailable =
   cart.items.some((item) => {
 
-    const variant =
-      item.product.variants.find(
-        (variant) =>
-          variant.size === item.size &&
-          variant.color === item.color
-      );
-
     return (
-      !variant ||
-      variant.stock < item.quantity ||
-      item.product.isDeleted
+      item.isUnavailable ||
+      !item.product ||
+      item.product.isDeleted ||
+      item.product.isListed === false
     );
 
   });
@@ -204,7 +235,7 @@ const response =
 const checkoutBtn =
   document.querySelector(".checkout-btn");
 
-if (hasOutOfStock) {
+if (hasUnavailable) {
 
   checkoutBtn.disabled = true;
 
@@ -258,7 +289,7 @@ const data =
   await response.json();
 
 if (!response.ok) {
-  alert(data.message);
+  showAlert(data.message,"danger");
   return;
 }
 

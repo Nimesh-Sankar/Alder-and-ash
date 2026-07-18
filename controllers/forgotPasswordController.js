@@ -2,18 +2,18 @@ import User from "../models/userModel.js";
 import OTP from "../models/otpModel.js";
 import bcrypt from "bcrypt";
 
-// Forgot Password - Send OTP
+
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if user exists
+    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate OTP 
+    
     const generateOTP = () => {
       return Math.floor(100000 + Math.random() * 900000).toString();
     };

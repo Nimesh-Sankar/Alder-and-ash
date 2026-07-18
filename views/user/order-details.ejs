@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Details</title>
+    <link rel="stylesheet" href="/css/orders.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+<body>
+
+<%- include("../partials/products-navbar") %>
+
+<div class="orders-container">
+
+    <h1 class="page-title">Order Details</h1>
+
+    <div class="orders-card">
+
+        <h3>Order #<%= order.orderId %></h3>
+
+        <p>
+            Status:
+            <span class="status">
+                <%= order.status %>
+            </span>
+        </p>
+
+        <p>
+            Placed on:
+            <%= order.createdAt.toDateString() %>
+        </p>
+
+        <p>
+            Total:
+            ₹<%= order.grandTotal %>
+        </p>
+
+        <% order.items.forEach(item=>{ %>
+
+            <hr>
+
+            <p>
+                <%= item.product.productName %>
+            </p>
+
+            <p>
+                Quantity:
+                <%= item.quantity %>
+            </p>
+
+            <p>
+                Size:
+                <%= item.size %>
+            </p>
+
+        <% }) %>
+
+        <div class="order-actions">
+
+            <% if(order.status==="DELIVERED"){ %>
+        
+                <a
+                    href="/api/orders/return/<%= order.orderId %>"
+                    class="orders-btn">
+                    Return Item
+                </a>
+        
+            <% } else if(order.status!=="CANCELLED"){ %>
+        
+                <a
+                    href="/api/orders/cancel/<%= order.orderId %>"
+                    class="orders-btn">
+                    Cancel Order
+                </a>
+        
+            <% } %>
+        
+            <a
+                href="/api/orders/invoice/<%= order.orderId %>"
+                class="orders-btn">
+                Download Invoice
+            </a>
+        
+        </div>
+
+            
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

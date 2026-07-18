@@ -53,7 +53,7 @@
       Category
     </li>
 
-    <li>
+    <li onclick="window.location.href='/api/orders/admin/orders'">
       Orders
     </li>
 
@@ -126,6 +126,39 @@
   </div>
   
   <script src="/js/admin.js"></script>
-
+  <div
+  id="confirmModal"
+  class="confirm-modal"
+  >
+  
+  <div class="confirm-box">
+  
+  <h3>
+  Confirm Delete
+  </h3>
+  
+  <p id="confirmText">
+  Are you sure?
+  </p>
+  
+  <div>
+  
+  <button
+  id="cancelDelete"
+  >
+  Cancel
+  </button>
+  
+  <button
+  id="confirmDelete"
+  >
+  Delete
+  </button>
+  
+  </div>
+  
+  </div>
+  
+  </div>
 </body>
 </html>

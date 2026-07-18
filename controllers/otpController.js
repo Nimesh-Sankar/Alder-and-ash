@@ -39,6 +39,11 @@ export const sendOTP = async (req, res) => {
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp, purpose } = req.body;
+    console.log("verify Body",req.body)
+
+    const existingOtp=await OTP.findOne({
+      email,purpose});
+      console.log("OTP IN DB:",existingOtp)
 
   
     const otpRecord = await OTP.findOne({
@@ -47,6 +52,7 @@ export const verifyOTP = async (req, res) => {
       purpose,
       expiresAt: { $gt: new Date() },
     });
+    
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid or expired OTP" });

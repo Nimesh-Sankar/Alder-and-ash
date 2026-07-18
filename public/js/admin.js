@@ -20,7 +20,8 @@ function showAlert(message, type = "success") {
 // =========================
 // ADMIN SESSION PROTECTION
 // =========================
-if (window.location.pathname === "/admin") {
+if (window.location.pathname.startsWith("/admin")&&
+window.location.pathname !== "/admin/login") {
 
   const admin = localStorage.getItem("admin");
 
@@ -54,6 +55,22 @@ if (adminLoginForm) {
     const errorEl = document.getElementById("adminLoginError");
 
     errorEl.textContent = "";
+    
+    let hasError=false;
+    
+    if(!email.trim()){
+      showAlert("Email is required","danger");
+      hasError=true;
+    }
+    else if(!/\S+@\S+\.\S+/.test(email)){
+      showAlert("Enter a valid email","danger");
+      hasError=true;
+    }
+    if(!password.trim()){
+      showAlert("Password is required","danger");
+      hasError=true;
+    }
+    if(hasError) return;
 
     try {
 
@@ -375,6 +392,21 @@ const response = await fetch(
             >
               Edit
             </button>
+            <button
+              onclick="
+              toggleCategoryStatus(
+                '${category._id}'
+                )
+                "
+                >
+
+                ${
+                category.isListed
+                ? "Block"
+                : "Unblock"
+                }
+
+            </button>
     
             <button
               onclick="deleteCategory('${category._id}')"
@@ -439,38 +471,91 @@ if (pagination) {
 
 }
 
-async function deleteCategory(id) {
+function deleteCategory(id) {
 
-  const confirmDelete =
-    confirm("Delete category?");
+  openConfirm(
+    "Delete category?",
+    async function () {
 
-  if (!confirmDelete) return;
+      try {
 
-  try {
+        const response =
+          await fetch(
+            `${API_BASE}/admin/categories/delete/${id}`,
+            {
+              method: "PATCH"
+            }
+          );
 
-    const response = await fetch(
-      `${API_BASE}/admin/categories/delete/${id}`,
-      {
-        method: "PATCH"
+        const data =
+          await response.json();
+
+        showAlert(
+          data.message,
+          response.ok ? "success" : "danger"
+        );
+
+        loadCategories();
+
+      } catch (error) {
+
+        console.log(
+          "DELETE CATEGORY ERROR:",
+          error
+        );
+
+        showAlert(
+          "Something went wrong",
+          "danger"
+        );
+
       }
-    );
 
-    const data = await response.json();
-
-    showAlert(data.message,"success");
-
-    loadCategories();
-
-  } catch (error) {
-
-    console.log(
-      "DELETE CATEGORY ERROR:",
-      error
-    );
-
-  }
+    }
+  );
 
 }
+async function toggleCategoryStatus(
+  categoryId
+  ) {
+  
+  try {
+  
+  const response =
+  await fetch(
+  
+  `/admin/categories/${categoryId}/status`,
+  
+  {
+  method: "PATCH"
+  }
+  
+  );
+  
+  const data =
+  await response.json();
+  
+  showAlert(
+  data.message,
+  response.ok
+  ? "success"
+  : "danger"
+  );
+  
+  loadCategories();
+  
+  } catch (error) {
+  
+  console.log(error);
+  
+  showAlert(
+  "Something went wrong",
+  "danger"
+  );
+  
+  }
+  
+  }
 
 
 const editForm = document.getElementById("editCategoryForm");
@@ -734,9 +819,6 @@ async function toggleBrandStatus(id) {
 }
 
 
-// =========================
-// ADD BRAND
-// =========================
 
 // =========================
 // ADD BRAND
@@ -929,37 +1011,50 @@ if (editBrandForm) {
   );
 
 }
-async function deleteBrand(id) {
+function deleteBrand(id) {
 
-  const confirmDelete =
-    confirm("Delete brand?");
+  openConfirm(
+    "Delete brand?",
+    async function () {
 
-  if (!confirmDelete) return;
+      try {
 
-  try {
+        const response =
+          await fetch(
+            `${API_BASE}/admin/brands/delete/${id}`,
+            {
+              method: "PATCH"
+            }
+          );
 
-    const response = await fetch(
-      `${API_BASE}/admin/brands/delete/${id}`,
-      {
-        method: "PATCH"
+        const data =
+          await response.json();
+
+        showAlert(
+          data.message,
+          response.ok
+            ? "success"
+            : "danger"
+        );
+
+        loadBrands();
+
+      } catch (error) {
+
+        console.log(
+          "DELETE BRAND ERROR:",
+          error
+        );
+
+        showAlert(
+          "Something went wrong",
+          "danger"
+        );
+
       }
-    );
 
-    const data =
-      await response.json();
-
-    showAlert(data.message,"success");
-
-    loadBrands();
-
-  } catch (error) {
-
-    console.log(
-      "DELETE BRAND ERROR:",
-      error
-    );
-
-  }
+    }
+  );
 
 }
 // =========================
@@ -968,108 +1063,123 @@ async function deleteBrand(id) {
 
 async function loadProducts(page = 1) {
 
-  const productContainer =
-    document.getElementById(
-      "productContainer"
-    );
+  const productContainer = document.getElementById("productContainer");
 
   if (!productContainer) return;
 
-  const searchInput =
-    document.getElementById(
-      "productSearchInput"
-    );
-
-  const search =
-    searchInput
-      ? searchInput.value.trim()
-      : "";
+  const searchInput = document.getElementById("productSearchInput");
+  const search = searchInput ? searchInput.value.trim() : "";
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
 
   try {
 
     const response = await fetch(
-      `${API_BASE}/admin/products?page=${page}&search=${search}`
+      `${API_BASE}/admin/products?page=${page}&search=${search}&fromDate=${fromDate}&toDate=${toDate}`
     );
 
-    const data =
-      await response.json();
-
+    const data = await response.json();
+    
+    
     productContainer.innerHTML = "";
 
-    data.products.forEach((product) => {
+data.products.forEach((product, index) => {
+  console.log(product.images);
 
-      productContainer.innerHTML += `
+    productContainer.innerHTML += `
+        <tr>
 
-        <div class="category-card">
+            <td>
+                ${(page - 1) * 5 + index + 1}
+            </td>
 
-          <h3>
-            ${product.productName}
-          </h3>
+            <td>
+                <img
+    src="${product.images[0]}"
+    width="60"
+    height="60"
+>
+                    
+                
+            </td>
 
-          <p>
-            ${product.description}
-          </p>
+            <td>
+                ${product.productName}
+            </td>
 
-          <p>
-            Brand:
-            ${product.brand?.brandName}
-          </p>
+            <td>
+                ${product.category?.name || "-"}
+            </td>
 
-          <p>
-            Category:
-            ${product.category?.name}
-          </p>
+            <td>
+                ${product.brand?.brandName || "-"}
+            </td>
 
-          <p>
-            ₹${product.variants?.[0]?.price || 0}
-          </p>
+            <td>
+                ${product.variants?.[0]?.stock || 0}
+            </td>
 
-          <p>
-            Stock:
-            ${product.variants?.[0]?.stock || 0}
-          </p>
+            <td>
+                ₹${product.variants?.[0]?.price || 0}
+            </td>
 
-          <div class="category-actions">
+            <td>
 
-            <button
-              onclick="window.location.href='/admin/edit-product?id=${product._id}'"
-            >
-              Edit
-            </button>
-          
-            <button
-              onclick="toggleProductStatus('${product._id}')"
-            >
-              ${product.isListed
-                ? "Unlist"
-                : "List"}
-            </button>
-      
+                <button
+                    onclick="window.location.href='/admin/edit-product?id=${product._id}'"
+                >
+                    Edit
+                </button>
 
-            <button
-              onclick="deleteProduct('${product._id}')"
-            >
-              Delete
-            </button>
+                <button
+                    onclick="toggleProductStatus('${product._id}')"
+                >
+                    ${product.isListed ? "Unlist" : "List"}
+                </button>
 
-          </div>
+                <button
+                    onclick="deleteProduct('${product._id}')"
+                >
+                    Delete
+                </button>
 
-        </div>
+            </td>
 
+        </tr>
+    `;
+});
+
+    // Pagination code
+    const pagination = document.getElementById("productPagination");
+    if (pagination) {
+      pagination.innerHTML = "";
+      if (data.hasPrevPage) {
+        pagination.innerHTML += `
+          <button onclick="loadProducts(${page - 1})">
+            Prev
+          </button>
+        `;
+      }
+      pagination.innerHTML += `
+        <span>
+          Page ${data.currentPage} of ${data.totalPages}
+        </span>
       `;
-
-    });
+      if (data.hasNextPage) {
+        pagination.innerHTML += `
+          <button onclick="loadProducts(${page + 1})">
+            Next
+          </button>
+        `;
+      }
+    }
 
   } catch (error) {
-
-    console.log(
-      "LOAD PRODUCTS ERROR:",
-      error
-    );
-
+    console.log("LOAD PRODUCTS ERROR:", error);
   }
-
 }
+
+
 function clearProductSearch() {
   const searchInput =
   document.getElementById(
@@ -1241,8 +1351,16 @@ function addVariant() {
 
     showAlert(
       "Fill all variant fields"
-    );
+);
 
+    return;
+  }
+  if(Number(price) <= 0) {
+    showAlert("price must be a positive number","danger");
+    return;
+  }
+  if(Number(stock) < 0) {
+    showAlert("stock cannot be negative","danger");
     return;
 
   }
@@ -1382,8 +1500,7 @@ if (addProductForm) {
     async (e) => {
 
       e.preventDefault();
-      console.log("add product submit");
-
+    
       try {
 
         const productName =
@@ -1406,10 +1523,39 @@ if (addProductForm) {
             "productBrand"
           ).value;
 
+          if (!productName.trim()){
+          showAlert(
+            "Product name is required",
+            "danger"
+          );
+          return;    
+          }
+          if(!description.trim()){
+            showAlert(
+              "Description is required",
+              "danger"
+            );
+            return;
+          }
+          if(!category){
+            showAlert(
+              "Select a category",
+              "danger"
+            );
+            return;
+          }
+          if(!brand){
+            showAlert(
+              "Select a brand", 
+              "danger"
+            );
+            return;
+          } 
+
         if (variants.length === 0) {
 
           showAlert(
-            "Add at least one variant"
+            "Add at least one variant","danger"
           );
 
           return;
@@ -1444,7 +1590,7 @@ formData.append(
   JSON.stringify(variants)
 );
 
-console.log("cropped before if:", croppedImages.length);
+
 
 
 if (croppedImages.length < 3) {
@@ -1479,8 +1625,7 @@ const response =
 
     }
   );
-  console.log("add product response:", response.status);
-  console.log("cropped images:", croppedImages.length);
+  
 
         const data =
           await response.json();
@@ -1677,6 +1822,60 @@ if (editProductForm) {
           document.getElementById(
             "productBrand"
           ).value;
+          if (!productName.trim()) {
+
+            showAlert(
+              "Product name is required",
+              "danger"
+            );
+          
+            return;
+          
+          }
+          
+          if (!description.trim()) {
+          
+            showAlert(
+              "Description is required",
+              "danger"
+            );
+          
+            return;
+          
+          }
+          
+          if (!category) {
+          
+            showAlert(
+              "Select a category",
+              "danger"
+            );
+          
+            return;
+          
+          }
+          
+          if (!brand) {
+          
+            showAlert(
+              "Select a brand",
+              "danger"
+            );
+          
+            return;
+          
+          }
+          
+          if (variants.length === 0) {
+          
+            showAlert(
+              "Add at least one variant",
+              "danger"
+            );
+          
+            return;
+          
+          }
 
         const formData =
           new FormData();
@@ -1759,41 +1958,81 @@ if (editProductForm) {
   );
 
 }
+function openConfirm(message, onConfirm) {
 
-async function deleteProduct(id) {
+  const modal =
+    document.getElementById("confirmModal");
 
-  const confirmDelete =
-    confirm(
-      "Delete this product?"
-    );
+  const text =
+    document.getElementById("confirmText");
 
-  if (!confirmDelete) return;
+  const cancelBtn =
+    document.getElementById("cancelDelete");
 
-  try {
+  const confirmBtn =
+    document.getElementById("confirmDelete");
 
-    const response =
-      await fetch(
-        `${API_BASE}/admin/products/delete/${id}`,
-        {
-          method: "PATCH"
-        }
-      );
-
-    const data =
-      await response.json();
-
-    showAlert(data.message,"success");
-
-    loadProducts();
-
-  } catch (error) {
-
-    console.log(
-      "DELETE PRODUCT ERROR:",
-      error
-    );
-
+  if (!modal || !text || !cancelBtn || !confirmBtn) {
+    return;
   }
+
+  text.textContent = message;
+
+  modal.style.display = "flex";
+
+  cancelBtn.onclick = function () {
+    modal.style.display = "none";
+  };
+
+  confirmBtn.onclick = function () {
+    modal.style.display = "none";
+    onConfirm();
+  };
+  modal.onclick=function(e){
+    if(e.target===modal){
+      modal,style.display="none";
+    }
+  }
+
+}
+
+function deleteProduct(id) {
+
+  openConfirm(
+    "Delete this product?",
+    async function () {
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE}/admin/products/delete/${id}`,
+            {
+              method: "PATCH"
+            }
+          );
+
+        const data =
+          await response.json();
+
+        showAlert(
+          data.message,
+          response.ok ? "success" : "danger"
+        );
+
+        loadProducts();
+
+      } catch (error) {
+
+        console.log(
+          "DELETE PRODUCT ERROR:",
+          error
+        );
+
+      }
+
+    }
+  );
 
 }
 async function toggleProductStatus(id) {
@@ -1824,6 +2063,16 @@ if (imageInput) {
       event.target.files[0];
 
     if (!file) return;
+    
+    if(!["image/jpeg",
+      "image/png",
+      "image/webp"
+    ].includes(file.type)){
+      showAlert("not allowed","danger");
+
+      event.target.files="";
+      return;
+    }
 
     const preview =
       document.getElementById("imagePreview");
@@ -1862,9 +2111,27 @@ window.saveCroppedImage = function () {
 
     croppedImages.push(blob);
 
-    document.getElementById("croppedImagesList").innerHTML += `
-      <p>Image ${croppedImages.length} saved</p>
-    `;
+    const preview =
+URL.createObjectURL(blob);
+
+document.getElementById(
+"croppedImagesList"
+).innerHTML += `
+
+<div class="cropped-preview">
+
+<img
+src="${preview}"
+class="cropped-preview-img"
+>
+
+<p>
+Image ${croppedImages.length}
+</p>
+
+</div>
+
+`;
 
     document.getElementById("productImages").value = "";
 
@@ -1876,3 +2143,50 @@ window.saveCroppedImage = function () {
   }, "image/jpeg", 0.8);
 
 };
+const adminPassword =
+document.getElementById(
+"adminPassword"
+);
+
+const toggleAdminPassword =
+document.getElementById(
+"toggleAdminPassword"
+);
+
+if (
+adminPassword &&
+toggleAdminPassword
+) {
+
+toggleAdminPassword
+.addEventListener(
+"click",
+
+() => {
+
+if (
+adminPassword.type ===
+"password"
+) {
+
+adminPassword.type =
+"text";
+
+toggleAdminPassword.innerText =
+"><";
+
+} else {
+
+adminPassword.type =
+"password";
+
+toggleAdminPassword.innerText =
+"<>";
+
+}
+
+}
+
+);
+
+}

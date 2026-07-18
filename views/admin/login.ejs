@@ -27,15 +27,25 @@
         type="email"
         id="adminEmail"
         placeholder="Admin Email"
-        required
+        
       />
 
-      <input
+      <div class="password-box">
+
+        <input
         type="password"
         id="adminPassword"
-        placeholder="Password"
-        required
-      />
+        name="password"
+        placeholder="Enter password"
+        >
+        
+        <span
+        id="toggleAdminPassword"
+        class="eye-icon" >
+        <>
+        </span>
+        
+        </div>
 
       <p id="adminLoginError"></p>
 

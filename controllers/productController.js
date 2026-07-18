@@ -1,6 +1,7 @@
-import e from "express";
 import Product from "../models/productModel.js";
 import sharp from "sharp";
+import Brand from "../models/brandModel.js";
+import Category from "../models/categoryModel.js";
 
 function validateImageFiles(files) {
   const allowedTypes = [
@@ -15,6 +16,27 @@ function validateImageFiles(files) {
     if (file.size > 2 * 1024 * 1024) {
       return "Each image must be less than 2MB";
     }
+  }
+  return null;
+}
+function validateVariants(variants) {
+  if(!variants||variants.length === 0) {
+    return "At least one variant is required";
+  }
+  for (const variant of variants) {
+    const price= Number(variant.price);
+    const stock= Number(variant.stock);
+    if(!variant.size || !variant.color) {
+      return "Each variant must have size and color";
+    }
+    if (isNaN(price) || price <= 0) {
+      return "Variant price must be a positive number";
+    }
+    if (isNaN(stock) || stock < 0) {
+      return "Variant stock must be a positive number";
+    }
+    variant.price = price;
+    variant.stock = stock;
   }
   return null;
 }
@@ -34,6 +56,17 @@ export const addProduct = async (req, res) => {
     } = req.body;
     const parsedVariants =
       JSON.parse(variants);
+
+      const variantError =
+      validateVariants(parsedVariants);
+
+    if (variantError) {
+
+      return res.status(400).json({
+        message: variantError
+      });
+    }
+
 
     if (
       !req.files ||
@@ -143,6 +176,10 @@ export const getProducts = async (req, res) => {
 
     const search =
       req.query.search || "";
+      const fromDate=
+      req.query.fromDate;
+      const toDate=
+      req.query.toDate;
     const category =
       req.query.category || "";
       const brand =
@@ -162,26 +199,92 @@ export const getProducts = async (req, res) => {
     const skip =
       (page - 1) * limit;
 
-      const query = {
+      const activeBrands=
+      await Brand.find({
+        isBlocked:false,
+        isDeleted:false
+      }).select("_id");
 
-        isDeleted: false,
-        
-      
-        productName: {
-          $regex: search,
-          $options: "i"
+      const activeBrandIds=activeBrands.map((brand)=>brand._id)
+
+      const activeCategories=
+      await Category.find({
+        isListed:true,
+        isDeleted:false
+      }).select("_id");
+
+      const activeCategoryIds=activeCategories.map((category)=>category._id )
+
+
+
+      const query = {
+        isDeleted:false,
+        brand:{
+          $in:activeBrandIds
+        },
+        category:{
+          $in:activeCategoryIds
+        },
+        productName:{
+          $regex:search,
+          $options:"i"
         }
       
       };
+    
+    
+
+      if(fromDate||toDate){
+        query.createdAt={};
+        if(fromDate){
+          query.createdAt.$gte=
+          new Date(fromDate);
+        }
+        if(toDate){
+          const endDate=
+          new Date(toDate);
+
+          endDate.setHours(23,59,59,999);
+
+          query.createdAt.$lte=endDate;
+        }
+
+
+
+
+
+
+      }
       
       if (category) {
         query.category = category;
 
       
       }
-        if (brand) {  
+      if (brand) {
+
+        if (
+          !activeBrandIds
+            .map((id) => id.toString())
+            .includes(brand)
+        ) {
+      
+          return res.status(200).json({
+            products: [],
+            currentPage: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPrevPage: false
+          });
+      
+        }
+      
         query.brand = brand;
+      
       }
+
+
+
       if (minPrice || maxPrice) {
         query["variants.price"] = {};
         if (minPrice) {
@@ -313,6 +416,15 @@ export const updateProduct = async (req, res) => {
 
     const parsedVariants =
       JSON.parse(variants);
+
+      const variantError =
+      validateVariants(parsedVariants);
+
+    if (variantError) {
+      return res.status(400).json({
+        message: variantError
+      });
+     }
 
     let existingImages = [];
 

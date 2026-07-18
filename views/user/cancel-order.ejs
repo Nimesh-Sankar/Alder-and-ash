@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Cancel Order</title>
+
+    <link rel="stylesheet"
+        href="/css/orders.css">
+
+    <link rel="stylesheet"
+        href="/css/products.css">
+
+    <link rel="stylesheet"
+        href="/css/navbar.css">
+
+</head>
+
+<body>
+
+    <%- include("../partials/products-navbar") %>
+
+    <div class="orders-container">
+
+        <h1 class="page-title">
+            Cancel Order
+        </h1>
+
+        <div class="orders-card">
+
+            <h2>
+                <%= order.items[0].product.productName %>
+            </h2>
+
+            <p>
+                Order ID:
+                <%= order.orderId %>
+            </p>
+
+            <p>
+                Status:
+                <span class="status">
+                    <%= order.status %>
+                </span>
+            </p>
+
+            <p>
+                Quantity:
+                <%= order.items[0].quantity %>
+            </p>
+
+            <form method="POST">
+
+                <label>
+                    Reason (Optional)
+                </label>
+
+                <textarea
+                    name="reason"
+                    rows="5"
+                    placeholder="Why are you cancelling this order?">
+                </textarea>
+
+                <br><br>
+
+                <button
+                    type="submit"
+                    class="orders-btn">
+
+                    Confirm Cancellation
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

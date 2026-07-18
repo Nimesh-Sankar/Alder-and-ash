@@ -230,3 +230,46 @@ export const deleteCategory = async (req, res) => {
   }
 
 };
+export const toggleCategoryStatus = async (req, res) => {
+
+  try {
+
+    const { categoryId } = req.params;
+
+    const category =
+      await Category.findById(categoryId);
+
+    if (!category) {
+
+      return res.status(404).json({
+        message: "Category not found"
+      });
+
+    }
+
+    category.isListed =
+      !category.isListed;
+
+    await category.save();
+
+    res.status(200).json({
+      message: category.isListed
+        ? "Category activated"
+        : "Category blocked",
+      category
+    });
+
+  } catch (error) {
+
+    console.log(
+      "CATEGORY STATUS ERROR:",
+      error.message
+    );
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
+  }
+
+};

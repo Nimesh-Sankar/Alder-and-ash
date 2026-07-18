@@ -18,39 +18,22 @@
     rel="stylesheet"
     href="/css/products.css"
   >
-
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 
 <body>
 
-  <!-- NAVBAR -->
-
-  <nav class="navbar">
-
-    <div class="logo">
-      Alder & Ash.
+  <%- include("../partials/products-navbar") %>
+  <div id="alertBox"
+      class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
+      role="alert"
+      style="z-index: 9999;">
     </div>
 
-    <div class="nav-links">
-      
 
-      <a href="/">
-        Home
-      </a>
 
-      <a href="#">
-        About
-      </a>
-
-      <a href="#">
-        Contact
-      </a>
-
-    </div>
-   
-
-  </nav>
-  
   <div class="listing-controls">
 
     <input
@@ -125,6 +108,37 @@
   </div>
 
   <script>
+    function showAlert(
+  message,
+  type = "success"
+) {
+
+  const alertBox =
+    document.getElementById(
+      "alertBox"
+    );
+
+  if (!alertBox) return;
+
+  alertBox.className =
+    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent =
+    message;
+
+  alertBox.classList.remove(
+    "d-none"
+  );
+
+  setTimeout(() => {
+
+    alertBox.classList.add(
+      "d-none"
+    );
+
+  }, 3000);
+
+}
 
 
 async function loadCategories() {
@@ -158,8 +172,9 @@ try {
 
   `;
 
-  data.categories.forEach(
-    (category) => {
+  data.categories
+  .filter((category) => category.isListed === true)
+  .forEach((category) => {
 
       container.innerHTML += `
 
@@ -346,19 +361,47 @@ document.getElementById("nextBtn").disabled =
     (product) => product.isListed!==false
   )
   .forEach((product) => {
+    const variant= product.variants[0];
+
+    const isOutOfStock=!variant ||
+    variant.stock<=0;
 
       container.innerHTML += `
 
 <div
-class="product-card"
+class="
+product-card
+${isOutOfStock ? "out-of-stock-card" : ""}
+"
+
 onclick="
-  viewProduct('${product._id}')
+viewProduct('${product._id}')
 "
 >
-
+${isOutOfStock
+? `
+<span class="stock-badge">
+Out Of Stock
+</span>
+`
+: ""
+}
 <img
   src="${product.images[0]}"
 >
+<div
+  class="wishlist-btn"
+  onclick="
+    event.stopPropagation();
+    addToWishlist('${product._id}');
+  "
+>
+  ❤️
+</div>
+<p class="product-meta">
+${product.brand?.brandName||""}
+•
+${product.category?.name||""}
 
 <h3>
   ${product.productName}
@@ -367,6 +410,32 @@ onclick="
 <p>
   ₹${product.variants[0].price}
 </p>
+
+<button
+  class="cart-btn"
+
+  ${isOutOfStock
+    ? "disabled"
+    : ""
+  }
+
+  onclick="
+    event.stopPropagation();
+
+    addProductToCartFromCard(
+      '${product._id}',
+      '${variant.size}',
+      '${variant.color}'
+    )
+  "
+>
+
+${isOutOfStock
+  ? "Out Of Stock"
+  : "Add To Cart"
+}
+
+</button>
 
 
 
@@ -451,6 +520,89 @@ document
         `/user/product-details?id=${id}`;
 
     }
+    async function addProductToCartFromCard(productId,size, color) {
+
+  const user =
+    JSON.parse(
+      localStorage.getItem("user")
+    );
+
+  if (!user) {
+
+    showAlert(
+  "Please login first",
+  "danger"
+);
+
+setTimeout(() => {
+
+  window.location.href =
+    "/login";
+
+}, 900);
+
+return;
+
+  }
+
+  const response =
+    await fetch(
+      "/api/cart/add",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "userid": user.id || user._id
+        },
+
+        body: JSON.stringify({
+          productId,
+          quantity: 1,
+          size,
+          color
+        })
+      }
+    );
+
+  const data =
+    await response.json();
+
+  showAlert(data.message,response.ok
+    ?"success"
+    :"danger"
+  );
+
+}
+async function addToWishlist(productId) {
+  const user=JSON.parse(localStorage.getItem("user"));
+  if(!user){
+    showAlert("Please login first","danger");
+    setTimeout(() => {
+      window.location.href="/login";
+    }, 900);
+    return;
+  }
+  const response=await fetch("/api/wishlist/add",
+  {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "userid":user.id||user._id
+    },
+    body:JSON.stringify({productId})
+  });
+
+  const data=await response.json();
+
+  showAlert(data.message,response.ok
+    ?"success"
+    :"danger"
+  );
+
+}
+
+
 
   </script>
 
