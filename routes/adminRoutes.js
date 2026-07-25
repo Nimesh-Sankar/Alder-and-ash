@@ -1,3 +1,4 @@
+import { requireAdmin } from "../middlewares/authMiddleware.js";
 import express from "express";
 import {
   toggleBlockUser,
@@ -32,6 +33,7 @@ import {
 
 import upload from "../config/multer.js";
 
+
 const router = express.Router();
 
 function noCache(req, res, next) {
@@ -53,110 +55,131 @@ function noCache(req, res, next) {
   next();
 }
 
+
 router.post("/login", adminLogin);
 
+router.get("/login", (req, res) => {
+  res.render("admin/login");
+});
+
+// USER MANAGEMENT
 router.patch(
   "/users/:userId/toggle-block",
+  requireAdmin,
   toggleBlockUser
 );
 
 router.get(
   "/users",
+  requireAdmin,
   getUsersWithFilters
 );
 
+// CATEGORY
 router.post(
   "/categories",
+  requireAdmin,
   addCategory
 );
 
 router.get(
   "/categories",
+  requireAdmin,
   getCategories
 );
 
 router.patch(
   "/categories/:id",
+  requireAdmin,
   updateCategory
 );
 
 router.patch(
   "/categories/delete/:id",
+  requireAdmin,
   deleteCategory
 );
+
 router.patch(
   "/categories/:categoryId/status",
+  requireAdmin,
   toggleCategoryStatus
 );
 
+// BRAND
 router.post(
   "/brands",
+  requireAdmin,
   addBrand
 );
 
 router.get(
   "/brands",
+  requireAdmin,
   getBrands
 );
 
 router.patch(
   "/brands/:id",
+  requireAdmin,
   updateBrand
 );
 
 router.patch(
   "/brands/delete/:id",
+  requireAdmin,
   deleteBrand
 );
 
 router.patch(
   "/brands/:brandId/status",
+  requireAdmin,
   toggleBrandStatus
 );
 
+// PRODUCT
 router.post(
   "/products",
+  requireAdmin,
   upload.array("images", 5),
   addProduct
 );
 
 router.get(
   "/products",
+  requireAdmin,
   getProducts
 );
 
 router.get(
   "/products/:id",
+  requireAdmin,
   getSingleProduct
 );
 
 router.patch(
   "/products/:id",
+  requireAdmin,
   upload.array("images", 5),
   updateProduct
 );
 
 router.patch(
   "/products/delete/:id",
+  requireAdmin,
   deleteProduct
 );
 
 router.patch(
   "/products/:productId/status",
+  requireAdmin,
   toggleProductStatus
 );
 
-// ADMIN PAGE ROUTES
-
-router.get(
-  "/login",
-  (req, res) => {
-    res.render("admin/login");
-  }
-);
-
+// ADMIN PAGES
 router.get(
   "/",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/dashboard");
@@ -165,6 +188,7 @@ router.get(
 
 router.get(
   "/category",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/category");
@@ -173,6 +197,7 @@ router.get(
 
 router.get(
   "/add-category",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/add-category");
@@ -181,6 +206,7 @@ router.get(
 
 router.get(
   "/edit-category",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/edit-category");
@@ -189,6 +215,7 @@ router.get(
 
 router.get(
   "/brands-page",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/brands");
@@ -197,6 +224,7 @@ router.get(
 
 router.get(
   "/add-brand",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/add-brand");
@@ -205,6 +233,7 @@ router.get(
 
 router.get(
   "/edit-brand",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/edit-brand");
@@ -213,6 +242,7 @@ router.get(
 
 router.get(
   "/products-page",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/products");
@@ -221,6 +251,7 @@ router.get(
 
 router.get(
   "/add-product",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/add-product");
@@ -229,6 +260,7 @@ router.get(
 
 router.get(
   "/edit-product",
+  requireAdmin,
   noCache,
   (req, res) => {
     res.render("admin/edit-product");

@@ -2,6 +2,8 @@ import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
 import Address from "../models/addressModel.js";
 import Product from "../models/productModel.js";
+import Category from "../models/categoryModel.js";
+import Brand from "../models/brandModel.js";
 import PDFDocument from "pdfkit";
 
 export const placeOrder = async (req, res) => {
@@ -30,19 +32,72 @@ export const placeOrder = async (req, res) => {
 
     
         for (const item of cart.items) {
-            const product = item.product;
 
+            const product = item.product;
+            const category =
+    await Category.findById(
+        product.category
+    );
+
+if (!category || !category.isListed) {
+
+    return res.status(400).json({
+        success: false,
+        message:
+            `${product.productName} category is unavailable`
+    });
+
+}
+
+const brand =
+    await Brand.findById(
+        product.brand
+    );
+
+if (!brand || brand.isBlocked) {
+
+    return res.status(400).json({
+        success: false,
+        message:
+            `${product.productName} brand is unavailable`
+    });
+
+}
+        
+            if (product.isBlocked) {
+        
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        `${product.productName} NO LONGER AVAILABLE`
+                });
+        
+            }
+        
+            if (!product.isListed) {
+        
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        `${product.productName} is currently unavailable`
+                });
+        
+            }
+        
             const variant = product.variants.find(
                 variant =>
                     variant.size === item.size &&
                     variant.color === item.color
             );
-
+        
             if (!variant || variant.stock < item.quantity) {
+        
                 return res.status(400).json({
                     success: false,
-                    message: `${product.productName} is out of stock`
+                    message:
+                        `${product.productName} is out of stock`
                 });
+        
             }
         }
 
@@ -213,20 +268,26 @@ export const renderMyOrders = async (req, res) => {
 };
 
 
-export const renderOrderDetails=
-async(req,res)=>{
+export const renderOrderDetails = async(req,res)=>{
+    console.log("ORDER DETAILS USER:", req.session.user);
 
-    const order=
-    await Order.findOne({
+    const order = await Order.findOne({
         orderId:req.params.orderId
-    }).populate("items.product");
+    })
+    .populate("items.product")
+    .populate("address");
+
+    if(!order){
+        return res.status(404).send("Order not found");
+    }
 
     res.render(
         "user/order-details",
-        {order}
+        { order }
     );
 }
 export const renderCancelPage = async (req, res) => {
+    console.log("CANCEL PAGE HIT");
     try {
 
         if (!req.session.user) {
@@ -250,6 +311,7 @@ export const renderCancelPage = async (req, res) => {
     }
 };
 export const renderReturnPage = async (req, res) => {
+    console.log("retuen PAGE HIT");
     try {
 
         if (!req.session.user) {
@@ -299,6 +361,9 @@ export const cancelOrder = async (req, res) => {
             req.body.reason || null;
 
         for (const item of order.items) {
+
+            /* UPDATE ITEM STATUS */
+            item.status = "CANCELLED";
 
             const product = await Product.findById(
                 item.product
@@ -350,7 +415,12 @@ export const returnOrder = async (req, res) => {
             );
         }
 
-        order.status = "RETURNED";
+        order.status = "RETURN_REQUESTED";
+
+        
+        for (const item of order.items) {
+            item.status = "RETURN_REQUESTED";
+        }
 
         order.returnReason = req.body.reason;
 
@@ -366,7 +436,10 @@ export const returnOrder = async (req, res) => {
 
 export const downloadInvoice = async (req, res) => {
     try {
-        console.log(req.session.user);
+        console.log("DOWNLOAD USER:", req.session.user);
+        console.log("SESSION:", req.session);
+console.log("USER:", req.session.user);
+
         if (!req.session.user) {
             return res.redirect("/login");
         }
@@ -378,17 +451,14 @@ export const downloadInvoice = async (req, res) => {
         .populate("user")
         .populate("address")
         .populate("items.product");
-       
-       
-       
-       
-     if (!order) {
-            return res.status(404).send(
-                "Order not found"
-            );
+
+        if (!order) {
+            return res.status(404).send("Order not found");
         }
 
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({
+            margin: 50
+        });
 
         res.setHeader(
             "Content-Type",
@@ -402,19 +472,46 @@ export const downloadInvoice = async (req, res) => {
 
         doc.pipe(res);
 
-        doc.fontSize(20)
-            .text("Alder & Ash.", {
-                align: "center"
-            });
+        // ======================
+        // STORE HEADER
+        // ======================
 
-        doc.moveDown();
+        doc.fontSize(24)
+           .text("Alder & Ash", {
+               align: "center"
+           });
 
-        doc.fontSize(14)
-            .text(`Invoice: ${order.orderId}`);
+        doc.fontSize(12)
+           .text("Fashion Store", {
+               align: "center"
+           });
+
+        doc.moveDown(2);
+
+        // ======================
+        // INVOICE INFO
+        // ======================
+
+        doc.fontSize(14);
+
+        doc.text(`Invoice No: ${order.orderId}`);
 
         doc.text(
             `Date: ${order.createdAt.toDateString()}`
         );
+
+        doc.moveDown();
+
+        // ======================
+        // CUSTOMER DETAILS
+        // ======================
+
+        doc.fontSize(16)
+           .text("Customer Details");
+
+        doc.moveDown(0.5);
+
+        doc.fontSize(12);
 
         doc.text(
             `Customer: ${
@@ -423,33 +520,140 @@ export const downloadInvoice = async (req, res) => {
                 order.user?.lastName || ""
             }`
         );
-        
-        order.items.forEach(item => {
-        
-            doc.text(
-                `${
-                    item.product?.productName ||
-                    "Deleted Product"
-                } x ${item.quantity}`
-            );
-        
-            doc.text(`₹${item.price}`);
-        
+
+        doc.text(
+            `Email: ${
+                order.user?.email || ""
+            }`
+        );
+
+        // ======================
+        // ADDRESS
+        // ======================
+
+        if (order.address) {
+
             doc.moveDown();
-        });
-        doc.text(
-            `Subtotal: ₹${order.subtotal}`
-        );
 
-        doc.text(
-            `Shipping: ₹${order.shipping}`
-        );
+            doc.fontSize(16)
+               .text("Delivery Address");
 
-        doc.text(
-            `Grand Total: ₹${order.grandTotal}`
-        );
+            doc.moveDown(0.5);
+
+            doc.fontSize(12);
+
+            doc.text(
+                order.address.fullName || ""
+            );
+
+            doc.text(
+                order.address.phone || ""
+            );
+
+            doc.text(
+                order.address.line1 || ""
+            );
+
+            doc.text(
+                `${order.address.city || ""}, ${order.address.state || ""}`
+            );
+
+            doc.text(
+                order.address.pincode || ""
+            );
+        }
 
         doc.moveDown();
+
+        doc.moveTo(50, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+
+        doc.moveDown();
+
+        // ======================
+        // ORDER ITEMS
+        // ======================
+
+        doc.fontSize(16)
+           .text("Order Items");
+
+        doc.moveDown();
+
+        order.items.forEach(item => {
+
+            doc.fontSize(12)
+               .text(
+                   item.product?.productName ||
+                   "Deleted Product",
+                   50,
+                   doc.y,
+                   { continued: true }
+               )
+               .text(
+                   `Qty: ${item.quantity}`,
+                   300,
+                   doc.y,
+                   { continued: true }
+               )
+               .text(
+                   `Rs. ${item.price}`,
+                   450,
+                   doc.y
+               );
+
+            doc.moveDown(0.5);
+        });
+
+        doc.moveDown();
+
+        doc.moveTo(50, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+
+        doc.moveDown();
+
+        // ======================
+        // TOTALS
+        // ======================
+
+        doc.fontSize(12)
+           .text(
+               `Subtotal: Rs. ${order.subtotal}`,
+               {
+                   align: "right"
+               }
+           );
+
+        doc.text(
+            `Tax: Rs. ${order.tax}`,
+            {
+                align: "right"
+            }
+        );
+
+        doc.text(
+            `Shipping: Rs. ${order.shipping}`,
+            {
+                align: "right"
+            }
+        );
+
+        doc.fontSize(16)
+           .text(
+               `Grand Total: Rs. ${order.grandTotal}`,
+               {
+                   align: "right"
+               }
+           );
+
+        doc.moveDown();
+
+        // ======================
+        // PAYMENT INFO
+        // ======================
+
+        doc.fontSize(12);
 
         doc.text(
             `Payment Method: ${order.paymentMethod}`
@@ -457,6 +661,15 @@ export const downloadInvoice = async (req, res) => {
 
         doc.text(
             `Status: ${order.status}`
+        );
+
+        doc.moveDown(2);
+
+        doc.text(
+            "Thank you for shopping with Alder & Ash!",
+            {
+                align: "center"
+            }
         );
 
         doc.end();
@@ -551,6 +764,36 @@ export const renderAdminOrders = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send("Internal Server Error");
+    }
+};
+export const renderAdminOrderDetails = async (req, res) => {
+    try {
+
+        const order = await Order.findOne({
+            orderId: req.params.orderId
+        })
+        .populate("user")
+        .populate("address")
+        .populate("items.product");
+
+        if (!order) {
+            return res.status(404).send(
+                "Order not found"
+            );
+        }
+
+        res.render(
+            "admin/order-details",
+            { order }
+        );
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).send(
+            "Server Error"
+        );
     }
 };
 export const updateOrderStatus = async (req, res) => {

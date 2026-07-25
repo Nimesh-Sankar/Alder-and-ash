@@ -1,36 +1,38 @@
 import express from "express";
+import { requireUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/profile", function (req, res) {
+router.get("/profile", requireUser, function (req, res) {
   res.set("Cache-Control", "no-store");
   res.render("user/profile");
 });
 
-router.get("/addresses", function (req, res) {
+router.get("/addresses", requireUser, function (req, res) {
   res.render("user/addresses");
 });
 
-router.get("/edit-profile", function (req, res) {
+router.get("/edit-profile", requireUser, function (req, res) {
   res.render("user/edit-profile");
 });
 
-router.get("/change-password", function (req, res) {
+router.get("/change-password", requireUser, function (req, res) {
   res.render("user/change-password");
 });
 
-router.get("/cart", function (req, res) {
+router.get("/cart", requireUser, function (req, res) {
   res.render("user/cart");
 });
 
-router.get("/product-details", function (req, res) {
+router.get("/product-details", requireUser, function (req, res) {
   res.render("user/product-details");
 });
 
-router.get("/wishlist", function (req, res) {
+router.get("/wishlist", requireUser, function (req, res) {
   res.render("user/wishlist");
 });
-router.get("/checkout", function (req, res) {
+
+router.get("/checkout", requireUser, function (req, res) {
   res.render("user/checkout");
 });
 

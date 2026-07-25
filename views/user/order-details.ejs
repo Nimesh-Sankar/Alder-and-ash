@@ -2,11 +2,12 @@
 <html>
 <head>
     <title>Order Details</title>
+
     <link rel="stylesheet" href="/css/orders.css">
-    <link rel="stylesheet" href="/css/products.css">
-    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/order-details.css">
     <link rel="stylesheet" href="/css/navbar.css">
 </head>
+
 <body>
 
 <%- include("../partials/products-navbar") %>
@@ -36,57 +37,122 @@
             ₹<%= order.grandTotal %>
         </p>
 
-        <% order.items.forEach(item=>{ %>
+        <% if(order.address){ %>
 
-            <hr>
-
-            <p>
-                <%= item.product.productName %>
-            </p>
-
-            <p>
-                Quantity:
-                <%= item.quantity %>
-            </p>
-
-            <p>
-                Size:
-                <%= item.size %>
-            </p>
-
-        <% }) %>
-
-        <div class="order-actions">
-
-            <% if(order.status==="DELIVERED"){ %>
-        
-                <a
-                    href="/api/orders/return/<%= order.orderId %>"
-                    class="orders-btn">
-                    Return Item
-                </a>
-        
-            <% } else if(order.status!=="CANCELLED"){ %>
-        
-                <a
-                    href="/api/orders/cancel/<%= order.orderId %>"
-                    class="orders-btn">
-                    Cancel Order
-                </a>
-        
-            <% } %>
-        
-            <a
-                href="/api/orders/invoice/<%= order.orderId %>"
-                class="orders-btn">
-                Download Invoice
-            </a>
-        
-        </div>
-
+            <div class="address-card">
             
+                <h3>Delivery Address</h3>
+            
+                <p><%= order.address.fullName %></p>
+<p><%= order.address.phone %></p>
+<p><%= order.address.line1 %></p>
+<p><%= order.address.city %></p>
+<p><%= order.address.state %></p>
+<p><%= order.address.pincode %></p>
+            
+            </div>
+            
+            <% } %>
+
+    </div>
+
+    <% order.items.forEach(item => { %>
+
+        <div class="product-card">
+
+            <img
+                src="<%= item.product.images[0] %>"
+                alt="<%= item.product.productName %>"
+                class="product-image"
+            >
+
+            <div class="product-info">
+
+                <h3>
+                    <%= item.product.productName %>
+                </h3>
+
+                <p>
+                    Quantity:
+                    <%= item.quantity %>
+                </p>
+
+                <p>
+                    Size:
+                    <%= item.size %>
+                </p>
+
+                <p>
+                    Color:
+                    <%= item.color %>
+                </p>
+
+                <p>
+                    Price:
+                    ₹<%= item.price %>
+                </p>
+
+                <p>
+                    Status:
+                    <%= item.status || order.status %>
+                </p>
+
+                <div class="order-actions">
+
+                    <% if(order.status === "PLACED"){ %>
+                
+                        <a
+                            href="/api/orders/cancel/<%= order.orderId %>"
+                            class="orders-btn"
+                        >
+                            Cancel Order
+                        </a>
+                
+                    <% } %>
+                
+                    <% if(order.status === "DELIVERED"){ %>
+                
+                        <a
+                            href="/api/orders/return/<%= order.orderId %>"
+                            class="orders-btn"
+                        >
+                            Return Order
+                        </a>
+                
+                    <% } %>
+                
+                    <% if(order.status === "RETURN_REQUESTED"){ %>
+                
+                        <span class="orders-btn disabled-btn">
+                            Return Requested
+                        </span>
+                
+                    <% } %>
+                
+                    <% if(order.status === "RETURNED"){ %>
+                
+                        <span class="orders-btn disabled-btn">
+                            Returned
+                        </span>
+                
+                    <% } %>
+                
+                </div>
+
+            </div>
 
         </div>
+
+    <% }) %>
+
+    <div class="order-actions">
+
+        <a
+            href="/api/orders/invoice/<%= order.orderId %>"
+            class="orders-btn"
+        >
+            Download Invoice
+        </a>
 
     </div>
 

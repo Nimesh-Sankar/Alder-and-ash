@@ -25,6 +25,17 @@ const orderItemSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: true
+    },
+    
+    status: {
+        type: String,
+        enum: [
+            "PLACED",
+            "CANCELLED",
+            "RETURN_REQUESTED",
+            "RETURNED"
+        ],
+        default: "PLACED"
     }
 });
 
@@ -88,8 +99,9 @@ const orderSchema = new mongoose.Schema({
             "PROCESSING",
             "SHIPPED",
             "DELIVERED",
-            "CANCELLED",
-            "RETURNED"
+            "RETURN_REQUESTED",
+            "RETURNED",
+            "CANCELLED"
         ],
         default: "PLACED"
     },

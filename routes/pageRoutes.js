@@ -1,4 +1,5 @@
 import express from "express";
+import { requireUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -30,12 +31,20 @@ router.get("/otp", (req, res) => {
   res.render("otp");
 });
 
-router.get("/user/emailotp", (req, res) => {
-  res.render("user/emailotp");
-});
+router.get(
+  "/user/emailotp",
+  requireUser,
+  (req, res) => {
+    res.render("user/emailotp");
+  }
+);
 
-router.get("/user/index", (req, res) => {
-  res.render("user/index");
-});
+router.get(
+  "/user/index",
+  requireUser,
+  (req, res) => {
+    res.render("user/index");
+  }
+);
 
 export default router;

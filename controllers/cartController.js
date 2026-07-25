@@ -9,7 +9,7 @@ function calculateTotals(cart) {
     0
   );
 
-  cart.tax = cart.subTotal * 0.05;
+  cart.tax = Math.round(cart.subTotal * 0.05);
 
   cart.shipping =
     cart.subTotal > 1000 || cart.subTotal === 0

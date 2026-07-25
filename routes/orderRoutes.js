@@ -1,36 +1,57 @@
 import express from "express";
 import { placeOrder,getMyOrders,getOrderDetails,renderOrderSuccess,renderMyOrders,renderOrderDetails,
 renderCancelPage,cancelOrder,
-renderReturnPage,returnOrder,renderAdminOrders,updateOrderStatus,downloadInvoice} from "../controllers/orderController.js";
+renderReturnPage,returnOrder,renderAdminOrders,updateOrderStatus,downloadInvoice,renderAdminOrderDetails} from "../controllers/orderController.js";
+import {
+    requireUser,
+    requireAdmin
+} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", placeOrder);
-router.get("/my-orders", renderMyOrders);
-router.get("/success/:orderId", renderOrderSuccess);
-router.get("/", getMyOrders);
+router.post("/", requireUser, placeOrder);
 
+router.get("/my-orders", requireUser, renderMyOrders);
 
+router.get("/success/:orderId", requireUser, renderOrderSuccess);
 
-router.get("/details/:orderId", renderOrderDetails);
-router.get("/:orderId", getOrderDetails);
-router.get("/cancel/:orderId",renderCancelPage);
+router.get("/details/:orderId", requireUser, renderOrderDetails);
 
-router.post("/cancel/:orderId",cancelOrder);
+router.get("/cancel/:orderId", requireUser, renderCancelPage);
 
-router.get("/return/:orderId",renderReturnPage);
+router.post("/cancel/:orderId", requireUser, cancelOrder);
 
-router.post("/return/:orderId",returnOrder);
+router.get("/return/:orderId", requireUser, renderReturnPage);
+
+router.post("/return/:orderId", requireUser, returnOrder);
+
+router.get("/invoice/:orderId", requireUser, downloadInvoice);
+
+router.get("/", requireUser, getMyOrders);
+
+// Admin Routes
 router.get(
-  "/admin/orders",
-  renderAdminOrders
+    "/admin/details/:orderId",
+    requireAdmin,
+    renderAdminOrderDetails
 );
+
+router.get(
+    "/admin/orders",
+    requireAdmin,
+    renderAdminOrders
+);
+
 router.post(
-  "/admin/update-status/:orderId",
-  updateOrderStatus
+    "/admin/update-status/:orderId",
+    requireAdmin,
+    updateOrderStatus
 );
+
+
 router.get(
-  "/invoice/:orderId",
-  downloadInvoice
+    "/:orderId",
+    requireUser,
+    getOrderDetails
 );
 export default router;

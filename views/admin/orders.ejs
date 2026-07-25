@@ -12,270 +12,309 @@
     <div class="admin-container">
 
         <aside class="admin-sidebar">
-        
+
             <h2 class="admin-logo">
                 Alder & Ash.
             </h2>
-        
+
             <ul class="admin-menu">
-        
+
                 <li onclick="window.location.href='/admin'">
                     Dashboard
                 </li>
-        
+
                 <li onclick="window.location.href='/admin'">
                     Users
                 </li>
-        
+
                 <li onclick="window.location.href='/admin/products-page'">
                     Products
                 </li>
-        
+
                 <li onclick="window.location.href='/admin/brands-page'">
                     Brands
                 </li>
-        
+
                 <li onclick="window.location.href='/admin/category'">
                     Category
                 </li>
-        
+
                 <li class="active">
                     Orders
                 </li>
-        
+
                 <li>Coupons</li>
                 <li>Banners</li>
                 <li>Reports</li>
                 <li>Settings</li>
-        
+
             </ul>
-        
+
         </aside>
-        
+
         <main class="admin-main">
+
             <h1>Orders Management</h1>
-<div class="card-container">
 
-    <div class="card">
-        <h3>Total Orders</h3>
-        <p><%= totalOrders %></p>
-    </div>
+            <div class="card-container">
 
-    <div class="card">
-        <h3>Completed</h3>
-        <p><%= deliveredCount %></p>
-    </div>
+                <div class="card">
+                    <h3>Total Orders</h3>
+                    <p><%= totalOrders %></p>
+                </div>
 
-    <div class="card">
-        <h3>Pending</h3>
-        <p><%= placedCount %></p>
-    </div>
+                <div class="card">
+                    <h3>Completed</h3>
+                    <p><%= deliveredCount %></p>
+                </div>
 
-    <div class="card">
-        <h3>Revenue</h3>
-        <p>₹<%= revenue %></p>
-    </div>
+                <div class="card">
+                    <h3>Pending</h3>
+                    <p><%= placedCount %></p>
+                </div>
 
-</div>
+                <div class="card">
+                    <h3>Revenue</h3>
+                    <p>₹<%= revenue %></p>
+                </div>
 
-<div class="filter-box">
+            </div>
 
-    <form
-        class="filter-form"
-        method="GET"
-        action="/api/orders/admin/orders"
-    >
-    <input
-        type="text"
-        name="search"
-        placeholder="Search Order ID"
-        value="<%= search || '' %>"
-    >
+            <div class="filter-box">
 
-    <select name="status">
+                <form
+                    class="filter-form"
+                    method="GET"
+                    action="/api/orders/admin/orders"
+                >
 
-        <option value="">All Status</option>
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search Order ID"
+                        value="<%= search || '' %>"
+                    >
 
-        <option
-            value="PLACED"
-            <%= status === "PLACED" ? "selected" : "" %>>
-            Placed
-        </option>
+                    <select name="status">
 
-        <option
-            value="PROCESSING"
-            <%= status === "PROCESSING" ? "selected" : "" %>>
-            Processing
-        </option>
+                        <option value="">All Status</option>
 
-        <option
-            value="SHIPPED"
-            <%= status === "SHIPPED" ? "selected" : "" %>>
-            Shipped
-        </option>
+                        <option
+                            value="PLACED"
+                            <%= status==="PLACED" ? "selected" : "" %>>
+                            Placed
+                        </option>
 
-        <option
-            value="DELIVERED"
-            <%= status === "DELIVERED" ? "selected" : "" %>>
-            Delivered
-        </option>
+                        <option
+                            value="PROCESSING"
+                            <%= status==="PROCESSING" ? "selected" : "" %>>
+                            Processing
+                        </option>
 
-        <option
-            value="CANCELLED"
-            <%= status === "CANCELLED" ? "selected" : "" %>>
-            Cancelled
-        </option>
+                        <option
+                            value="SHIPPED"
+                            <%= status==="SHIPPED" ? "selected" : "" %>>
+                            Shipped
+                        </option>
 
-    </select>
-    <select name="sort">
+                        <option
+                            value="DELIVERED"
+                            <%= status==="DELIVERED" ? "selected" : "" %>>
+                            Delivered
+                        </option>
 
-      <option
-          value="latest"
-          <%= sort === "latest" ? "selected" : "" %>>
-          Latest First
-      </option>
-  
-      <option
-          value="oldest"
-          <%= sort === "oldest" ? "selected" : "" %>>
-          Oldest First
-      </option>
-  
-  </select>
-    <button type="submit">
-        Apply
-    </button>
-    <a href="/api/orders/admin/orders">
-      Clear
-  </a>
+                        <option
+                            value="RETURN_REQUESTED"
+                            <%= status==="RETURN_REQUESTED" ? "selected" : "" %>>
+                            Return Requested
+                        </option>
 
-</form>
+                        <option
+                            value="RETURNED"
+                            <%= status==="RETURNED" ? "selected" : "" %>>
+                            Returned
+                        </option>
 
-  
+                        <option
+                            value="CANCELLED"
+                            <%= status==="CANCELLED" ? "selected" : "" %>>
+                            Cancelled
+                        </option>
 
-</div>
+                    </select>
 
-<table border="1">
+                    <select name="sort">
 
-<tr>
+                        <option
+                            value="latest"
+                            <%= sort==="latest" ? "selected" : "" %>>
+                            Latest First
+                        </option>
 
-    <th>Order ID</th>
-    <th>Customer</th>
-    <th>Product</th>
-    <th>Amount</th>
-    <th>Status</th>
-    <th>Date</th>
+                        <option
+                            value="oldest"
+                            <%= sort==="oldest" ? "selected" : "" %>>
+                            Oldest First
+                        </option>
 
+                    </select>
 
-</tr>
+                    <button type="submit">
+                        Apply
+                    </button>
 
-<% orders.forEach(order=>{ %>
+                    <a href="/api/orders/admin/orders">
+                        Clear
+                    </a>
 
-<tr>
+                </form>
 
-    <td>
-        <%= order.orderId %>
-    </td>
+            </div>
 
-    <td>
+            <table border="1">
 
-      <% if(order.user){ %>
-      
-          <%= order.user.firstName %>
-          <%= order.user.lastName %>
-      
-      <% } else { %>
-      
-          Unknown User
-      
-      <% } %>
-      
-      </td>
+                <tr>
 
-      <td>
-        <%= order.items[0]?.product?.productName || "Deleted Product" %>
-    </td>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
 
-    <td>
-        ₹<%= order.grandTotal %>
-    </td>
+                </tr>
 
-    <td>
+                <% orders.forEach(order=>{ %>
 
-      <form
-          action="/api/orders/admin/update-status/<%= order.orderId %>"
-          method="POST"
-      >
-  
-          <select name="status">
-  
-              <option
-                  value="PLACED"
-                  <%= order.status==="PLACED" ? "selected" : "" %>>
-                  PLACED
-              </option>
-  
-              <option
-                  value="PROCESSING"
-                  <%= order.status==="PROCESSING" ? "selected" : "" %>>
-                  PROCESSING
-              </option>
-  
-              <option
-                  value="SHIPPED"
-                  <%= order.status==="SHIPPED" ? "selected" : "" %>>
-                  SHIPPED
-              </option>
-  
-              <option
-                  value="DELIVERED"
-                  <%= order.status==="DELIVERED" ? "selected" : "" %>>
-                  DELIVERED
-              </option>
-  
-              <option
-                  value="CANCELLED"
-                  <%= order.status==="CANCELLED" ? "selected" : "" %>>
-                  CANCELLED
-              </option>
-  
-          </select>
-  
-          <button type="submit">
-              Update
-          </button>
-  
-      </form>
-  
-  </td>
+                <tr>
 
-    <td>
-        <%= order.createdAt.toDateString() %>
-    </td>
+                    <td>
+                        <%= order.orderId %>
+                    </td>
 
+                    <td>
 
-</tr>
+                        <% if(order.user){ %>
 
-<% }) %>
+                            <%= order.user.firstName %>
+                            <%= order.user.lastName %>
 
-</table>
-<div class="pagination">
+                        <% } else { %>
 
-  <% for(let i = 1; i <= totalPages; i++) { %>
+                            Unknown User
 
-      <a
-          href="/api/orders/admin/orders?page=<%= i %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+                        <% } %>
 
-          <%= i %>
+                    </td>
 
-      </a>
+                    <td>
+                        <%= order.items[0]?.product?.productName || "Deleted Product" %>
+                    </td>
 
-  <% } %>
-</div>
+                    <td>
+                        ₹<%= order.grandTotal %>
+                    </td>
+
+                    <td>
+
+                        <form
+                            action="/api/orders/admin/update-status/<%= order.orderId %>"
+                            method="POST"
+                        >
+
+                            <select name="status">
+
+                                <option
+                                    value="PLACED"
+                                    <%= order.status==="PLACED" ? "selected" : "" %>>
+                                    PLACED
+                                </option>
+
+                                <option
+                                    value="PROCESSING"
+                                    <%= order.status==="PROCESSING" ? "selected" : "" %>>
+                                    PROCESSING
+                                </option>
+
+                                <option
+                                    value="SHIPPED"
+                                    <%= order.status==="SHIPPED" ? "selected" : "" %>>
+                                    SHIPPED
+                                </option>
+
+                                <option
+                                    value="DELIVERED"
+                                    <%= order.status==="DELIVERED" ? "selected" : "" %>>
+                                    DELIVERED
+                                </option>
+
+                                <option
+                                    value="RETURN_REQUESTED"
+                                    <%= order.status==="RETURN_REQUESTED" ? "selected" : "" %>>
+                                    RETURN REQUESTED
+                                </option>
+
+                                <option
+                                    value="RETURNED"
+                                    <%= order.status==="RETURNED" ? "selected" : "" %>>
+                                    RETURNED
+                                </option>
+
+                                <option
+                                    value="CANCELLED"
+                                    <%= order.status==="CANCELLED" ? "selected" : "" %>>
+                                    CANCELLED
+                                </option>
+
+                            </select>
+
+                            <button type="submit">
+                                Update
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                    <td>
+                        <%= order.createdAt.toDateString() %>
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="/api/orders/admin/details/<%= order.orderId %>"
+                        >
+                            View Details
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <% }) %>
+
+            </table>
+
+            <div class="pagination">
+
+                <% for(let i = 1; i <= totalPages; i++) { %>
+
+                    <a
+                        href="/api/orders/admin/orders?page=<%= i %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+
+                        <%= i %>
+
+                    </a>
+
+                <% } %>
+
+            </div>
 
         </main>
-    </div>
 
+    </div>
 
 </body>
 </html>

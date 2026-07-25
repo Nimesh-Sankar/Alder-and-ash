@@ -1,4 +1,6 @@
 const API_BASE = "";
+let selectedProductId = null;
+let selectedStatus = null;
 
 function showAlert(message, type = "success") {
   const alertBox = document.getElementById("alertBox");
@@ -1079,12 +1081,37 @@ async function loadProducts(page = 1) {
     );
 
     const data = await response.json();
-    
+    let wishlistIds = [];
+
+const user =
+    JSON.parse(
+        localStorage.getItem("user")
+    );
+
+if (user) {
+
+    const wishlistResponse =
+        await fetch("/api/wishlist");
+
+    const wishlistData =
+        await wishlistResponse.json();
+
+    if (wishlistData.wishlist) {
+
+        wishlistIds =
+            wishlistData.wishlist.products
+                .map(product =>
+                    product._id.toString()
+                );
+
+    }
+}
     
     productContainer.innerHTML = "";
 
 data.products.forEach((product, index) => {
   console.log(product.images);
+  
 
     productContainer.innerHTML += `
         <tr>
@@ -1132,7 +1159,12 @@ data.products.forEach((product, index) => {
                 </button>
 
                 <button
-                    onclick="toggleProductStatus('${product._id}')"
+                    onclick="
+                        toggleProductStatus(
+                            '${product._id}',
+                            ${product.isListed}
+                        )
+                    "
                 >
                     ${product.isListed ? "Unlist" : "List"}
                 </button>
@@ -1504,14 +1536,10 @@ if (addProductForm) {
       try {
 
         const productName =
-          document.getElementById(
-            "productName"
-          ).value;
-
-        const description =
-          document.getElementById(
-            "productDescription"
-          ).value;
+        document.getElementById("productName").value.trim();
+      
+      const description =
+        document.getElementById("productDescription").value.trim();
 
         const category =
           document.getElementById(
@@ -1523,44 +1551,55 @@ if (addProductForm) {
             "productBrand"
           ).value;
 
-          if (!productName.trim()){
-          showAlert(
-            "Product name is required",
-            "danger"
-          );
-          return;    
-          }
-          if(!description.trim()){
-            showAlert(
-              "Description is required",
-              "danger"
-            );
+          if (!productName) {
+            showAlert("Product name is required", "danger");
             return;
           }
-          if(!category){
-            showAlert(
-              "Select a category",
-              "danger"
-            );
+          
+          if (productName.length < 3) {
+            showAlert("Product name must be at least 3 characters", "danger");
             return;
           }
-          if(!brand){
-            showAlert(
-              "Select a brand", 
-              "danger"
-            );
+          
+          if (productName.length > 100) {
+            showAlert("Product name is too long", "danger");
             return;
-          } 
-
-        if (variants.length === 0) {
-
-          showAlert(
-            "Add at least one variant","danger"
-          );
-
-          return;
-
-        }
+          }
+          
+          if (!/^[a-zA-Z0-9\s\-&()]+$/.test(productName)) {
+            showAlert("Product name contains invalid characters", "danger");
+            return;
+          }
+          
+          if (!description) {
+            showAlert("Description is required", "danger");
+            return;
+          }
+          
+          if (description.length < 10) {
+            showAlert("Description must be at least 10 characters", "danger");
+            return;
+          }
+          
+          if (description.length > 1000) {
+            showAlert("Description is too long", "danger");
+            return;
+          }
+          
+          if (!category) {
+            showAlert("Select a category", "danger");
+            return;
+          }
+          
+          if (!brand) {
+            showAlert("Select a brand", "danger");
+            return;
+          }
+          
+          if (variants.length === 0) {
+            showAlert("Add at least one variant", "danger");
+            return;
+          }
 
         const formData =
   new FormData();
@@ -2035,21 +2074,53 @@ function deleteProduct(id) {
   );
 
 }
-async function toggleProductStatus(id) {
-  console.log(id);
-const response = await fetch(
-  `/admin/products/${id}/status`,
-  {
-    method: "PATCH"
-  }
-);
-const data = await response.json();
+async function toggleProductStatus(
+  id,
+  isListed
+) {
 
-showAlert(data.message,"success");
+  openConfirm(
 
-loadProducts();
-};
+      `Are you sure you want to ${
+          isListed
+              ? "unlist"
+              : "list"
+      } this product?`,
 
+      async function () {
+
+          try {
+
+              const response =
+                  await fetch(
+                      `/admin/products/${id}/status`,
+                      {
+                          method: "PATCH"
+                      }
+                  );
+
+              const data =
+                  await response.json();
+
+              showAlert(
+                  data.message,
+                  response.ok
+                      ? "success"
+                      : "danger"
+              );
+
+              loadProducts();
+
+          } catch (error) {
+
+              console.log(
+                  "TOGGLE ERROR:",
+                  error
+              );
+          }
+      }
+  );
+}
 
 
 const imageInput =

@@ -2,7 +2,7 @@ import Wishlist from "../models/Wishlist.js";
 
 export const addToWishlist=async(req,res)=>{
   try{
-    console.log("heart clicked")
+    
     const userId=req.user._id;
     const {productId}=req.body;
 

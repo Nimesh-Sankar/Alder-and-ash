@@ -10,16 +10,52 @@
 <link rel="stylesheet" href="/css/navbar.css">
 <link rel="stylesheet" href="/css/navbar.css">
   <link rel="stylesheet" href="/css/wishlist.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
 <body>
 
     <%- include("../partials/products-navbar") %>
+    <div id="alertBox"
+      class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
+      role="alert"
+      style="z-index: 9999;">
+    </div>
 
     <h1>My Wishlist</h1>
 
     <div id="wishlistContainer"></div>
 
     <script>
+         function showAlert(
+  message,
+  type = "success"
+) {
+
+  const alertBox =
+    document.getElementById(
+      "alertBox"
+    );
+
+  if (!alertBox) return;
+
+  alertBox.className =
+    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent =
+    message;
+
+  alertBox.classList.remove(
+    "d-none"
+  );
+
+  setTimeout(() => {
+
+    alertBox.classList.add(
+      "d-none"
+    );
+  }, 3000);
+
+}
 
       async function loadWishlist() {
       
@@ -70,9 +106,7 @@ container.innerHTML += `
 
       <img src="${product.images[0]}">
 
-      <button class="heart-btn">
-          ❤️
-      </button>
+      <button class="heart-btn" onclick="removeFromWishlist('${product._id}')">❤️</button>
 
   </div>
 
@@ -115,6 +149,31 @@ container.innerHTML += `
 });
       
       }
+
+
+      async function removeFromWishlist(productId) {
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (!confirm("Remove from wishlist?")) return;
+    
+    try {
+        const response = await fetch("/api/wishlist/remove", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                userid: user.id || user._id,
+            },
+            body: JSON.stringify({ productId }),
+        });
+        
+        if (response.ok) {
+            showAlert(" Removed from wishlist! ", "success");
+            loadWishlist();
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
             loadWishlist();
         async function addToCartFromWishlist(productId, size, color) {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -134,9 +193,9 @@ container.innerHTML += `
         });
       const cartDate=await cartResponse.json();
         if (cartResponse.ok) {
-            alert("Product added to cart successfully!");
+            showAlert("Product added to cart successfully!","success");
             } else {
-            alert("Failed to add product to cart.");
+            showAlert("Failed to add product to cart.", "danger");
         }
         await fetch("/api/wishlist/remove", {
           method: "POST",
@@ -149,7 +208,7 @@ container.innerHTML += `
           }),
         });
         loadWishlist();
-        alert("added to cart")
+        showAlert("Product added to cart successfully!", "success");
       }
       
     

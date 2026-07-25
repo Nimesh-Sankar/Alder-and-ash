@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Admin Order Details</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin-orders.css">
+    <link rel="stylesheet" href="/css/admin-order-details.css">
+</head>
+
+<body>
+
+    <div class="admin-container">
+    
+        <aside class="admin-sidebar">
+    
+            <h2 class="admin-logo">
+                Alder & Ash.
+            </h2>
+    
+            <ul class="admin-menu">
+    
+                <li onclick="window.location.href='/admin'">
+                    Dashboard
+                </li>
+    
+                <li onclick="window.location.href='/admin'">
+                    Users
+                </li>
+    
+                <li onclick="window.location.href='/admin/products-page'">
+                    Products
+                </li>
+    
+                <li onclick="window.location.href='/admin/brands-page'">
+                    Brands
+                </li>
+    
+                <li onclick="window.location.href='/admin/category'">
+                    Category
+                </li>
+    
+                <li class="active">
+                    Orders
+                </li>
+    
+                <li>Coupons</li>
+                <li>Banners</li>
+                <li>Reports</li>
+                <li>Settings</li>
+    
+            </ul>
+    
+        </aside>
+    
+        <main class="admin-main">
+    
+            <div class="admin-order-details">
+    
+                <a
+                    href="/api/orders/admin/orders"
+                    class="back-btn"
+                >
+                    ← Back to Orders
+                </a>
+    
+                <h1>Admin Order Details</h1>
+    
+                <div class="order-summary">
+    
+                    <div class="summary-card">
+    
+                        <h3>Customer Information</h3>
+    
+                        <p>
+                            <strong>Name:</strong>
+                            <%= order.user.firstName %>
+                            <%= order.user.lastName %>
+                        </p>
+    
+                        <p>
+                            <strong>Email:</strong>
+                            <%= order.user.email %>
+                        </p>
+    
+                    </div>
+    
+                    <div class="summary-card">
+    
+                        <h3>Order Information</h3>
+    
+                        <p>
+                            <strong>Order ID:</strong>
+                            <%= order.orderId %>
+                        </p>
+    
+                        <p>
+                            <strong>Status:</strong>
+    
+                            <span
+                                class="status-badge
+                                <% if(order.status==='PLACED'){ %> placed <% } %>
+                                <% if(order.status==='SHIPPED'){ %> shipped <% } %>
+                                <% if(order.status==='OUT_FOR_DELIVERY'){ %> out-for-delivery <% } %>
+                                <% if(order.status==='DELIVERED'){ %> delivered <% } %>
+                                <% if(order.status==='CANCELLED'){ %> cancelled <% } %>
+                                <% if(order.status==='RETURNED'){ %> returned <% } %>
+                                "
+                            >
+                                <%= order.status %>
+                            </span>
+                        </p>
+    
+                        <p>
+                            <strong>Payment:</strong>
+                            <%= order.paymentMethod %>
+                        </p>
+    
+                        <p>
+                            <strong>Order Date:</strong>
+                            <%= order.createdAt.toDateString() %>
+                        </p>
+    
+                    </div>
+    
+                </div>
+    
+                <div class="address-box">
+    
+                    <h3>Delivery Address</h3>
+    
+                    <p>
+                        <strong>Name:</strong>
+                        <%= order.address?.fullName || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>Phone:</strong>
+                        <%= order.address?.phone || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>Label:</strong>
+                        <%= order.address?.label || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>Address Line 1:</strong>
+                        <%= order.address?.line1 || "" %>
+                    </p>
+    
+                    <% if(order.address?.line2){ %>
+    
+                        <p>
+                            <strong>Address Line 2:</strong>
+                            <%= order.address.line2 %>
+                        </p>
+    
+                    <% } %>
+    
+                    <p>
+                        <strong>Street:</strong>
+                        <%= order.address?.street || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>City:</strong>
+                        <%= order.address?.city || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>State:</strong>
+                        <%= order.address?.state || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>Pincode:</strong>
+                        <%= order.address?.pincode || "" %>
+                    </p>
+    
+                    <p>
+                        <strong>Country:</strong>
+                        <%= order.address?.country || "" %>
+                    </p>
+    
+                </div>
+    
+                <h2>Ordered Products</h2>
+    
+                <table class="products-table">
+    
+                    <thead>
+    
+                        <tr>
+    
+                            <th>Image</th>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+    
+                        </tr>
+    
+                    </thead>
+    
+                    <tbody>
+    
+                        <% order.items.forEach(item => { %>
+    
+                            <tr>
+    
+                                <td>
+    
+                                    <img
+                                        src="<%= item.product.images[0] %>"
+                                        alt=""
+                                        class="admin-product-image"
+                                    >
+    
+                                </td>
+    
+                                <td>
+                                    <%= item.product.productName %>
+                                </td>
+    
+                                <td>
+                                    <%= item.size %>
+                                </td>
+    
+                                <td>
+                                    <%= item.color %>
+                                </td>
+    
+                                <td>
+                                    <%= item.quantity %>
+                                </td>
+    
+                                <td>
+                                    ₹<%= item.price %>
+                                </td>
+    
+                                <td>
+                                    ₹<%= item.price * item.quantity %>
+                                </td>
+    
+                            </tr>
+    
+                        <% }) %>
+    
+                    </tbody>
+    
+                </table>
+    
+                <div class="price-box">
+    
+                    <h3>
+                        Subtotal:
+                        ₹<%= order.subtotal %>
+                    </h3>
+    
+                    <h3>
+                        Tax:
+                        ₹<%= order.tax %>
+                    </h3>
+    
+                    <h3>
+                        Shipping:
+                        ₹<%= order.shipping %>
+                    </h3>
+    
+                    <hr>
+    
+                    <h2>
+                        Grand Total:
+                        ₹<%= order.grandTotal %>
+                    </h2>
+    
+                </div>
+    
+            </div>
+    
+        </main>
+    
+    </div>
+    
+    </body>
+
+</html>
