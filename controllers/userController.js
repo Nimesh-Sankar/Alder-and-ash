@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
-// Get user profile with details
+
 export const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;

@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 import Address from "../models/addressModel.js";
 
-// Helper function to validate ObjectId
+
 const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
-// Add new address
 export const addAddress = async (req, res) => {
   try {
     const { 
@@ -24,7 +23,7 @@ export const addAddress = async (req, res) => {
       isDefault 
     } = req.body;
     
-    // Validate userId
+
     if (!userId || !isValidObjectId(userId)) {
       return res.status(400).json({
         success: false,
@@ -76,7 +75,7 @@ export const addAddress = async (req, res) => {
   }
 };
 
-// Update address
+
 export const updateAddress = async (req, res) => {
   try {
     const { addressId } = req.params;

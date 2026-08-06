@@ -1,24 +1,58 @@
 import Wishlist from "../models/Wishlist.js";
+import Product from "../models/productModel.js";
 
-export const addToWishlist=async(req,res)=>{
-  try{
-    
-    const userId=req.user._id;
-    const {productId}=req.body;
+export const addToWishlist = async (req, res) => {
+  try {
 
-    const wishlist=await Wishlist.findOne({user:userId});
-    if(!wishlist){
-      wishlist =await Wishlist.create({user:userId,products:[]});
-    }
-    if(!wishlist.products.includes(productId)){
-      wishlist.products.push(productId);
-      await wishlist.save();
-    }
+      const userId = req.user._id;
+      const { productId } = req.body;
 
-    res.status(200).json({ message: "Product added to wishlist", wishlist });
+      const product = await Product.findById(productId);
+
+      if (!product || product.isDeleted || product.isListed === false) {
+          return res.status(400).json({
+              message: "Product is not available"
+          });
+      }
+
+      const hasStock = product.variants.some(
+          (variant) => variant.stock > 0
+      );
+
+      if (!hasStock) {
+          return res.status(400).json({
+              message: "This product is out of stock"
+          });
+      }
+
+      let wishlist = await Wishlist.findOne({
+          user: userId
+      });
+
+      if (!wishlist) {
+          wishlist = await Wishlist.create({
+              user: userId,
+              products: []
+          });
+      }
+
+      if (!wishlist.products.includes(productId)) {
+          wishlist.products.push(productId);
+          await wishlist.save();
+      }
+
+      res.status(200).json({
+          message: "Product added to wishlist",
+          wishlist
+      });
+
   } catch (error) {
-    console.error("Error adding to wishlist:", error);
-    res.status(500).json({ message: "Internal server error" });
+
+      console.error("Error adding to wishlist:", error);
+
+      res.status(500).json({
+          message: "Internal server error"
+      });
   }
 };
 

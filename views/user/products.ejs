@@ -436,15 +436,15 @@ Out Of Stock
 <img
   src="${product.images[0]}"
 >
-<div
-class="wishlist-btn"
-onclick="
-event.stopPropagation();
-addToWishlist('${product._id}');
-"
->
-${isWishlisted ? "❤️" : "🤍"}
-</div>
+  <div
+  class="wishlist-btn"
+  onclick="
+  event.stopPropagation();
+  addToWishlist('${product._id}', ${isOutOfStock});
+  "
+  >
+  ${isWishlisted ? "❤️" : "🤍"}
+  </div>
 <p class="product-meta">
 ${product.brand?.brandName||""}
 •
@@ -627,7 +627,7 @@ return;
   );
 
 }
-async function addToWishlist(productId) {
+async function addToWishlist(productId, isOutOfStock) {
 
 const user =
     JSON.parse(
@@ -644,6 +644,16 @@ if (!user) {
     setTimeout(() => {
         window.location.href = "/login";
     }, 900);
+
+    return;
+}
+
+if (isOutOfStock) {
+
+    showAlert(
+        "This product is out of stock",
+        "danger"
+    );
 
     return;
 }
@@ -707,16 +717,16 @@ try {
         const data =
             await response.json();
 
-        showAlert(
-            data.message,
-            response.ok
-                ? "success"
-                : "danger"
-        );
+            showAlert(
+    data.message,
+    response.ok
+        ? "success"
+        : "danger"
+);
 
-        wishlistIds.push(
-            productId
-        );
+if (response.ok) {
+    wishlistIds.push(productId);
+}
     }
 
     loadProducts();

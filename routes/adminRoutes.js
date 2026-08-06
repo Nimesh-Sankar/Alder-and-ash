@@ -33,7 +33,6 @@ import {
 
 import upload from "../config/multer.js";
 
-
 const router = express.Router();
 
 function noCache(req, res, next) {
@@ -54,7 +53,6 @@ function noCache(req, res, next) {
 
   next();
 }
-
 
 router.post("/login", adminLogin);
 
@@ -84,7 +82,6 @@ router.post(
 
 router.get(
   "/categories",
-  requireAdmin,
   getCategories
 );
 
@@ -115,7 +112,6 @@ router.post(
 
 router.get(
   "/brands",
-  requireAdmin,
   getBrands
 );
 
@@ -147,13 +143,11 @@ router.post(
 
 router.get(
   "/products",
-  requireAdmin,
   getProducts
 );
 
 router.get(
   "/products/:id",
-  requireAdmin,
   getSingleProduct
 );
 

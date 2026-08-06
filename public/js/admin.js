@@ -19,9 +19,7 @@ function showAlert(message, type = "success") {
   }, 3000);
 }
 
-// =========================
-// ADMIN SESSION PROTECTION
-// =========================
+
 if (window.location.pathname.startsWith("/admin")&&
 window.location.pathname !== "/admin/login") {
 
@@ -154,6 +152,7 @@ async function loadUsers(page = 1) {
   const search = searchInput
     ? searchInput.value.trim()
     : "";
+    const stats=document.getElementById("status")?.value;
 
   try {
 
@@ -162,6 +161,7 @@ async function loadUsers(page = 1) {
     );
 
     const data = await res.json();
+
 
     usersTableBody.innerHTML = "";
 
@@ -257,9 +257,7 @@ function clearSearch() {
   loadUsers(1);
 }
 
-// =========================
-// BLOCK / UNBLOCK USER
-// =========================
+
 async function toggleBlock(userId, isBlocked) {
 
   const action = isBlocked
@@ -1861,6 +1859,7 @@ if (editProductForm) {
           document.getElementById(
             "productBrand"
           ).value;
+          
           if (!productName.trim()) {
 
             showAlert(

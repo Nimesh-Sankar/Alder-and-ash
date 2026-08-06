@@ -1,10 +1,9 @@
 import OTP from "../models/otpModel.js";
 
-// Generate OTP
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
-// Send OTP
+
 export const sendOTP = async (req, res) => {
   try {
     const { email, purpose } = req.body; 
@@ -35,7 +34,6 @@ export const sendOTP = async (req, res) => {
   }
 };
 
-// Verify OTP
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp, purpose } = req.body;

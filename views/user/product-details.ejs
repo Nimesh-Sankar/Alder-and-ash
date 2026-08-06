@@ -80,6 +80,8 @@
   
         const data =
           await response.json();
+          console.log("PRODUCT RESPONSE:", response);
+console.log("PRODUCT DATA:", data);
   
         const product =
           data.product;
@@ -110,10 +112,12 @@
           <span>${product.productName}</span>
         `;
   
-        loadRelatedProducts(
-          product.category._id,
-          product._id
-        );
+        if (product.category) {
+  loadRelatedProducts(
+    product.category._id || product.category,
+    product._id
+  );
+}
   
         document.getElementById(
           "productDetails"
