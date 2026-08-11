@@ -68,8 +68,24 @@ const orderSchema = new mongoose.Schema({
 
     paymentMethod: {
         type: String,
-        enum: ["COD"],
+        enum: ["COD", "RAZORPAY", "WALLET"],
         default: "COD"
+    },
+    
+    paymentStatus: {
+        type: String,
+        enum: [
+            "PENDING",
+            "PAID",
+            "FAILED",
+            "REFUNDED"
+        ],
+        default: "PENDING"
+    },
+    
+    transactionId: {
+        type: String,
+        default: null
     },
 
     subtotal: {

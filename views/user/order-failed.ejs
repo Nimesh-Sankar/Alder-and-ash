@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Failed | Alder & Ash</title>
+
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+
+<body>
+
+<%- include("../partials/products-navbar") %>
+
+<main class="order-success-container">
+
+    <div class="success-icon failed-icon">
+        ✕
+    </div>
+
+    <h1 class="success-title">
+        Payment failed
+    </h1>
+
+    <p class="success-subtitle">
+        We couldn't complete your payment.
+        Don't worry, your order has not been placed.
+    </p>
+
+    <div class="success-card payment-failed-card">
+
+        <h3>What happened?</h3>
+
+        <p>
+            Your payment could not be completed.
+            This may happen because of a declined payment,
+            cancelled payment, or a temporary payment issue.
+        </p>
+
+        <p>
+            Please try again or choose another payment method.
+        </p>
+
+    </div>
+
+    <div class="success-actions">
+
+      <a href="javascript:history.back()" class="success-btn">
+        Try Again
+    </a>
+           
+
+        <a href="/api/users/products" class="success-btn secondary">
+            Continue Shopping
+        </a>
+
+    </div>
+
+</main>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 import express from "express";
-import { placeOrder,getMyOrders,getOrderDetails,renderOrderSuccess,renderMyOrders,renderOrderDetails,
+import { placeOrder,createRazorpayOrder,verifyRazorpayPayment,getMyOrders,getOrderDetails,renderOrderSuccess,renderPaymentFailed,renderMyOrders,renderOrderDetails,
 renderCancelPage,cancelOrder,
 renderReturnPage,returnOrder,renderAdminOrders,updateOrderStatus,downloadInvoice,renderAdminOrderDetails} from "../controllers/orderController.js";
 import {
@@ -11,9 +11,21 @@ const router = express.Router();
 
 router.post("/", requireUser, placeOrder);
 
+router.post("/create-payment",requireUser,createRazorpayOrder);
+router.post(
+    "/verify-payment",
+    requireUser,
+    verifyRazorpayPayment
+);
+
 router.get("/my-orders", requireUser, renderMyOrders);
 
 router.get("/success/:orderId", requireUser, renderOrderSuccess);
+router.get(
+    "/order-failed",
+    requireUser,
+    renderPaymentFailed
+);
 
 router.get("/details/:orderId", requireUser, renderOrderDetails);
 
