@@ -42,7 +42,7 @@
 
         </div>
 
-        <!-- RIGHT SIDE -->
+        
         <div class="checkout-right">
 
             <h3>Order Summary</h3>
@@ -50,7 +50,36 @@
             <div id="cartItems">
 
             </div>
+            <div class="coupon-section">
 
+                <h4>Have a coupon?</h4>
+            
+                <div class="coupon-input">
+            
+                    <input
+                        type="text"
+                        id="couponCode"
+                        placeholder="Enter coupon code"
+                    >
+            
+                    <button
+                        type="button"
+                        id="applyCouponBtn">
+                        Apply
+                    </button>
+            
+                    <button
+                        type="button"
+                        id="removeCouponBtn"
+                        style="display: none;">
+                        Remove
+                    </button>
+            
+                </div>
+            
+                <p id="couponMessage"></p>
+            
+            </div>
             <div class="summary">
 
                 <div class="summary-row">
@@ -66,6 +95,10 @@
                 <div class="summary-row">
                     <span>Shipping</span>
                     <span id="shipping">₹0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Discount</span>
+                    <span id="discount">₹0</span>
                 </div>
 
                 <div class="summary-row total">
@@ -193,13 +226,156 @@ document.getElementById("tax").innerText =
 document.getElementById("shipping").innerText =
     `₹${cart.shipping}`;
 
+document.getElementById("discount").innerText =
+    `₹${cart.couponDiscount || 0}`;
+
 document.getElementById("grandTotal").innerText =
     `₹${cart.grandTotal}`;
 }
 
   loadAddresses();
   loadCart();
+  document.getElementById("applyCouponBtn").addEventListener("click", async () => {
 
+const couponInput = document.getElementById("couponCode");
+const message = document.getElementById("couponMessage");
+const applyButton = document.getElementById("applyCouponBtn");
+
+const code = couponInput.value.trim();
+
+if (!code) {
+    message.textContent = "Please enter a coupon code.";
+    return;
+}
+
+applyButton.disabled = true;
+applyButton.textContent = "Applying...";
+
+try {
+
+    const response = await fetch(
+        "/api/orders/apply-coupon",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: code
+            })
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+        throw new Error(
+            result.message || "Unable to apply coupon"
+        );
+    }
+
+    message.textContent =
+        "Coupon applied successfully!";
+
+    document.getElementById("discount").innerText =
+        `₹${result.data.discount}`;
+
+    document.getElementById("grandTotal").innerText =
+        `₹${result.data.grandTotal}`;
+
+        couponInput.disabled = true;
+applyButton.style.display = "none";
+
+document.getElementById("removeCouponBtn")
+    .style.display = "inline-block";
+
+} catch (error) {
+
+    message.textContent = error.message;
+
+    applyButton.disabled = false;
+    applyButton.textContent = "Apply";
+}
+
+});
+document.getElementById("removeCouponBtn")
+    .addEventListener("click", async () => {
+
+        const couponInput =
+            document.getElementById("couponCode");
+
+        const message =
+            document.getElementById("couponMessage");
+
+        const applyButton =
+            document.getElementById("applyCouponBtn");
+
+        const removeButton =
+            document.getElementById("removeCouponBtn");
+
+        const user =
+            JSON.parse(localStorage.getItem("user"));
+
+        try {
+
+            removeButton.disabled = true;
+            removeButton.textContent = "Removing...";
+
+            const response = await fetch(
+                "/api/cart/remove-coupon",
+                {
+                    method: "DELETE",
+                    headers: {
+                        userid: user.id || user._id
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message ||
+                    "Unable to remove coupon"
+                );
+            }
+
+            couponInput.value = "";
+            couponInput.disabled = false;
+
+            applyButton.style.display = "inline-block";
+            applyButton.disabled = false;
+            applyButton.textContent = "Apply";
+
+            removeButton.style.display = "none";
+            removeButton.disabled = false;
+            removeButton.textContent = "Remove";
+
+            document.getElementById("discount")
+                .innerText = "₹0";
+
+            document.getElementById("grandTotal")
+                .innerText =
+                `₹${result.cart.grandTotal}`;
+
+            message.textContent =
+                "Coupon removed successfully.";
+
+        } catch (error) {
+
+            console.error(
+                "REMOVE COUPON ERROR:",
+                error
+            );
+
+            message.textContent =
+                error.message;
+
+            removeButton.disabled = false;
+            removeButton.textContent = "Remove";
+        }
+
+    });
   document.getElementById("placeOrderBtn").addEventListener("click", async () => {
     const selectedAddress = document.querySelector('input[name="address"]:checked');
     const selectedPayment = document.querySelector('input[name="payment"]:checked');

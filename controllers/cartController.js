@@ -1,22 +1,33 @@
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
+import Coupon from "../models/couponModel.js";
 
 const MAX_CART_QUANTITY = 5;
 
 function calculateTotals(cart) {
+
   cart.subTotal = cart.items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
+      (total, item) =>
+          total + item.price * item.quantity,
+      0
   );
 
   cart.tax = Math.round(cart.subTotal * 0.05);
 
   cart.shipping =
-    cart.subTotal > 1000 || cart.subTotal === 0
-      ? 0 : 100;
+      cart.subTotal > 1000 || cart.subTotal === 0
+          ? 0
+          : 100;
 
   cart.grandTotal =
-    cart.subTotal + cart.tax + cart.shipping;
+      cart.subTotal +
+      cart.tax +
+      cart.shipping -
+      (cart.couponDiscount || 0)
+
+  if (cart.grandTotal < 0) {
+      cart.grandTotal = 0;
+  }
 }
 
 export const addToCart = async (req, res) => {
@@ -328,5 +339,47 @@ export const removeCartItem = async (req, res) => {
     res.status(500).json({
       message: "Server error"
     });
+  }
+};
+export const removeCoupon = async (req, res) => {
+  try {
+
+      const userId = req.user.id;
+
+      const cart = await Cart.findOne({
+          user: userId
+      });
+
+      if (!cart) {
+          return res.status(404).json({
+              success: false,
+              message: "Cart not found"
+          });
+      }
+
+      cart.coupon = null;
+      cart.couponDiscount = 0;
+
+      calculateTotals(cart);
+
+      await cart.save();
+
+      res.status(200).json({
+          success: true,
+          message: "Coupon removed successfully",
+          cart
+      });
+
+  } catch (error) {
+
+      console.log(
+          "REMOVE COUPON ERROR:",
+          error.message
+      );
+
+      res.status(500).json({
+          success: false,
+          message: "Server error"
+      });
   }
 };

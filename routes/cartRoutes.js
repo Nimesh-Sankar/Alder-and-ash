@@ -1,6 +1,6 @@
 import express from "express";
 
-import {addToCart,getCart,updateCartItem,removeCartItem} from "../controllers/cartController.js";
+import {addToCart,getCart,updateCartItem,removeCartItem,removeCoupon} from "../controllers/cartController.js";
 
 const router = express.Router();
 const setUserFromHeader = (req, res, next) => {
@@ -45,6 +45,11 @@ router.delete(
   "/items/:itemId",
   setUserFromHeader,
   removeCartItem
+);
+router.delete(
+  "/remove-coupon",
+  setUserFromHeader,
+  removeCoupon
 );
 
 export default router;

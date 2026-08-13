@@ -11,7 +11,7 @@ import crypto from "crypto";
 export const placeOrder = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const { addressId, couponCode, paymentMethod } = req.body;
+        const { addressId, paymentMethod } = req.body;
 
         const address = await Address.findById(addressId);
 
@@ -23,7 +23,8 @@ export const placeOrder = async (req, res) => {
         }
 
         const cart = await Cart.findOne({ user: userId })
-            .populate("items.product");
+        .populate("items.product")
+        .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({
@@ -122,10 +123,14 @@ if (!brand || brand.isBlocked) {
         
             address: addressId,
     
-            couponCode,
-        
+                        couponCode: cart.coupon
+                ? cart.coupon.code
+                : null,
+
+            couponDiscount: cart.couponDiscount || 0,
+
             paymentMethod,
-        
+
             subtotal: cart.subTotal,
             tax: cart.tax,
             shipping: cart.shipping,
@@ -150,11 +155,15 @@ if (!brand || brand.isBlocked) {
 
         
         cart.items = [];
+
+        cart.coupon = null;
+        cart.couponDiscount = 0;
+        
         cart.subTotal = 0;
         cart.tax = 0;
         cart.shipping = 0;
         cart.grandTotal = 0;
-
+        
         await cart.save();
 
         
@@ -193,7 +202,9 @@ export const createRazorpayOrder = async (req, res) => {
 
         const cart = await Cart.findOne({
             user: userId
-        }).populate("items.product");
+        })
+        .populate("items.product")
+        .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({
@@ -369,7 +380,9 @@ export const verifyRazorpayPayment = async (req, res) => {
 
         const cart = await Cart.findOne({
             user: userId
-        }).populate("items.product");
+        })
+        .populate("items.product")
+        .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
 
@@ -408,6 +421,10 @@ export const verifyRazorpayPayment = async (req, res) => {
             })),
 
             address: addressId,
+            
+            couponCode: cart.coupon ? cart.coupon.code : null,
+
+             couponDiscount: cart.couponDiscount || 0,
 
             paymentMethod: "RAZORPAY",
 

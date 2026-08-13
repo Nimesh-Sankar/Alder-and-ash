@@ -6,6 +6,7 @@ import {
     requireUser,
     requireAdmin
 } from "../middlewares/authMiddleware.js";
+import { applyCoupon } from "../controllers/couponController.js";
 
 const router = express.Router();
 
@@ -65,5 +66,10 @@ router.get(
     "/:orderId",
     requireUser,
     getOrderDetails
+);
+router.post(
+    "/apply-coupon",
+    requireUser,
+    applyCoupon
 );
 export default router;

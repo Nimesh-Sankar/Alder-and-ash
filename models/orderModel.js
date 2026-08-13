@@ -65,7 +65,11 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-
+    
+    couponDiscount: {
+        type: Number,
+        default: 0
+    },
     paymentMethod: {
         type: String,
         enum: ["COD", "RAZORPAY", "WALLET"],

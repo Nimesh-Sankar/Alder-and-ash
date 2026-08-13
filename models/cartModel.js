@@ -47,6 +47,10 @@ const cartSchema =
       ref: "Coupon",
       default: null
     },
+    couponDiscount: {
+      type: Number,
+      default: 0
+  },
 
     items: [cartItemSchema],
 
@@ -64,6 +68,7 @@ const cartSchema =
       type: Number,
       default: 0
     },
+    
 
     grandTotal: {
       type: Number,

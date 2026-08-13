@@ -31,6 +31,12 @@ import {
   toggleProductStatus
 } from "../controllers/productController.js";
 
+import {
+  createCoupon,
+  getCoupons,
+  deleteCoupon
+} from "../controllers/couponController.js";
+
 import upload from "../config/multer.js";
 
 const router = express.Router();
@@ -164,13 +170,33 @@ router.patch(
   deleteProduct
 );
 
+
 router.patch(
   "/products/:productId/status",
   requireAdmin,
   toggleProductStatus
 );
+// COUPON
 
-// ADMIN PAGES
+router.post(
+  "/coupons",
+  requireAdmin,
+  createCoupon
+);
+
+router.get(
+  "/coupons",
+  requireAdmin,
+  getCoupons
+);
+
+router.delete(
+  "/coupons/:id",
+  requireAdmin,
+  deleteCoupon
+);
+
+
 router.get(
   "/",
   requireAdmin,
@@ -258,6 +284,14 @@ router.get(
   noCache,
   (req, res) => {
     res.render("admin/edit-product");
+  }
+);
+router.get(
+  "/coupons-page",
+  requireAdmin,
+  noCache,
+  (req, res) => {
+      res.render("admin/coupons");
   }
 );
 
