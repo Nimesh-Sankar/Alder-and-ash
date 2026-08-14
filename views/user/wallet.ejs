@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Wallet</title>
+
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/wallet.css">
+</head>
+
+<body>
+
+    <%- include("../partials/products-navbar") %>
+
+    <main class="wallet-page">
+
+        <div class="wallet-header">
+            <div>
+                <h1>My Wallet</h1>
+                <p>Manage your wallet and transactions</p>
+            </div>
+        </div>
+
+        <!-- BALANCE -->
+
+        <section class="wallet-balance-card">
+
+            <div>
+                <p>Available Balance</p>
+
+                <h2 id="walletBalance">
+                    ₹0
+                </h2>
+
+                <p id="walletId">
+                    Wallet ID: Loading...
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- SUMMARY -->
+
+        <section class="wallet-summary">
+
+            <div class="wallet-summary-card">
+
+                <p>Total Added</p>
+
+                <h3 id="totalCredit">
+                    ₹0
+                </h3>
+
+            </div>
+
+
+            <div class="wallet-summary-card">
+
+                <p>Total Spent</p>
+
+                <h3 id="totalDebit">
+                    ₹0
+                </h3>
+
+            </div>
+
+
+            <div class="wallet-summary-card">
+
+                <p>Transactions</p>
+
+                <h3 id="transactionCount">
+                    0
+                </h3>
+
+            </div>
+
+        </section>
+
+
+        <!-- TRANSACTIONS -->
+
+        <section class="transactions-section">
+
+            <div class="transactions-header">
+
+                <h2>Transaction History</h2>
+
+            </div>
+
+
+            <div class="transactions-table-wrapper">
+
+                <table class="transactions-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Type</th>
+
+                            <th>Description</th>
+
+                            <th>Amount</th>
+
+                            <th>Balance After</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="transactionsBody">
+
+                        <tr>
+
+                            <td colspan="5">
+                                Loading transactions...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        async function loadWallet() {
+
+            try {
+
+                const response =
+                    await fetch("/api/wallet");
+
+                const result =
+                    await response.json();
+
+                if (!response.ok || !result.success) {
+
+                    throw new Error(
+                        result.message ||
+                        "Unable to load wallet"
+                    );
+
+                }
+
+                const wallet = result.wallet;
+
+
+                // =========================
+                // BALANCE
+                // =========================
+
+                document.getElementById(
+                    "walletBalance"
+                ).textContent =
+                    `₹${wallet.balance}`;
+
+
+                document.getElementById(
+                    "walletId"
+                ).textContent =
+                    `Wallet ID: ${wallet.walletId}`;
+
+
+                // =========================
+                // TRANSACTIONS
+                // =========================
+
+                const transactions =
+                    wallet.transactions || [];
+
+
+                let totalCredit = 0;
+                let totalDebit = 0;
+
+
+                transactions.forEach(
+                    (transaction) => {
+
+                        if (
+                            transaction.type === "CREDIT"
+                        ) {
+
+                            totalCredit +=
+                                transaction.amount;
+
+                        }
+
+                        if (
+                            transaction.type === "DEBIT"
+                        ) {
+
+                            totalDebit +=
+                                transaction.amount;
+
+                        }
+
+                    }
+                );
+
+
+                document.getElementById(
+                    "totalCredit"
+                ).textContent =
+                    `₹${totalCredit}`;
+
+
+                document.getElementById(
+                    "totalDebit"
+                ).textContent =
+                    `₹${totalDebit}`;
+
+
+                document.getElementById(
+                    "transactionCount"
+                ).textContent =
+                    transactions.length;
+
+
+                // =========================
+                // TRANSACTION TABLE
+                // =========================
+
+                const tbody =
+                    document.getElementById(
+                        "transactionsBody"
+                    );
+
+                tbody.innerHTML = "";
+
+
+                if (transactions.length === 0) {
+
+                    tbody.innerHTML = `
+
+                        <tr>
+
+                            <td colspan="5">
+                                No transactions yet.
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                    return;
+                }
+
+
+                transactions
+                    .slice()
+                    .reverse()
+                    .forEach(
+                        (transaction) => {
+
+                            const date =
+                                new Date(
+                                    transaction.createdAt
+                                ).toLocaleDateString();
+
+
+                            const row =
+                                document.createElement("tr");
+
+
+                            row.innerHTML = `
+
+                                <td>
+                                    ${date}
+                                </td>
+
+                                <td>
+                                    ${transaction.type}
+                                </td>
+
+                                <td>
+                                    ${transaction.description || "-"}
+                                </td>
+
+                                <td>
+                                    ₹${transaction.amount}
+                                </td>
+
+                                <td>
+                                    ₹${transaction.balanceAfter}
+                                </td>
+
+                            `;
+
+
+                            tbody.appendChild(row);
+
+                        }
+                    );
+
+
+            } catch (error) {
+
+                console.error(
+                    "LOAD WALLET ERROR:",
+                    error
+                );
+
+                document.getElementById(
+                    "transactionsBody"
+                ).innerHTML = `
+
+                    <tr>
+
+                        <td colspan="5">
+                            Unable to load wallet.
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        loadWallet();
+
+    </script>
+
+</body>
+
+</html>

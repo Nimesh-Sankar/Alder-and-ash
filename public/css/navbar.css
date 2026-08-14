@@ -1,47 +1,115 @@
+/* =========================================================
+   PRODUCTS NAVBAR
+========================================================= */
+
 .products-navbar {
   width: 90%;
+  max-width: 1110px;
+
   margin: 20px auto;
   padding: 18px 0;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  box-sizing: border-box;
 }
 
+
+/* =========================================================
+ LOGO
+========================================================= */
+
 .products-logo {
+  font-family: Arial, Helvetica, sans-serif;
+
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
+
   cursor: pointer;
+
+  color: #111;
 }
+
+
+/* =========================================================
+ NAV LINKS
+========================================================= */
 
 .products-nav-links {
   display: flex;
+  align-items: center;
   gap: 30px;
 }
 
-.products-nav-links a,
-.products-nav-icons a {
+.products-nav-links a {
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-size: 16px;
+  font-weight: 400;
+
   text-decoration: none;
-  color: black;
+  color: #111;
+
+  transition: opacity 0.2s ease;
 }
+
+.products-nav-links a:hover {
+  opacity: 0.6;
+}
+
+
+/* =========================================================
+ NAV ICONS
+========================================================= */
 
 .products-nav-icons {
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 15px;
 }
 
+.products-nav-icons a {
+  display: flex;
+  align-items: center;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  text-decoration: none;
+  color: #111;
+}
+
+.products-nav-icons img,
+.products-nav-icons svg {
+  display: block;
+}
+
+
+/* =========================================================
+ RESPONSIVE
+========================================================= */
+
 @media (max-width: 768px) {
+
   .products-navbar {
-    width: calc(100% - 32px);
-    flex-wrap: wrap;
-    gap: 14px;
+      width: calc(100% - 32px);
+
+      flex-wrap: wrap;
+      gap: 14px;
   }
 
   .products-nav-links {
-    order: 3;
-    width: 100%;
-    gap: 16px;
-    overflow-x: auto;
-    padding-bottom: 4px;
+      order: 3;
+
+      width: 100%;
+
+      gap: 16px;
+
+      overflow-x: auto;
+
+      padding-bottom: 4px;
   }
 }

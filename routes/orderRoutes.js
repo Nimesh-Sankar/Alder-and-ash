@@ -1,7 +1,13 @@
 import express from "express";
 import { placeOrder,createRazorpayOrder,verifyRazorpayPayment,getMyOrders,getOrderDetails,renderOrderSuccess,renderPaymentFailed,renderMyOrders,renderOrderDetails,
 renderCancelPage,cancelOrder,
-renderReturnPage,returnOrder,renderAdminOrders,updateOrderStatus,downloadInvoice,renderAdminOrderDetails} from "../controllers/orderController.js";
+renderReturnPage,
+returnOrder,
+renderAdminOrders,
+updateOrderStatus,
+approveReturn,
+downloadInvoice,
+renderAdminOrderDetails} from "../controllers/orderController.js";
 import {
     requireUser,
     requireAdmin
@@ -60,7 +66,11 @@ router.post(
     requireAdmin,
     updateOrderStatus
 );
-
+router.post(
+    "/admin/approve-return/:orderId",
+    requireAdmin,
+    approveReturn
+);
 
 router.get(
     "/:orderId",

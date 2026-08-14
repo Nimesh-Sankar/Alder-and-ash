@@ -46,7 +46,9 @@
                     Orders
                 </li>
     
-                <li>Coupons</li>
+                <li onclick="window.location.href='/admin/coupons-page'">
+                    Coupons
+                </li>
                 <li>Banners</li>
                 <li>Reports</li>
                 <li>Settings</li>
@@ -128,6 +130,32 @@
                 </div>
     
                 <div class="address-box">
+                    <% if (order.status === "RETURN_REQUESTED") { %>
+
+                        <div class="summary-card return-request-card">
+                    
+                            <h3>Return Request</h3>
+                    
+                            <p>
+                                <strong>Reason:</strong>
+                                <%= order.returnReason || "No reason provided" %>
+                            </p>
+                    
+                            <form
+                                action="/api/orders/admin/approve-return/<%= order.orderId %>"
+                                method="POST"
+                            >
+                                <button
+                                    type="submit"
+                                    class="approve-return-btn"
+                                >
+                                    Approve Return & Refund
+                                </button>
+                            </form>
+                    
+                        </div>
+                    
+                    <% } %>
     
                     <h3>Delivery Address</h3>
     

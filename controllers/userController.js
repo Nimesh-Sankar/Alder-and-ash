@@ -145,3 +145,6 @@ export const verifyEmailChange = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+export const renderWallet = (req, res) => {
+  res.render("user/wallet");
+};

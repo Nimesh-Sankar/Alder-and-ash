@@ -1,5 +1,7 @@
 import express from "express";
 import { requireUser } from "../middlewares/authMiddleware.js";
+import { renderWallet } from "../controllers/userController.js";
+
 
 const router = express.Router();
 
@@ -35,5 +37,10 @@ router.get("/wishlist", requireUser, function (req, res) {
 router.get("/checkout", requireUser, function (req, res) {
   res.render("user/checkout");
 });
+router.get("/checkout", requireUser, function (req, res) {
+  res.render("user/checkout");
+});
+
+router.get("/wallet", requireUser, renderWallet);
 
 export default router;

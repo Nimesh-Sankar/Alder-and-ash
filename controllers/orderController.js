@@ -7,6 +7,7 @@ import Brand from "../models/brandModel.js";
 import PDFDocument from "pdfkit";
 import razorpay from "../config/razorpay.js";
 import crypto from "crypto";
+import Wallet from "../models/walletModel.js";
 
 export const placeOrder = async (req, res) => {
     try {
@@ -103,7 +104,28 @@ if (!brand || brand.isBlocked) {
         
             }
         }
+        let wallet = null;
 
+if (paymentMethod === "WALLET") {
+
+    wallet = await Wallet.findOne({
+        user: userId
+    });
+
+    if (!wallet) {
+        return res.status(400).json({
+            success: false,
+            message: "Wallet not found"
+        });
+    }
+
+    if (wallet.balance < cart.grandTotal) {
+        return res.status(400).json({
+            success: false,
+            message: "Insufficient wallet balance"
+        });
+    }
+}
         
         const orderCount = await Order.countDocuments();
         const orderId = `ORD${1000 + orderCount + 1}`;
@@ -131,6 +153,11 @@ if (!brand || brand.isBlocked) {
 
             paymentMethod,
 
+            paymentStatus:
+                paymentMethod === "WALLET"
+                    ? "PAID"
+                    : "PENDING",
+            
             subtotal: cart.subTotal,
             tax: cart.tax,
             shipping: cart.shipping,
@@ -138,6 +165,20 @@ if (!brand || brand.isBlocked) {
         
             status: "PLACED"
         });
+        if (paymentMethod === "WALLET") {
+
+            wallet.balance -= cart.grandTotal;
+        
+            wallet.transactions.push({
+                type: "DEBIT",
+                amount: cart.grandTotal,
+                balanceAfter: wallet.balance,
+                description: `Payment for order ${order.orderId}`,
+                orderId: order.orderId
+            });
+        
+            await wallet.save();
+        }
 
         
         for (const item of cart.items) {
@@ -720,6 +761,55 @@ export const cancelOrder = async (req, res) => {
 
         order.cancellationReason =
             req.body.reason || null;
+        
+        
+        // =========================
+        // WALLET REFUND
+        // =========================
+        
+        if (
+            (
+                order.paymentMethod === "RAZORPAY" ||
+                order.paymentMethod === "WALLET"
+            ) &&
+            order.paymentStatus === "PAID"
+        ) {
+        
+            let wallet = await Wallet.findOne({
+                user: req.session.user.id
+            });
+        
+            if (!wallet) {
+        
+                wallet = await Wallet.create({
+                    user: req.session.user.id,
+                    walletId: `WALLET-${Date.now()}`,
+                    balance: 0,
+                    transactions: []
+                });
+        
+            }
+        
+            wallet.balance += order.grandTotal;
+        
+            wallet.transactions.push({
+        
+                type: "CREDIT",
+        
+                amount: order.grandTotal,
+        
+                balanceAfter: wallet.balance,
+        
+                description: `Refund for cancelled order ${order.orderId}`,
+        
+                orderId: order.orderId
+        
+            });
+        
+            await wallet.save();
+        
+            order.paymentStatus = "REFUNDED";
+        }
 
         for (const item of order.items) {
 
@@ -1158,16 +1248,217 @@ export const renderAdminOrderDetails = async (req, res) => {
     }
 };
 export const updateOrderStatus = async (req, res) => {
+    try {
 
-    const { orderId } = req.params;
-    const { status } = req.body;
+        const { orderId } = req.params;
+        const { status } = req.body;
 
-    await Order.findOneAndUpdate(
-        { orderId },
-        { status }
-    );
+        const order = await Order.findOne({ orderId });
 
-    res.redirect(
-        "/api/orders/admin/orders"
-    );
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+        // =========================
+        // RETURN APPROVED
+        // =========================
+
+        if (
+    status === "RETURNED" &&
+    order.status === "RETURN_REQUESTED"
+) {
+
+            // Refund only if customer actually paid
+            if (
+                order.paymentStatus === "PAID" &&
+                (
+                    order.paymentMethod === "RAZORPAY" ||
+                    order.paymentMethod === "WALLET"
+                )
+            ) {
+
+                let wallet = await Wallet.findOne({
+                    user: order.user
+                });
+
+                if (!wallet) {
+
+                    wallet = await Wallet.create({
+                        user: order.user,
+                        walletId: `WALLET-${Date.now()}`,
+                        balance: 0,
+                        transactions: []
+                    });
+
+                }
+
+                wallet.balance += order.grandTotal;
+
+                wallet.transactions.push({
+
+                    type: "CREDIT",
+
+                    amount: order.grandTotal,
+
+                    balanceAfter: wallet.balance,
+
+                    description:
+                        `Refund for returned order ${order.orderId}`,
+
+                    orderId: order.orderId
+
+                });
+
+                await wallet.save();
+
+                order.paymentStatus = "REFUNDED";
+            }
+
+            // =========================
+            // UPDATE ITEM STATUS
+            // =========================
+
+            for (const item of order.items) {
+
+                item.status = "RETURNED";
+
+                const product =
+                    await Product.findById(item.product);
+
+                if (!product) {
+                    continue;
+                }
+
+                const variant =
+                    product.variants.find(
+                        v =>
+                            v.size === item.size &&
+                            v.color === item.color
+                    );
+
+                if (variant) {
+                    variant.stock += item.quantity;
+                }
+
+                await product.save();
+            }
+        }
+
+        order.status = status;
+
+        await order.save();
+
+        res.redirect(
+            "/api/orders/admin/orders"
+        );
+
+    } catch (error) {
+
+        console.log(
+            "UPDATE ORDER STATUS ERROR:",
+            error
+        );
+
+        res.status(500).send(
+            "Server Error"
+        );
+    }
+};
+export const approveReturn = async (req, res) => {
+    try {
+
+        const { orderId } = req.params;
+
+        const order = await Order.findOne({
+            orderId
+        });
+
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+        if (order.status !== "RETURN_REQUESTED") {
+            return res.status(400).send(
+                "This order is not waiting for return approval."
+            );
+        }
+
+        // Restore stock
+        for (const item of order.items) {
+
+            item.status = "RETURNED";
+
+            const product = await Product.findById(
+                item.product
+            );
+
+            if (!product) {
+                continue;
+            }
+
+            const variant = product.variants.find(
+                v =>
+                    v.size === item.size &&
+                    v.color === item.color
+            );
+
+            if (variant) {
+                variant.stock += item.quantity;
+            }
+
+            await product.save();
+        }
+
+        // Refund only paid online orders
+        if (
+            order.paymentMethod === "RAZORPAY" &&
+            order.paymentStatus === "PAID"
+        ) {
+
+            let wallet = await Wallet.findOne({
+                user: order.user
+            });
+
+            if (!wallet) {
+                wallet = await Wallet.create({
+                    user: order.user,
+                    walletId: `WALLET-${Date.now()}`,
+                    balance: 0,
+                    transactions: []
+                });
+            }
+
+            wallet.balance += order.grandTotal;
+
+            wallet.transactions.push({
+                type: "CREDIT",
+                amount: order.grandTotal,
+                balanceAfter: wallet.balance,
+                description:
+                    `Refund for returned order ${order.orderId}`,
+                orderId: order.orderId
+            });
+
+            await wallet.save();
+
+            order.paymentStatus = "REFUNDED";
+        }
+
+        order.status = "RETURNED";
+
+        await order.save();
+
+        res.redirect(
+            `/api/orders/admin/details/${order.orderId}`
+        );
+
+    } catch (error) {
+
+        console.log(
+            "APPROVE RETURN ERROR:",
+            error
+        );
+
+        res.status(500).send("Server Error");
+    }
 };

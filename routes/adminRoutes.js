@@ -37,6 +37,13 @@ import {
   deleteCoupon
 } from "../controllers/couponController.js";
 
+import {
+  createOffer,
+  getOffers,
+  deleteOffer,
+  toggleOfferStatus
+} from "../controllers/offerController.js";
+
 import upload from "../config/multer.js";
 
 const router = express.Router();
@@ -292,6 +299,40 @@ router.get(
   noCache,
   (req, res) => {
       res.render("admin/coupons");
+  }
+);
+// OFFER
+
+router.post(
+  "/offers",
+  requireAdmin,
+  createOffer
+);
+
+router.get(
+  "/offers",
+  requireAdmin,
+  getOffers
+);
+
+router.delete(
+  "/offers/:id",
+  requireAdmin,
+  deleteOffer
+);
+
+router.patch(
+  "/offers/:id/status",
+  requireAdmin,
+  toggleOfferStatus
+);
+
+router.get(
+  "/offers-page",
+  requireAdmin,
+  noCache,
+  (req, res) => {
+    res.render("admin/offers");
   }
 );
 

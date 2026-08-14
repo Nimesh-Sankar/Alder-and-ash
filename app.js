@@ -15,6 +15,7 @@ import forgotPasswordRoutes from "./routes/forgotPasswordRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -70,6 +71,7 @@ app.use("/api/forgot-password", forgotPasswordRoutes);
 app.use("/api/cart", cartRoutes); 
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);  
+app.use("/api/wallet", walletRoutes);
 
 app.use((req, res) => {
   res.status(404).send("Page not found");

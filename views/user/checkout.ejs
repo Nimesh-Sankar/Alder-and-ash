@@ -130,6 +130,14 @@
                   >
                   Razorpay
               </label>
+              <label>
+                <input
+                    type="radio"
+                    name="payment"
+                    value="WALLET"
+                >
+                Wallet
+            </label>
           
           </div>
 
@@ -423,7 +431,33 @@ if (paymentMethod === "COD") {
 
     return;
 }
+if (paymentMethod === "WALLET") {
 
+const response = await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        addressId: selectedAddress.value,
+        paymentMethod: "WALLET"
+    })
+});
+
+const result = await response.json();
+
+if (!response.ok || !result.success) {
+    throw new Error(
+        result.message ||
+        "Unable to place wallet order."
+    );
+}
+
+window.location.href =
+    `/api/orders/success/${result.data.orderId}`;
+
+return;
+}
 if (paymentMethod === "RAZORPAY") {
 
 const response = await fetch(

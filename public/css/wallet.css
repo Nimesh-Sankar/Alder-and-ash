@@ -1,0 +1,321 @@
+/* =========================================================
+   WALLET PAGE
+========================================================= */
+
+.wallet-page {
+  width: 90%;
+  max-width: 1110px;
+  margin: 0 auto;
+  padding: 65px 0 80px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+ HEADER
+========================================================= */
+
+.wallet-header {
+  margin-bottom: 36px;
+}
+
+.wallet-header h1 {
+  margin: 0 0 8px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+}
+
+.wallet-header p {
+  margin: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+ BALANCE CARD
+========================================================= */
+
+.wallet-balance-card {
+  width: 100%;
+  min-height: 318px;
+
+  background: #111;
+
+  padding: 70px 45px;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+
+  margin-bottom: 27px;
+}
+
+.wallet-balance-card > div {
+  width: 100%;
+}
+
+
+/* Available Balance */
+
+.wallet-balance-card p:first-child {
+  margin: 0 0 18px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  color: #ddd;
+}
+
+
+/* Balance */
+
+.wallet-balance-card h2 {
+  margin: 0 0 28px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 52px;
+  font-weight: 500;
+
+  color: #fff;
+
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+
+/* Wallet ID */
+
+#walletId {
+  margin: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+
+  color: #aaa;
+}
+
+
+/* =========================================================
+ SUMMARY CARDS
+========================================================= */
+
+.wallet-summary {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+
+  margin-bottom: 58px;
+}
+
+.wallet-summary-card {
+  min-height: 172px;
+
+  border: 1px solid #ddd;
+
+  padding: 40px 30px;
+
+  box-sizing: border-box;
+
+  background: #fff;
+}
+
+
+/* Summary title */
+
+.wallet-summary-card p {
+  margin: 0 0 16px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  color: #777;
+}
+
+
+/* Summary value */
+
+.wallet-summary-card h3 {
+  margin: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+
+  color: #111;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+ TRANSACTION HISTORY
+========================================================= */
+
+.transactions-section {
+  width: 100%;
+}
+
+.transactions-header {
+  margin-bottom: 20px;
+}
+
+.transactions-header h2 {
+  margin: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+ TRANSACTION TABLE
+========================================================= */
+
+.transactions-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border-top: 1px solid #111;
+}
+
+.transactions-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+
+/* Table headings */
+
+.transactions-table th {
+  padding: 18px 14px;
+
+  text-align: left;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+
+  color: #666;
+
+  border-bottom: 1px solid #ddd;
+
+  white-space: nowrap;
+}
+
+
+/* Table cells */
+
+.transactions-table td {
+  padding: 20px 14px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+
+  color: #222;
+
+  border-bottom: 1px solid #e5e5e5;
+
+  vertical-align: middle;
+}
+
+
+/* Hover */
+
+.transactions-table tbody tr:hover {
+  background: #fafafa;
+}
+
+
+/* =========================================================
+ RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .wallet-page {
+      width: calc(100% - 50px);
+      padding: 40px 0 60px;
+  }
+
+  .wallet-summary {
+      grid-template-columns: 1fr;
+  }
+
+  .wallet-balance-card {
+      min-height: 270px;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .wallet-page {
+      width: calc(100% - 36px);
+      padding: 30px 0 50px;
+  }
+
+  .wallet-header h1 {
+      font-size: 34px;
+  }
+
+  .wallet-header p {
+      font-size: 15px;
+  }
+
+  .wallet-balance-card {
+      min-height: 240px;
+      padding: 45px 28px;
+  }
+
+  .wallet-balance-card h2 {
+      font-size: 42px;
+  }
+
+  .wallet-summary-card {
+      min-height: 140px;
+      padding: 30px 25px;
+  }
+
+  .transactions-header h2 {
+      font-size: 28px;
+  }
+
+  .transactions-table {
+      min-width: 700px;
+  }
+}
