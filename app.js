@@ -16,6 +16,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -72,6 +73,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);  
 app.use("/api/wallet", walletRoutes);
+app.use("/admin/reports", reportRoutes);
 
 app.use((req, res) => {
   res.status(404).send("Page not found");
