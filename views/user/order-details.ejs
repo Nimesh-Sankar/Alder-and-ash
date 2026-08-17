@@ -9,6 +9,15 @@
 </head>
 
 <body>
+    <%
+    const statusLabels = {
+        PLACED: "Order Placed",
+        CANCELLED: "Cancelled",
+        DELIVERED: "Delivered",
+        RETURN_REQUESTED: "Return Requested",
+        RETURNED: "Returned"
+    };
+%>
 
 <%- include("../partials/products-navbar") %>
 
@@ -17,13 +26,13 @@
     <h1 class="page-title">Order Details</h1>
 
     <div class="orders-card">
-
+        
         <h3>Order #<%= order.orderId %></h3>
 
         <p>
             Status:
             <span class="status">
-                <%= order.status %>
+                <%= statusLabels[order.status] || order.status %>
             </span>
         </p>
 
@@ -94,7 +103,7 @@
 
                 <p>
                     Status:
-                    <%= item.status || order.status %>
+                    <%= statusLabels[item.status || order.status] || item.status || order.status %>
                 </p>
 
                 <div class="order-actions">

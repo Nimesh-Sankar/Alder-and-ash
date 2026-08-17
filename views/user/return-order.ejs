@@ -51,11 +51,41 @@
 
             <form method="POST">
 
-                <label>
-                    Reason (Required)
+                <label for="reason">
+                    Return Reason
                 </label>
-                <textarea name="reason" rows="5" placeholder="why are you returning "Required></textarea>
-
+                
+                <select name="reason" id="reason" required>
+                
+                    <option value="" disabled selected>
+                        Select a reason
+                    </option>
+                
+                    <option value="Product is damaged">
+                        Product is damaged
+                    </option>
+                
+                    <option value="Wrong product received">
+                        Wrong product received
+                    </option>
+                
+                    <option value="Wrong size or fit">
+                        Wrong size or fit
+                    </option>
+                
+                    <option value="Product does not match description">
+                        Product does not match description
+                    </option>
+                
+                    <option value="Product quality issue">
+                        Product quality issue
+                    </option>
+                
+                    <option value="Other">
+                        Other
+                    </option>
+                
+                </select>
                 <br><br>
 
                 <button

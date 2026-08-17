@@ -637,14 +637,23 @@ export const renderMyOrders = async (req, res) => {
         const limit=7;
         const skip=(page-1)*limit;
         const orders = await Order.find({ user: userId })
-            .populate("address")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
+        .populate("address")
+        .populate("items.product")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+        const totalOrders = await Order.countDocuments({
+            user: userId
+        });
+        
+        const totalPages = Math.ceil(totalOrders / limit);
             
 
-        res.render("user/my-orders", { orders });
+        res.render("user/my-orders", {
+            orders,
+            currentPage: page,
+            totalPages
+        });
 
     } catch (error) {
         console.log(error);

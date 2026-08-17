@@ -51,11 +51,41 @@
 
             <form method="POST">
 
-                <label>
-                    Reason (Optional)
+                <label for="reason">
+                    Cancellation Reason
                 </label>
-
-                <textarea name="reason" rows="5" placeholder="why are you canceling "Required></textarea>
+                
+                <select name="reason" id="reason" required>
+                
+                    <option value="" disabled selected>
+                        Select a reason
+                    </option>
+                
+                    <option value="Changed my mind">
+                        Changed my mind
+                    </option>
+                
+                    <option value="Ordered by mistake">
+                        Ordered by mistake
+                    </option>
+                
+                    <option value="Found a better price">
+                        Found a better price
+                    </option>
+                
+                    <option value="Product no longer needed">
+                        Product no longer needed
+                    </option>
+                
+                    <option value="Delivery taking too long">
+                        Delivery taking too long
+                    </option>
+                
+                    <option value="Other">
+                        Other
+                    </option>
+                
+                </select>
 
                 <br><br>
 
