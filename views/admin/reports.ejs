@@ -636,84 +636,57 @@
   // ==============================
   
   function renderOrders(orders) {
-  
-      reportTableBody.innerHTML = "";
-  
-  
-      if (!orders || orders.length === 0) {
-  
-          reportTableBody.innerHTML = `
-              <tr>
-                  <td
-                      colspan="9"
-                      class="empty-report"
-                  >
-                      No sales found for this period.
-                  </td>
-              </tr>
-          `;
-  
-          return;
-      }
-  
-  
-      orders.forEach((order, index) => {
-  
-          const customer =
-              `${order.user?.firstName || ""} ${order.user?.lastName || ""}`
-              .trim() || "Unknown";
-  
-  
-          const row =
-              document.createElement("tr");
-  
-  
-          row.innerHTML = `
-  
-              <td>
-                  ${index + 1}
-              </td>
-  
-              <td>
-                  ${order.orderId}
-              </td>
-  
-              <td>
-                  ${formatDate(order.createdAt)}
-              </td>
-  
-              <td>
-                  ${customer}
-              </td>
-  
-              <td>
-                  ${formatCurrency(order.subtotal)}
-              </td>
-  
-              <td>
-                  ${formatCurrency(order.couponDiscount)}
-              </td>
-  
-              <td>
-                  ${formatCurrency(order.grandTotal)}
-              </td>
-  
-              <td>
-                  ${order.paymentMethod || "-"}
-              </td>
-  
-              <td>
-                  ${order.status || "-"}
-              </td>
-  
-          `;
-  
-  
-          reportTableBody.appendChild(row);
-  
-      });
-  
-  }
+
+reportTableBody.innerHTML = "";
+
+if (!orders || orders.length === 0) {
+
+    const row = document.createElement("tr");
+
+    const cell = document.createElement("td");
+    cell.colSpan = 9;
+    cell.className = "empty-report";
+    cell.textContent = "No sales found for this period.";
+
+    row.appendChild(cell);
+    reportTableBody.appendChild(row);
+
+    return;
+}
+
+orders.forEach((order, index) => {
+
+    const customer =
+        `${order.user?.firstName || ""} ${order.user?.lastName || ""}`
+            .trim() || "Unknown";
+
+    const row = document.createElement("tr");
+
+    const values = [
+        index + 1,
+        order.orderId || "-",
+        formatDate(order.createdAt),
+        customer,
+        formatCurrency(order.subtotal),
+        formatCurrency(order.couponDiscount),
+        formatCurrency(order.grandTotal),
+        order.paymentMethod || "-",
+        order.status || "-"
+    ];
+
+    values.forEach(value => {
+
+        const cell = document.createElement("td");
+
+        // Safely insert text instead of HTML
+        cell.textContent = String(value);
+
+        row.appendChild(cell);
+    });
+
+    reportTableBody.appendChild(row);
+});
+}
   
   
   // ==============================

@@ -1,32 +1,112 @@
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
 import Coupon from "../models/couponModel.js";
+import Offer from "../models/offerModel.js";
 
 const MAX_CART_QUANTITY = 5;
 
+async function getDiscountedPrice(product, variantPrice) {
+
+  const now = new Date();
+
+  const offers = await Offer.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now },
+    $or: [
+      {
+        type: "PRODUCT",
+        product: product._id
+      },
+      {
+        type: "CATEGORY",
+        category: product.category
+      }
+    ]
+  });
+
+  if (!offers.length) {
+    return {
+      originalPrice: variantPrice,
+      discountedPrice: variantPrice,
+      discount: 0,
+      offer: null
+    };
+  }
+
+  let bestDiscount = 0;
+  let bestOffer = null;
+
+  for (const offer of offers) {
+
+    let discount = 0;
+
+    if (offer.discountType === "PERCENTAGE") {
+
+      discount =
+        variantPrice *
+        Number(offer.discountValue) /
+        100;
+
+    } else {
+
+      discount =
+        Number(offer.discountValue);
+
+    }
+
+    // Never allow price to go below 0
+    discount = Math.min(
+      discount,
+      variantPrice
+    );
+
+    if (discount > bestDiscount) {
+
+      bestDiscount = discount;
+      bestOffer = offer;
+
+    }
+  }
+
+  return {
+    originalPrice: variantPrice,
+
+    discountedPrice:
+      variantPrice - bestDiscount,
+
+    discount: bestDiscount,
+
+    offer: bestOffer
+  };
+}
 function calculateTotals(cart) {
 
   cart.subTotal = cart.items.reduce(
-      (total, item) =>
-          total + item.price * item.quantity,
-      0
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
   );
 
   cart.tax = Math.round(cart.subTotal * 0.05);
 
   cart.shipping =
-      cart.subTotal > 1000 || cart.subTotal === 0
-          ? 0
-          : 100;
+    cart.subTotal > 1000 || cart.subTotal === 0
+      ? 0
+      : 100;
+
+  const discount = cart.coupon
+    ? (cart.couponDiscount || 0)
+    : 0;
 
   cart.grandTotal =
-      cart.subTotal +
-      cart.tax +
-      cart.shipping -
-      (cart.couponDiscount || 0)
+    cart.subTotal +
+    cart.tax +
+    cart.shipping -
+    discount;
 
   if (cart.grandTotal < 0) {
-      cart.grandTotal = 0;
+    cart.grandTotal = 0;
   }
 }
 
@@ -79,6 +159,10 @@ export const addToCart = async (req, res) => {
       });
       
     }
+    const priceInfo = await getDiscountedPrice(
+      product,
+      variant.price
+    );
 
 
     let cart = await Cart.findOne({
@@ -118,13 +202,21 @@ export const addToCart = async (req, res) => {
       }
 
       existingItem.quantity = newQuantity;
+
+const priceInfo = await getDiscountedPrice(
+  product,
+  variant.price
+);
+
+existingItem.price =
+  priceInfo.discountedPrice;
     } else {
       cart.items.push({
         product: productId,
         quantity: Number(quantity),
         size,
         color,
-        price: variant.price
+        price: priceInfo.discountedPrice
       });
     }
 

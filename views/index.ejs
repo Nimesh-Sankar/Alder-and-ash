@@ -31,7 +31,18 @@
       <a href="/api/users/products" class="hero-btn">Explore Now</a>
     </div>
 
-    <div class="hero-image placeholder-box">
+    <div class="hero-image">
+
+      <% newProducts.slice(0, 3).forEach(product => { %>
+    
+        <% if (product.images && product.images.length > 0) { %>
+          <img
+            src="<%= product.images[0] %>"
+            alt="<%= product.productName %>"
+          >
+        <% } %>
+    
+      <% }) %>
     
     </div>
   </section>
@@ -44,61 +55,76 @@
 
   <!-- Products -->
   <section class="products-section">
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Classic Jacket</h4>
-      <p>$89.00</p>
-    </div>
 
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Casual Shirt</h4>
-      <p>$49.00</p>
-    </div>
-
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Urban Fit</h4>
-      <p>$69.00</p>
-    </div>
-
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Summer Tee</h4>
-      <p>$39.00</p>
-    </div>
-
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Denim Wear</h4>
-      <p>$79.00</p>
-    </div>
-
-    <div class="product-card">
-      <div class="product-image placeholder-box"></div>
-      <h4>Street Style</h4>
-      <p>$59.00</p>
-    </div>
+    <% newProducts.forEach(product => { %>
+  
+      <div
+        class="product-card"
+        onclick="window.location.href='/user/product-details?id=<%= product._id %>'"
+      >
+  
+        <div class="product-image">
+          <img
+            src="<%= product.images[0] %>"
+            alt="<%= product.productName %>"
+          >
+        </div>
+  
+        <h4>
+          <%= product.productName %>
+        </h4>
+  
+        <p>
+          ₹<%= Math.min(...product.variants.map(v => v.price)) %>
+        </p>
+  
+      </div>
+  
+    <% }) %>
+  
   </section>
 
-  <!-- Brands -->
+
   <section class="brands-section">
     <h3>Top Brands</h3>
+  
     <div class="brands-row">
-      <span>ADIDAS</span>
-      <span>LV</span>
-      <span>NIKE</span>
-      <span>GUCCI</span>
+      <% brands.forEach(brand => { %>
+  
+        <span>
+          <%= brand.brandName %>
+        </span>
+  
+      <% }) %>
     </div>
   </section>
 
   <!-- Deal Section -->
   <section class="deal-section">
-    <div class="deal-image placeholder-box"></div>
+    <img
+    class="deal-image"
+    src="/images/PngItem_4001105.png"
+    alt="Exclusive Deal"
+  />
 
     <div class="deal-content">
-      <h3>Exclusive Deal of The Day</h3>
-      <p>Grab your favorites before the timer ends.</p>
+      <% if (offer) { %>
+
+        <h3><%= offer.name %></h3>
+      
+        <p>
+          <%= offer.discountType === "PERCENTAGE"
+            ? `${offer.discountValue}% OFF`
+            : `₹${offer.discountValue} OFF`
+          %>
+        </p>
+      
+      <% } else { %>
+      
+        <h3>No Active Offer</h3>
+        <p>Check back soon for our latest deals.</p>
+      
+      <% } %>
 
       <div class="timer-box">
         <div><strong>05</strong><span>Days</span></div>
@@ -106,7 +132,9 @@
         <div><strong>40</strong><span>Min</span></div>
       </div>
 
-      <a href="#" class="hero-btn">Shop Now</a>
+      <a href="/api/users/products" class="hero-btn">
+        Shop Now
+      </a>
     </div>
   </section>
   <script src="/js/auth.js"></script>

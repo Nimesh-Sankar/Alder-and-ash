@@ -1,11 +1,11 @@
 import express from "express";
 import { requireUser } from "../middlewares/authMiddleware.js";
+import { getHome } from "../controllers/userController.js";
+
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.render("index");
-});
+router.get("/", getHome);
 
 router.get("/login", (req, res) => {
   res.render("login");
@@ -39,12 +39,5 @@ router.get(
   }
 );
 
-router.get(
-  "/user/index",
-  requireUser,
-  (req, res) => {
-    res.render("user/index");
-  }
-);
 
 export default router;

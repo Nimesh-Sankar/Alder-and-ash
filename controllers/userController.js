@@ -1,5 +1,8 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import Product from "../models/productModel.js";
+import Brand from "../models/brandModel.js";
+import Offer from "../models/offerModel.js";
 
 
 export const getUserProfile = async (req, res) => {
@@ -147,4 +150,40 @@ export const verifyEmailChange = async (req, res) => {
 };
 export const renderWallet = (req, res) => {
   res.render("user/wallet");
+};
+export const getHome = async (req, res) => {
+  try {
+
+    const newProducts = await Product.find({
+      isDeleted: false,
+      isListed: true
+    })
+      .sort({ createdAt: -1 })
+      .limit(6);
+
+    const brands = await Brand.find({
+      isDeleted: false,
+      isBlocked: false
+    })
+      .sort({ brandName: 1 })
+      .limit(6);
+
+    const offer = await Offer.findOne({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    });
+
+    res.render("index", {
+      newProducts,
+      brands,
+      offer
+    });
+
+  } catch (error) {
+
+    console.log("HOME ERROR:", error.message);
+
+    res.status(500).send("Server error");
+  }
 };

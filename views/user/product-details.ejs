@@ -83,8 +83,8 @@
           console.log("PRODUCT RESPONSE:", response);
 console.log("PRODUCT DATA:", data);
   
-        const product =
-          data.product;
+        const product = data.product;
+          const offer = data.offer;
   
         if (
           !response.ok ||
@@ -163,14 +163,22 @@ console.log("PRODUCT DATA:", data);
                 ₹${product.variants[0].price}
               </p>
   
-              <div class="offer-box">
-  
-                <p>
-                  Save 10% with code:
-                  <strong>ALDER10</strong>
-                </p>
-  
-              </div>
+<div class="offer-box">
+  ${
+    offer
+      ? `
+        <p>
+          ${offer.discountType === "PERCENTAGE"
+            ? `Save ${offer.discountValue}%`
+            : `Save ₹${offer.discountValue}`
+          }
+        </p>
+      `
+      : `
+        <p>No offer available</p>
+      `
+  }
+</div>
   
               <p class="stock-info" id="stockInfo">
                 ${

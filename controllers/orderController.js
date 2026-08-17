@@ -375,9 +375,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             addressId
         } = req.body;
 
-        // =========================
-        // VERIFY RAZORPAY SIGNATURE
-        // =========================
+        
 
         const body =
             razorpay_order_id + "|" + razorpay_payment_id;
@@ -400,9 +398,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 
         }
 
-        // =========================
-        // GET ADDRESS
-        // =========================
+        
 
         const address = await Address.findById(addressId);
 
@@ -415,9 +411,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 
         }
 
-        // =========================
-        // GET CART
-        // =========================
+       
 
         const cart = await Cart.findOne({
             user: userId
@@ -434,18 +428,14 @@ export const verifyRazorpayPayment = async (req, res) => {
 
         }
 
-        // =========================
-        // CREATE ORDER ID
-        // =========================
+    
 
         const orderCount = await Order.countDocuments();
 
         const orderId =
             `ORD${1000 + orderCount + 1}`;
 
-        // =========================
-        // CREATE ORDER
-        // =========================
+       
 
         const order = await Order.create({
 
@@ -484,9 +474,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             status: "PLACED"
         });
 
-        // =========================
-        // REDUCE STOCK
-        // =========================
+       
 
         for (const item of cart.items) {
 
@@ -511,22 +499,17 @@ export const verifyRazorpayPayment = async (req, res) => {
             await product.save();
         }
 
-        // =========================
-        // CLEAR CART
-        // =========================
-
         cart.items = [];
 
-        cart.subTotal = 0;
-        cart.tax = 0;
-        cart.shipping = 0;
-        cart.grandTotal = 0;
+cart.coupon = null;
+cart.couponDiscount = 0;
 
-        await cart.save();
+cart.subTotal = 0;
+cart.tax = 0;
+cart.shipping = 0;
+cart.grandTotal = 0;
 
-        // =========================
-        // SEND ORDER ID TO FRONTEND
-        // =========================
+        
 
         res.status(200).json({
 

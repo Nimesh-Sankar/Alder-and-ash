@@ -315,11 +315,7 @@ export const applyCoupon = async (req, res) => {
             cart.tax +
             cart.shipping -
             discount;
-            console.log("SUBTOTAL:", cart.subTotal);
-console.log("TAX:", cart.tax);
-console.log("SHIPPING:", cart.shipping);
-console.log("DISCOUNT:", discount);
-console.log("GRAND TOTAL:", cart.grandTotal);
+           
 
         await cart.save();
 

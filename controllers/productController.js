@@ -2,6 +2,7 @@ import Product from "../models/productModel.js";
 import sharp from "sharp";
 import Brand from "../models/brandModel.js";
 import Category from "../models/categoryModel.js";
+import Offer from "../models/offerModel.js";
 
 function validateImageFiles(files) {
   const allowedTypes = [
@@ -40,7 +41,70 @@ function validateVariants(variants) {
   }
   return null;
 }
+async function getBestOffer(product) {
+  const now = new Date();
 
+  const offers = await Offer.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now },
+    $or: [
+      { type: "PRODUCT", product: product._id },
+      { type: "CATEGORY", category: product.category }
+    ]
+  });
+
+  if (!offers.length) {
+    return null;
+  }
+
+  let bestOffer = null;
+  let bestDiscount = 0;
+
+  const basePrice = Math.min(
+    ...product.variants.map(v => v.price)
+  );
+
+  for (const offer of offers) {
+
+    let discount = 0;
+
+    if (offer.discountType === "PERCENTAGE") {
+      discount =
+        basePrice * offer.discountValue / 100;
+    } else {
+      discount =
+        offer.discountValue;
+    }
+
+    // Don't allow discount greater than product price
+    discount = Math.min(discount, basePrice);
+
+    if (discount > bestDiscount) {
+      bestDiscount = discount;
+      bestOffer = offer;
+    }
+  }
+
+  if (!bestOffer) {
+    return null;
+  }
+
+  const offerPrice =
+    Math.round((basePrice - bestDiscount) * 100) / 100;
+
+  return {
+    _id: bestOffer._id,
+    name: bestOffer.name,
+    type: bestOffer.type,
+    discountType: bestOffer.discountType,
+    discountValue: bestOffer.discountValue,
+
+    originalPrice: basePrice,
+    discountAmount: Math.round(bestDiscount * 100) / 100,
+    offerPrice
+  };
+}
 
 
 export const addProduct = async (req, res) => {
@@ -363,31 +427,28 @@ export const getProducts = async (req, res) => {
 
 };
 export const getSingleProduct = async (req, res) => {
-
   try {
-
     const { id } = req.params;
 
-    const product =
-      await Product.findById(id)
-
-        .populate("category")
-        .populate("brand");
+    const product = await Product.findById(id)
+      .populate("category")
+      .populate("brand");
 
     if (!product) {
-
       return res.status(404).json({
         message: "Product not found"
       });
-
     }
 
+    // GET BEST OFFER
+    const offer = await getBestOffer(product);
+
     res.status(200).json({
-      product
+      product,
+      offer
     });
 
   } catch (error) {
-
     console.log(
       "GET SINGLE PRODUCT ERROR:",
       error.message
@@ -396,9 +457,7 @@ export const getSingleProduct = async (req, res) => {
     res.status(500).json({
       message: "Server error"
     });
-
   }
-
 };
 export const updateProduct = async (req, res) => {
 
