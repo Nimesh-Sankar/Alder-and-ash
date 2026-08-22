@@ -32,28 +32,30 @@
 
   <ul class="admin-menu">
 
-    <li class="active">
+    <li
+      id="dashboardMenu"
+      class="active"
+      onclick="showSection('dashboardSection')"
+    >
       Dashboard
     </li>
-    <li onclick="showSection('usersSection')">
+
+    <li
+      id="usersMenu"
+      onclick="showSection('usersSection')"
+    >
       Users
     </li>
 
-    <li
-      onclick="window.location.href='/admin/products-page'"
-    >
+    <li onclick="window.location.href='/admin/products-page'">
       Products
     </li>
 
-    <li
-      onclick="window.location.href='/admin/brands-page'"
-    >
+    <li onclick="window.location.href='/admin/brands-page'">
       Brands
     </li>
 
-    <li
-      onclick="window.location.href='/admin/category'"
-    >
+    <li onclick="window.location.href='/admin/category'">
       Category
     </li>
 
@@ -63,18 +65,14 @@
 
     <li onclick="window.location.href='/admin/coupons-page'">
       Coupons
-  </li>
+    </li>
 
-    <li>
+    <li onclick="window.location.href='/admin/banners-page'">
       Banners
     </li>
 
-    <li>
+    <li onclick="window.location.href='/admin/reports'">
       Reports
-    </li>
-
-    <li>
-      Settings
     </li>
 
   </ul>
@@ -102,22 +100,28 @@
         <h1 class="section-title">Dashboard</h1>
 
         <div class="dashboard-cards">
-          <div class="dashboard-card">
-            <h4>Product Orders</h4>
-            <p>1,456</p>
-          </div>
 
+          <div class="dashboard-card">
+            <h4>Orders</h4>
+            <p id="dashboardOrders">0</p>
+          </div>
+        
           <div class="dashboard-card">
             <h4>Revenue</h4>
-            <p>$892,340</p>
+            <p id="dashboardRevenue">₹0</p>
           </div>
-
+        
           <div class="dashboard-card">
             <h4>Users</h4>
-            <p>132</p>
+            <p id="dashboardUsers">0</p>
           </div>
+        
+          <div class="dashboard-card">
+            <h4>Products</h4>
+            <p id="dashboardProducts">0</p>
+          </div>
+        
         </div>
-
         <div class="dashboard-placeholder">
           Dashboard
         </div>
@@ -166,5 +170,56 @@
   </script>
   
     <script src="/js/admin.js"></script>
+    <script>
+      async function loadDashboardStats() {
+        try {
+          const response =
+            await fetch("/admin/dashboard-stats");
+    
+          const result =
+            await response.json();
+    
+          if (!response.ok || !result.success) {
+            throw new Error(
+              result.message ||
+              "Unable to load dashboard"
+            );
+          }
+    
+          const data = result.data;
+    
+          document.getElementById(
+            "dashboardOrders"
+          ).textContent =
+            data.totalOrders;
+    
+          document.getElementById(
+            "dashboardUsers"
+          ).textContent =
+            data.totalUsers;
+    
+          document.getElementById(
+            "dashboardProducts"
+          ).textContent =
+            data.totalProducts;
+    
+          document.getElementById(
+            "dashboardRevenue"
+          ).textContent =
+            "₹" +
+            Number(
+              data.totalRevenue || 0
+            ).toLocaleString("en-IN");
+    
+        } catch (error) {
+          console.log(
+            "DASHBOARD LOAD ERROR:",
+            error
+          );
+        }
+      }
+    
+      loadDashboardStats();
+    </script>
   </body>
   </html>

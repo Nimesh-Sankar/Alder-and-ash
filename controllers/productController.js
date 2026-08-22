@@ -21,24 +21,44 @@ function validateImageFiles(files) {
   return null;
 }
 function validateVariants(variants) {
-  if(!variants||variants.length === 0) {
-    return "At least one variant is required";
+
+  if (!variants || variants.length === 0) {
+      return "At least one variant is required";
   }
+
+  const uniqueVariants = new Set();
+
   for (const variant of variants) {
-    const price= Number(variant.price);
-    const stock= Number(variant.stock);
-    if(!variant.size || !variant.color) {
-      return "Each variant must have size and color";
-    }
-    if (isNaN(price) || price <= 0) {
-      return "Variant price must be a positive number";
-    }
-    if (isNaN(stock) || stock < 0) {
-      return "Variant stock must be a positive number";
-    }
-    variant.price = price;
-    variant.stock = stock;
+
+      const price = Number(variant.price);
+      const stock = Number(variant.stock);
+
+      if (!variant.size || !variant.color) {
+          return "Each variant must have size and color";
+      }
+
+      // Check duplicate size + color
+      const key =
+          `${variant.size.trim().toLowerCase()}-${variant.color.trim().toLowerCase()}`;
+
+      if (uniqueVariants.has(key)) {
+          return `${variant.size} - ${variant.color} variant already exists`;
+      }
+
+      uniqueVariants.add(key);
+
+      if (isNaN(price) || price <= 0) {
+          return "Variant price must be a positive number";
+      }
+
+      if (isNaN(stock) || stock < 0) {
+          return "Variant stock must be a positive number";
+      }
+
+      variant.price = price;
+      variant.stock = stock;
   }
+
   return null;
 }
 async function getBestOffer(product) {

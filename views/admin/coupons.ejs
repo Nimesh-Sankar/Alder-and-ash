@@ -11,60 +11,16 @@
 </head>
 
 <body>
-   <aside class="admin-sidebar">
+    <div
+  id="alertBox"
+  class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3"
+  role="alert"
+  style="z-index: 9999;"
+></div>
 
-    <div class="admin-logo">
-        Alder & Ash.
-    </div>
-
-    <ul class="admin-menu">
-
-        <li onclick="window.location.href='/admin'">
-            Dashboard
-        </li>
-
-        <li onclick="window.location.href='/admin'">
-            Users
-        </li>
-
-        <li onclick="window.location.href='/admin/products-page'">
-            Products
-        </li>
-
-        <li onclick="window.location.href='/admin/brands-page'">
-            Brands
-        </li>
-
-        <li onclick="window.location.href='/admin/category'">
-            Category
-        </li>
-
-        <li onclick="window.location.href='/api/orders/admin/orders'">
-            Orders
-        </li>
-
-        <li
-            class="active"
-            onclick="window.location.href='/admin/coupons-page'"
-        >
-            Coupons
-        </li>
-
-        <li>
-            Banners
-        </li>
-
-        <li>
-            Reports
-        </li>
-
-        <li>
-            Settings
-        </li>
-
-    </ul>
-
-</aside>
+    <%- include("../partials/admin-sidebar", {
+        activePage: "coupons"
+      }) %>
     <div class="coupon-page">
 
         <div class="coupon-header">
@@ -565,6 +521,23 @@
 
 
     <script>
+        function showAlert(message, type = "success") {
+  const alertBox =
+    document.getElementById("alertBox");
+
+  if (!alertBox) return;
+
+  alertBox.className =
+    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent = message;
+
+  alertBox.classList.remove("d-none");
+
+  setTimeout(() => {
+    alertBox.classList.add("d-none");
+  }, 3000);
+}
 
         const couponModal =
             document.getElementById("couponModal");
@@ -592,9 +565,11 @@
 
 
         function closeCouponModal() {
-            couponModal.classList.remove("active");
-            couponForm.reset();
-        }
+    couponModal.classList.remove("active");
+    couponForm.reset();
+
+    delete couponForm.dataset.editId;
+}
 
 
         function openOfferModal() {
@@ -694,6 +669,60 @@
     } catch (error) {
         console.error("LOAD PRODUCTS ERROR:", error);
     }
+}
+function editCoupon(couponId) {
+
+const coupon = promotions.find(
+    item =>
+        item._id === couponId &&
+        item.promotionType === "COUPON"
+);
+
+if (!coupon) {
+    return;
+}
+
+document.getElementById("code").value =
+    coupon.code || "";
+
+document.getElementById("name").value =
+    coupon.name || "";
+
+document.getElementById("description").value =
+    coupon.description || "";
+
+document.getElementById("discountType").value =
+    coupon.discountType;
+
+document.getElementById("discountValue").value =
+    coupon.discountValue;
+
+document.getElementById("minimumOrderAmount").value =
+    coupon.minimumOrderAmount || 0;
+
+document.getElementById("maximumDiscount").value =
+    coupon.maximumDiscount || "";
+
+document.getElementById("usageLimit").value =
+    coupon.usageLimit || "";
+
+document.getElementById("startDate").value =
+    coupon.startDate
+        ? new Date(coupon.startDate)
+            .toISOString()
+            .slice(0, 16)
+        : "";
+
+document.getElementById("endDate").value =
+    coupon.endDate
+        ? new Date(coupon.endDate)
+            .toISOString()
+            .slice(0, 16)
+        : "";
+
+couponForm.dataset.editId = couponId;
+
+couponModal.classList.add("active");
 }
 
 
@@ -1028,13 +1057,23 @@ async function loadCategories() {
                             ${
                                 isCoupon
 
-                                    ? `
-                                        <button
-                                            class="delete-btn"
-                                            onclick="deleteCoupon('${item._id}')">
-                                            Delete
-                                        </button>
-                                    `
+    ? `
+        <div class="action-buttons">
+
+            <button
+                class="status-btn"
+                onclick="editCoupon('${item._id}')">
+                Edit
+            </button>
+
+            <button
+                class="delete-btn"
+                onclick="deleteCoupon('${item._id}')">
+                Delete
+            </button>
+
+        </div>
+    `
 
                                     : `
                                         <div class="action-buttons">
@@ -1149,24 +1188,22 @@ async function loadCategories() {
 
                 try {
 
-                    const response =
-                        await fetch(
-                            "/admin/coupons",
-                            {
-                                method: "POST",
+                    const editId = couponForm.dataset.editId;
 
-                                headers: {
-                                    "Content-Type":
-                                        "application/json"
-                                },
+const response = await fetch(
+    editId
+        ? `/admin/coupons/${editId}`
+        : "/admin/coupons",
+    {
+        method: editId ? "PATCH" : "POST",
 
-                                body:
-                                    JSON.stringify(
-                                        couponData
-                                    )
-                            }
-                        );
+        headers: {
+            "Content-Type": "application/json"
+        },
 
+        body: JSON.stringify(couponData)
+    }
+);
 
                     const result =
                         await response.json();
@@ -1184,9 +1221,10 @@ async function loadCategories() {
                     }
 
 
-                    alert(
-                        "Coupon created successfully"
-                    );
+                    showAlert(
+    "Coupon created successfully",
+    "success"
+);
 
 
                     closeCouponModal();
@@ -1196,7 +1234,10 @@ async function loadCategories() {
 
                 } catch (error) {
 
-                    alert(error.message);
+                    showAlert(
+    error.message || "Something went wrong",
+    "danger"
+);
 
                 }
 
@@ -1298,9 +1339,10 @@ async function loadCategories() {
                     }
 
 
-                    alert(
-                        "Offer created successfully"
-                    );
+                    showAlert(
+    "Offer created successfully",
+    "success"
+);
 
 
                     closeOfferModal();
@@ -1310,7 +1352,10 @@ async function loadCategories() {
 
                 } catch (error) {
 
-                    alert(error.message);
+                    showAlert(
+    error.message || "Something went wrong",
+    "danger"
+);
 
                 }
 
@@ -1363,7 +1408,10 @@ async function loadCategories() {
 
             } catch (error) {
 
-                alert(error.message);
+                showAlert(
+    error.message || "Failed to delete coupon",
+    "danger"
+);
 
             }
 
@@ -1415,7 +1463,10 @@ async function loadCategories() {
 
             } catch (error) {
 
-                alert(error.message);
+                showAlert(
+    error.message || "Failed to delete offer",
+    "danger"
+);
 
             }
 
@@ -1458,7 +1509,10 @@ async function loadCategories() {
 
             } catch (error) {
 
-                alert(error.message);
+                showAlert(
+    error.message || "Failed to update offer",
+    "danger"
+);
 
             }
 

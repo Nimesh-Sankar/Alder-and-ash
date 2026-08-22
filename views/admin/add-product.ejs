@@ -34,68 +34,60 @@
   
    
 
-<aside class="admin-sidebar">
+    <aside class="admin-sidebar">
 
-  <h2 class="admin-logo">
-    Alder & Ash.
-  </h2>
-
-  <ul class="admin-menu">
-
-    <li
-      onclick="window.location.href='/admin'"
-    >
-      Dashboard
-    </li>
-
-    <li
-      onclick="window.location.href='/admin'"
-    >
-      Users
-    </li>
-
-    <li
-      class="active"
-      onclick="window.location.href='/admin/products-page'"
-    >
-      Products
-    </li>
-
-    <li
-      onclick="window.location.href='/admin/brands-page'"
-    >
-      Brands
-    </li>
-
-    <li
-      onclick="window.location.href='/admin/category'"
-    >
-      Category
-    </li>
-
-    <li onclick="window.location.href='/api/orders/admin/orders'">
-      Orders
-    </li>
-
-    <li onclick="window.location.href='/admin/coupons-page'">
-      Coupons
-  </li>
-
-    <li>
-      Banners
-    </li>
-
-    <li>
-      Reports
-    </li>
-
-    <li>
-      Settings
-    </li>
-
-  </ul>
-
-</aside>
+      <h2 class="admin-logo">
+        Alder & Ash.
+      </h2>
+    
+      <ul class="admin-menu">
+    
+        <li
+          id="dashboardMenu"
+          class="active"
+          onclick="showSection('dashboardSection')"
+        >
+          Dashboard
+        </li>
+    
+        <li
+          id="usersMenu"
+          onclick="showSection('usersSection')"
+        >
+          Users
+        </li>
+    
+        <li onclick="window.location.href='/admin/products-page'">
+          Products
+        </li>
+    
+        <li onclick="window.location.href='/admin/brands-page'">
+          Brands
+        </li>
+    
+        <li onclick="window.location.href='/admin/category'">
+          Category
+        </li>
+    
+        <li onclick="window.location.href='/api/orders/admin/orders'">
+          Orders
+        </li>
+    
+        <li onclick="window.location.href='/admin/coupons-page'">
+          Coupons
+        </li>
+    
+        <li onclick="window.location.href='/admin/banners-page'">
+          Banners
+        </li>
+    
+        <li onclick="window.location.href='/admin/reports'">
+          Reports
+        </li>
+    
+      </ul>
+    
+    </aside>
  
     <!-- MAIN -->
     <main class="admin-main">

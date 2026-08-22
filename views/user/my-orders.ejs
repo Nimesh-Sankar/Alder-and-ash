@@ -57,6 +57,16 @@
                 View Details
 
             </a>
+            <% if (order.status === "ORDER_FAILED") { %>
+
+                <button
+                type="button"
+                class="orders-btn"
+                onclick="retryPayment('<%= order.orderId %>')"
+            >
+                Retry Payment
+            </button>            
+            <% } %>
 
         </div>
 
@@ -94,6 +104,106 @@
 
 
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    async function retryPayment(orderId) {
+    
+        try {
+    
+            const response = await fetch(
+                `/api/orders/retry-payment/${orderId}`
+            );
+    
+            const result = await response.json();
+    
+            if (!response.ok || !result.success) {
+                console.error(
+                    result.message || "Unable to retry payment"
+                );
+                return;
+            }
+    
+            const options = {
+    
+                key: "rzp_test_TMkZpAZPvOVGIC",
+    
+                amount: result.data.amount,
+    
+                currency: result.data.currency,
+    
+                name: "Alder & Ash",
+    
+                description: `Retry payment for ${orderId}`,
+    
+                order_id:
+                    result.data.razorpayOrderId,
+    
+                    handler: async function (response) {
 
+try {
+
+    const verifyResponse = await fetch(
+        `/api/orders/retry-payment/verify/${orderId}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                razorpay_order_id:
+                    response.razorpay_order_id,
+
+                razorpay_payment_id:
+                    response.razorpay_payment_id,
+
+                razorpay_signature:
+                    response.razorpay_signature
+            })
+        }
+    );
+
+    const verifyResult =
+        await verifyResponse.json();
+
+    if (
+        !verifyResponse.ok ||
+        !verifyResult.success
+    ) {
+        console.error(
+            verifyResult.message ||
+            "Retry payment verification failed"
+        );
+
+        return;
+    }
+
+    window.location.href =
+        `/api/orders/success/${verifyResult.data.orderId}`;
+
+} catch (error) {
+
+    console.error(
+        "RETRY VERIFY ERROR:",
+        error
+    );
+}
+}
+    
+            };
+    
+            const razorpay =
+                new Razorpay(options);
+    
+            razorpay.open();
+    
+        } catch (error) {
+    
+            console.error(
+                "RETRY PAYMENT ERROR:",
+                error
+            );
+        }
+    }
+    </script>
 </body>
 </html>

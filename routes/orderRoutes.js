@@ -1,5 +1,5 @@
 import express from "express";
-import { placeOrder,createRazorpayOrder,verifyRazorpayPayment,getMyOrders,getOrderDetails,renderOrderSuccess,renderPaymentFailed,renderMyOrders,renderOrderDetails,
+import { placeOrder,createRazorpayOrder,verifyRazorpayPayment,handlePaymentFailed,retryPayment,verifyRetryPayment,getMyOrders,getOrderDetails,renderOrderSuccess,renderPaymentFailed,renderMyOrders,renderOrderDetails,
 renderCancelPage,cancelOrder,
 renderReturnPage,
 returnOrder,
@@ -24,25 +24,55 @@ router.post(
     requireUser,
     verifyRazorpayPayment
 );
+router.post(
+    "/payment-failed",
+    requireUser,
+    handlePaymentFailed
+);
+router.get(
+    "/retry-payment/:orderId",
+    requireUser,
+    retryPayment
+);
+router.post(
+    "/retry-payment/verify/:orderId",
+    requireUser,
+    verifyRetryPayment
+);
 
 router.get("/my-orders", requireUser, renderMyOrders);
 
 router.get("/success/:orderId", requireUser, renderOrderSuccess);
 router.get(
-    "/order-failed",
+    "/order-failed/:orderId",
     requireUser,
     renderPaymentFailed
 );
 
 router.get("/details/:orderId", requireUser, renderOrderDetails);
+router.get(
+    "/cancel/:orderId/:itemId",
+    requireUser,
+    renderCancelPage
+);
 
-router.get("/cancel/:orderId", requireUser, renderCancelPage);
+router.post(
+    "/cancel/:orderId/:itemId",
+    requireUser,
+    cancelOrder
+);
 
-router.post("/cancel/:orderId", requireUser, cancelOrder);
+router.get(
+    "/return/:orderId/:itemId",
+    requireUser,
+    renderReturnPage
+);
 
-router.get("/return/:orderId", requireUser, renderReturnPage);
-
-router.post("/return/:orderId", requireUser, returnOrder);
+router.post(
+    "/return/:orderId/:itemId",
+    requireUser,
+    returnOrder
+);
 
 router.get("/invoice/:orderId", requireUser, downloadInvoice);
 

@@ -1,6 +1,8 @@
 import express from "express";
 import { getUserProfile, updateProfile, changePassword } from "../controllers/userController.js"; 
+import {getActiveBanner} from "../controllers/bannerController.js";
 import User from "../models/userModel.js";
+
 import path from "path";
 import { requireUser } from "../middlewares/authMiddleware.js";
 
@@ -22,6 +24,10 @@ router.post(
   "/change-password",
   requireUser,
   changePassword
+);
+router.get(
+  "/banner",
+  getActiveBanner
 );
 
 router.get(

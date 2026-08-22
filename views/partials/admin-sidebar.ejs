@@ -1,0 +1,74 @@
+<aside class="admin-sidebar">
+
+  <h2 class="admin-logo">
+    Alder & Ash.
+  </h2>
+
+  <ul class="admin-menu">
+
+    <li
+      class="<%= activePage === 'dashboard' ? 'active' : '' %>"
+      onclick="window.location.href='/admin'"
+    >
+      Dashboard
+    </li>
+
+    <li
+      class="<%= activePage === 'users' ? 'active' : '' %>"
+      onclick="window.location.href='/admin?section=users'"
+    >
+      Users
+    </li>
+
+    <li
+      class="<%= activePage === 'products' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/products-page'"
+    >
+      Products
+    </li>
+
+    <li
+      class="<%= activePage === 'brands' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/brands-page'"
+    >
+      Brands
+    </li>
+
+    <li
+      class="<%= activePage === 'category' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/category'"
+    >
+      Category
+    </li>
+
+    <li
+      class="<%= activePage === 'orders' ? 'active' : '' %>"
+      onclick="window.location.href='/api/orders/admin/orders'"
+    >
+      Orders
+    </li>
+
+    <li
+      class="<%= activePage === 'coupons' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/coupons-page'"
+    >
+      Coupons
+    </li>
+
+    <li
+      class="<%= activePage === 'banners' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/banners-page'"
+    >
+      Banners
+    </li>
+
+    <li
+      class="<%= activePage === 'reports' ? 'active' : '' %>"
+      onclick="window.location.href='/admin/reports'"
+    >
+      Reports
+    </li>
+
+  </ul>
+
+</aside>

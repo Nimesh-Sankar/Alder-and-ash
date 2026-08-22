@@ -49,9 +49,13 @@
 
     <div class="success-actions">
 
-      <a href="javascript:history.back()" class="success-btn">
+        <button
+        type="button"
+        class="success-btn"
+        onclick="retryPayment('<%= orderId %>')"
+    >
         Try Again
-    </a>
+    </button>
            
 
         <a href="/api/users/products" class="success-btn secondary">
@@ -61,6 +65,96 @@
     </div>
 
 </main>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    async function retryPayment(orderId) {
+        try {
+            // 1. Create a new Razorpay payment attempt
+            const response = await fetch(
+                `/api/orders/retry-payment/${orderId}`
+            );
+    
+            const result = await response.json();
+    
+            if (!response.ok || !result.success) {
+                console.error(
+                    result.message || "Unable to retry payment"
+                );
+                return;
+            }
+    
+            // 2. Open Razorpay
+            const options = {
+                key: "rzp_test_TMkZpAZPvOVGIC",
+    
+                amount: result.data.amount,
+                currency: result.data.currency,
+    
+                name: "Alder & Ash",
+                description: `Retry payment for ${orderId}`,
+    
+                order_id: result.data.razorpayOrderId,
+    
+                // 3. Payment successful
+                handler: async function (response) {
+                    try {
+                        const verifyResponse = await fetch(
+                            `/api/orders/retry-payment/verify/${orderId}`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    razorpay_order_id:
+                                        response.razorpay_order_id,
+    
+                                    razorpay_payment_id:
+                                        response.razorpay_payment_id,
+    
+                                    razorpay_signature:
+                                        response.razorpay_signature
+                                })
+                            }
+                        );
+    
+                        const verifyResult =
+                            await verifyResponse.json();
+    
+                        if (
+                            !verifyResponse.ok ||
+                            !verifyResult.success
+                        ) {
+                            console.error(
+                                verifyResult.message ||
+                                "Payment verification failed"
+                            );
+                            return;
+                        }
+    
+                        window.location.href =
+                            `/api/orders/success/${verifyResult.data.orderId}`;
+    
+                    } catch (error) {
+                        console.error(
+                            "VERIFY RETRY ERROR:",
+                            error
+                        );
+                    }
+                }
+            };
+    
+            const razorpay = new Razorpay(options);
+    
+            razorpay.open();
+    
+        } catch (error) {
+            console.error(
+                "RETRY PAYMENT ERROR:",
+                error
+            );
+        }
+    }
+    </script>
 </body>
 </html>

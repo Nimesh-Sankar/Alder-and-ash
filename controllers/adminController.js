@@ -1,4 +1,6 @@
 import User from "../models/userModel.js";
+import Order from "../models/orderModel.js";
+import Product from "../models/productModel.js";
 import bcrypt from "bcrypt";
 
 // Block/Unblock 
@@ -71,35 +73,159 @@ export const getUsersWithFilters = async (req, res) => {
   }
 };
 
-
 export const adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
 
-    const admin = await User.findOne({ email, isAdmin: true });
-    if (!admin) {
-      return res.status(401).json({ message: "Admin not found" });
-    }
+      const { email, password } = req.body;
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-    req.session.admin = {
-      id: admin._id,
-      email: admin.email,
-    };
+      const admin = await User.findOne({
+          email,
+          isAdmin: true
+      });
 
-    res.json({
-      message: "Admin login successful",
-      admin: {
-        id: admin._id,
-        name: `${admin.firstName} ${admin.lastName}`,
-        email: admin.email,
-      },
-    });
+      if (!admin) {
+          return res.status(401).json({
+              message: "Admin not found"
+          });
+      }
+
+      const isMatch = await bcrypt.compare(
+          password,
+          admin.password
+      );
+
+      if (!isMatch) {
+          return res.status(401).json({
+              message: "Invalid credentials"
+          });
+      }
+
+      req.session.admin = {
+          id: admin._id,
+          email: admin.email
+      };
+
+      // Explicitly save session
+      req.session.save((err) => {
+
+          if (err) {
+              console.log(
+                  "ADMIN SESSION SAVE ERROR:",
+                  err
+              );
+
+              return res.status(500).json({
+                  message: "Session error"
+              });
+          }
+
+          res.json({
+              message: "Admin login successful",
+              admin: {
+                  id: admin._id,
+                  name: `${admin.firstName} ${admin.lastName}`,
+                  email: admin.email
+              }
+          });
+
+      });
+
   } catch (error) {
-    console.log("ADMIN LOGIN ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+
+      console.log(
+          "ADMIN LOGIN ERROR:",
+          error.message
+      );
+
+      res.status(500).json({
+          message: "Server error"
+      });
+  }
+};
+export const getDashboardStats = async (req, res) => {
+  try {
+
+    const totalUsers =
+      await User.countDocuments({
+        isAdmin: { $ne: true }
+      });
+
+    const totalProducts =
+      await Product.countDocuments({
+        isDeleted: { $ne: true }
+      });
+
+    const totalOrders =
+      await Order.countDocuments({
+        status: {
+          $ne: "ORDER_FAILED"
+        }
+      });
+
+    const revenueData =
+      await Order.aggregate([
+        {
+          $match: {
+            status: "DELIVERED"
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: {
+              $sum: {
+                $subtract: [
+                  "$grandTotal",
+                  {
+                    $ifNull: [
+                      "$refundedAmount",
+                      0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]);
+
+    const totalRevenue =
+      revenueData[0]?.totalRevenue || 0;
+
+    const recentOrders =
+      await Order.find({
+        status: {
+          $ne: "ORDER_FAILED"
+        }
+      })
+      .populate("user")
+      .sort({
+        createdAt: -1
+      })
+      .limit(5);
+
+    return res.status(200).json({
+      success: true,
+
+      data: {
+        totalUsers,
+        totalProducts,
+        totalOrders,
+        totalRevenue,
+        recentOrders
+      }
+    });
+
+  } catch (error) {
+
+    console.log(
+      "DASHBOARD STATS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to load dashboard"
+    });
   }
 };

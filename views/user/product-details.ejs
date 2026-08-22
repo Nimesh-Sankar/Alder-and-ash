@@ -127,11 +127,23 @@ console.log("PRODUCT DATA:", data);
   
             <div class="gallery">
   
-              <img
-                class="main-img"
-                src="${product.images[0]}"
-                onclick="openImageZoom(this.src)"
-              >
+              <div class="image-zoom-wrapper">
+
+  <img
+    class="main-img"
+    src="${product.images[0]}"
+    onclick="openImageZoom(this.src)"
+    onmousemove="handleImageZoom(event, this)"
+    onmouseenter="showZoomPreview(this)"
+    onmouseleave="hideZoomPreview()"
+  >
+
+  <div
+    id="zoomPreview"
+    class="zoom-preview"
+  ></div>
+
+</div>
   
               <div class="small-images">
   
@@ -377,10 +389,7 @@ return;
           response.ok?"success":"danger"
         );
   
-        if (response.ok) {
-          window.location.href =
-            "/user/cart";
-        }
+        
   
       } catch (error) {
   
@@ -411,12 +420,57 @@ async function addToWishlist(productId) {
 }
 
   
-    function changeMainImage(imageUrl) {
-  
-      document.querySelector(".main-img").src =
-        imageUrl;
-  
-    }
+function changeMainImage(imageUrl) {
+
+const mainImage =
+  document.querySelector(".main-img");
+
+mainImage.src = imageUrl;
+
+const preview =
+  document.getElementById("zoomPreview");
+
+if (preview) {
+  preview.style.backgroundImage =
+    `url('${imageUrl}')`;
+}
+}
+    function showZoomPreview(image) {
+
+const preview =
+  document.getElementById("zoomPreview");
+
+preview.style.backgroundImage =
+  `url('${image.src}')`;
+
+preview.style.display = "block";
+}
+
+function hideZoomPreview() {
+
+const preview =
+  document.getElementById("zoomPreview");
+
+preview.style.display = "none";
+}
+
+function handleImageZoom(event, image) {
+
+const preview =
+  document.getElementById("zoomPreview");
+
+const rect =
+  image.getBoundingClientRect();
+
+const x =
+  ((event.clientX - rect.left) / rect.width) * 100;
+
+const y =
+  ((event.clientY - rect.top) / rect.height) * 100;
+
+preview.style.backgroundPosition =
+  `${x}% ${y}%`;
+}
     function openImageZoom(imageUrl){
       const modal=
       document.getElementById("imageZoomModal");

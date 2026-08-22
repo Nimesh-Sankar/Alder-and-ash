@@ -11,50 +11,9 @@
 <body>
     <div class="admin-container">
 
-        <aside class="admin-sidebar">
-
-            <h2 class="admin-logo">
-                Alder & Ash.
-            </h2>
-            <ul class="admin-menu">
-
-                <li onclick="window.location.href='/admin'">
-                    Dashboard
-                </li>
-            
-                <li onclick="window.location.href='/admin'">
-                    Users
-                </li>
-            
-                <li onclick="window.location.href='/admin/products-page'">
-                    Products
-                </li>
-            
-                <li onclick="window.location.href='/admin/brands-page'">
-                    Brands
-                </li>
-            
-                <li onclick="window.location.href='/admin/category'">
-                    Category
-                </li>
-            
-                <li class="active">
-                    Orders
-                </li>
-            
-                <li onclick="window.location.href='/admin/coupons-page'">
-                    Coupons
-                </li>
-            
-                <li>Banners</li>
-            
-                <li>Reports</li>
-            
-                <li>Settings</li>
-            
-            </ul>
-
-        </aside>
+        <%- include("../partials/admin-sidebar", {
+            activePage: "orders"
+          }) %>
 
         <main class="admin-main">
 

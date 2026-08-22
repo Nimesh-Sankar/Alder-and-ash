@@ -61,6 +61,11 @@ if (document.getElementById('signupForm')) {
 
   const signupForm = document.getElementById('signupForm');
   const emailInput = document.getElementById('email');
+  const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const phoneInput = document.getElementById('phone');
+const signupPasswordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
 
   function clearErrors() {
 
@@ -85,6 +90,53 @@ if (document.getElementById('signupForm')) {
     }
 
   }
+  firstNameInput.addEventListener("input", () => {
+    if (firstNameInput.value.trim()) {
+      setError("firstNameError", "");
+    }
+  });
+  
+  lastNameInput.addEventListener("input", () => {
+    if (lastNameInput.value.trim()) {
+      setError("lastNameError", "");
+    }
+  });
+  
+  emailInput.addEventListener("input", () => {
+    const email = emailInput.value.trim();
+  
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("emailError", "");
+    }
+  });
+  
+  phoneInput.addEventListener("input", () => {
+    if (/^\d{10}$/.test(phoneInput.value.trim())) {
+      setError("phoneError", "");
+    }
+  });
+  
+  signupPasswordInput.addEventListener("input", () => {
+    if (signupPasswordInput.value.trim()) {
+      setError("passwordError", "");
+    }
+  
+    if (
+      signupPasswordInput.value ===
+      confirmPasswordInput.value
+    ) {
+      setError("confirmPasswordError", "");
+    }
+  });
+  
+  confirmPasswordInput.addEventListener("input", () => {
+    if (
+      confirmPasswordInput.value ===
+      signupPasswordInput.value
+    ) {
+      setError("confirmPasswordError", "");
+    }
+  });
 
   async function sendOTP(email) {
 
@@ -273,6 +325,29 @@ if (document.getElementById('loginForm')) {
       errorEl.textContent = message;
     }
   }
+  const loginEmailInput =
+  document.getElementById('email');
+
+const loginPasswordInput =
+  document.getElementById('password');
+
+loginEmailInput.addEventListener('input', () => {
+
+  const email = loginEmailInput.value.trim();
+
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setLoginError('loginEmailError', '');
+  }
+
+});
+
+loginPasswordInput.addEventListener('input', () => {
+
+  if (loginPasswordInput.value.trim()) {
+    setLoginError('loginPasswordError', '');
+  }
+
+});
 
   function clearLoginErrors() {
     const emailError = document.getElementById('loginEmailError');

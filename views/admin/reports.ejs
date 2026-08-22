@@ -27,65 +27,20 @@
 </head>
 
 <body>
+    <div
+  id="alertBox"
+  class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3"
+  role="alert"
+  style="z-index: 9999;"
+></div>
 
 <div class="admin-container">
 
     <!-- ================= SIDEBAR ================= -->
 
-    <aside class="admin-sidebar">
-
-        <h2 class="admin-logo">
-            Alder & Ash.
-        </h2>
-
-        <ul class="admin-menu">
-
-            <li onclick="window.location.href='/admin'">
-                Dashboard
-            </li>
-
-            <li onclick="window.location.href='/admin'">
-                Users
-            </li>
-
-            <li onclick="window.location.href='/admin/products-page'">
-                Products
-            </li>
-
-            <li onclick="window.location.href='/admin/brands-page'">
-                Brands
-            </li>
-
-            <li onclick="window.location.href='/admin/category'">
-                Category
-            </li>
-
-            <li onclick="window.location.href='/api/orders/admin/orders'">
-                Orders
-            </li>
-
-            <li onclick="window.location.href='/admin/coupons-page'">
-                Coupons
-            </li>
-
-            <li>
-                Banners
-            </li>
-
-            <li
-                class="active"
-                onclick="window.location.href='/admin/reports'"
-            >
-                Reports
-            </li>
-
-            <li>
-                Settings
-            </li>
-
-        </ul>
-
-    </aside>
+    <%- include("../partials/admin-sidebar", {
+        activePage: "reports"
+      }) %>
 
 
     <!-- ================= MAIN ================= -->
@@ -233,6 +188,17 @@
                 </strong>
 
             </div>
+            <div class="summary-card">
+
+                <span>
+                    Refund Amount
+                </span>
+            
+                <strong id="totalRefund">
+                    ₹0.00
+                </strong>
+            
+            </div>
 
 
             <div class="summary-card">
@@ -338,7 +304,14 @@
                             <th>
                                 Order Amount
                             </th>
-
+                            <th>
+                                Refund
+                            </th>
+                            
+                            <th>
+                                Net Amount
+                            </th>
+                            
                             <th>
                                 Payment
                             </th>
@@ -356,7 +329,7 @@
                         <tr>
 
                             <td
-                                colspan="9"
+                                colspan="11"
                                 class="empty-report"
                             >
                                 Generate a report to view sales.
@@ -378,6 +351,23 @@
 
 
 <script>
+    function showAlert(message, type = "success") {
+  const alertBox =
+    document.getElementById("alertBox");
+
+  if (!alertBox) return;
+
+  alertBox.className =
+    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent = message;
+
+  alertBox.classList.remove("d-none");
+
+  setTimeout(() => {
+    alertBox.classList.add("d-none");
+  }, 3000);
+}
 
   const reportType = document.getElementById("reportType");
   
@@ -407,6 +397,8 @@
   
   const totalDiscount =
       document.getElementById("totalDiscount");
+      const totalRefund =
+    document.getElementById("totalRefund");
   
   const netSales =
       document.getElementById("netSales");
@@ -472,9 +464,7 @@
   );
   
   
-  // ==============================
-  // LOAD REPORT
-  // ==============================
+  
   
   async function loadReport() {
   
@@ -496,25 +486,26 @@
           );
   
   
-          // CUSTOM DATE VALIDATION
+          
   
           if (reportType.value === "custom") {
   
               if (!fromDate.value || !toDate.value) {
   
-                  alert(
-                      "Please select both dates."
-                  );
+                showAlert(
+                    "Please select both dates.",
+                    "danger"
+                    );
   
                   return;
               }
   
   
               if (fromDate.value > toDate.value) {
-  
-                  alert(
-                      "From date cannot be after To date."
-                  );
+                showAlert(
+                    "From date cannot be after To date.",
+                    "danger"
+                    );
   
                   return;
               }
@@ -545,10 +536,11 @@
   
           if (!result.success) {
   
-              alert(
-                  result.message ||
-                  "Unable to load report."
-              );
+            showAlert(
+            result.message ||
+            "Unable to load report.",
+            "danger"
+            );
   
               return;
           }
@@ -576,6 +568,10 @@
               formatCurrency(
                   summary.totalDiscount
               );
+              totalRefund.textContent =
+    formatCurrency(
+        summary.totalRefund
+    );
   
   
           netSales.textContent =
@@ -615,9 +611,10 @@
               error
           );
   
-          alert(
-              "Something went wrong while loading the report."
-          );
+          showAlert(
+  "Something went wrong while loading the report.",
+  "danger"
+);
   
       } finally {
   
@@ -644,7 +641,7 @@ if (!orders || orders.length === 0) {
     const row = document.createElement("tr");
 
     const cell = document.createElement("td");
-    cell.colSpan = 9;
+    cell.colSpan = 11;
     cell.className = "empty-report";
     cell.textContent = "No sales found for this period.";
 
@@ -670,8 +667,22 @@ orders.forEach((order, index) => {
         formatCurrency(order.subtotal),
         formatCurrency(order.couponDiscount),
         formatCurrency(order.grandTotal),
-        order.paymentMethod || "-",
-        order.status || "-"
+
+formatCurrency(
+    order.refundedAmount || 0
+),
+
+formatCurrency(
+    Math.max(
+        0,
+        (order.grandTotal || 0) -
+        (order.refundedAmount || 0)
+    )
+),
+
+order.paymentMethod || "-",
+
+order.status || "-"
     ];
 
     values.forEach(value => {
@@ -709,9 +720,10 @@ orders.forEach((order, index) => {
   
           if (!fromDate.value || !toDate.value) {
   
-              alert(
-                  "Please select both dates."
-              );
+            showAlert(
+  "Please select both dates.",
+  "danger"
+);
   
               return null;
           }
@@ -719,9 +731,10 @@ orders.forEach((order, index) => {
   
           if (fromDate.value > toDate.value) {
   
-              alert(
-                  "From date cannot be after To date."
-              );
+            showAlert(
+  "From date cannot be after To date.",
+  "danger"
+);
   
               return null;
           }

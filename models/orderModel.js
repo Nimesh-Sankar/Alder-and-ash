@@ -33,7 +33,8 @@ const orderItemSchema = new mongoose.Schema({
             "PLACED",
             "CANCELLED",
             "RETURN_REQUESTED",
-            "RETURNED"
+            "RETURNED",
+            "ORDER_FAILED"
         ],
         default: "PLACED"
     }
@@ -111,7 +112,10 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-
+    refundedAmount: {
+        type: Number,
+        default: 0
+    },
     status: {
         type: String,
         enum: [
@@ -121,7 +125,8 @@ const orderSchema = new mongoose.Schema({
             "DELIVERED",
             "RETURN_REQUESTED",
             "RETURNED",
-            "CANCELLED"
+            "CANCELLED",
+            "ORDER_FAILED"
         ],
         default: "PLACED"
     },

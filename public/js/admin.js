@@ -260,57 +260,61 @@ function clearSearch() {
 
 async function toggleBlock(userId, isBlocked) {
 
-  const action = isBlocked
-    ? "unblock"
-    : "block";
+  const action =
+    isBlocked
+      ? "unblock"
+      : "block";
 
-  const confirmAction = confirm(
-    `Are you sure you want to ${action} this user?`
-  );
+  openConfirm(
+    `Are you sure you want to ${action} this user?`,
+    async function () {
 
-  if (!confirmAction) return;
+      try {
 
-  try {
+        const res =
+          await fetch(
+            `${API_BASE}/admin/users/${userId}/toggle-block`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                action
+              })
+            }
+          );
 
-    const res = await fetch(
-      `${API_BASE}/admin/users/${userId}/toggle-block`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ action })
+        const data =
+          await res.json();
+
+        showAlert(
+          data.message ||
+          `User ${action}ed successfully`,
+          res.ok
+            ? "success"
+            : "danger"
+        );
+
+        if (res.ok) {
+          loadUsers();
+        }
+
+      } catch (error) {
+
+        console.error(
+          "TOGGLE BLOCK ERROR:",
+          error
+        );
+
+        showAlert(
+          "Something went wrong",
+          "danger"
+        );
       }
-    );
-
-    const data = await res.json();
-
-    if (res.ok) {
-
-      showAlert(
-        `User ${action}ed successfully`,
-        "success"
-      );
-
-      loadUsers();
-
-    } else {
-
-      showAlert(
-        data.message || "Action failed",
-        "danger"
-      );
 
     }
-
-  } catch (error) {
-
-    console.error("TOGGLE BLOCK ERROR:", error);
-
-    showAlert("Something went wrong", "danger");
-
-  }
-
+  );
 }
 
 // =========================
@@ -2013,6 +2017,7 @@ function openConfirm(message, onConfirm) {
   if (!modal || !text || !cancelBtn || !confirmBtn) {
     return;
   }
+}
 
   text.textContent = message;
 
@@ -2020,7 +2025,7 @@ function openConfirm(message, onConfirm) {
 
   cancelBtn.onclick = function () {
     modal.style.display = "none";
-  };
+  // };
 
   confirmBtn.onclick = function () {
     modal.style.display = "none";
@@ -2028,7 +2033,7 @@ function openConfirm(message, onConfirm) {
   };
   modal.onclick=function(e){
     if(e.target===modal){
-      modal,style.display="none";
+      modal.style.display="none";
     }
   }
 

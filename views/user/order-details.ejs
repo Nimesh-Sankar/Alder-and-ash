@@ -107,28 +107,34 @@
                 </p>
 
                 <div class="order-actions">
+                    <% if(
+                        order.status === "PLACED" &&
+                        item.status !== "CANCELLED"
+                    ){ %>
+                    
+                        <a
+                            href="/api/orders/cancel/<%= order.orderId %>/<%= item._id %>"
+                            class="orders-btn"
+                        >
+                            Cancel Item
+                        </a>
+                    
+                    <% } %>
+                
+                    <% if(
+    order.status === "DELIVERED" &&
+    item.status !== "RETURN_REQUESTED" &&
+    item.status !== "RETURNED"
+){ %>
 
-                    <% if(order.status === "PLACED"){ %>
-                
-                        <a
-                            href="/api/orders/cancel/<%= order.orderId %>"
-                            class="orders-btn"
-                        >
-                            Cancel Order
-                        </a>
-                
-                    <% } %>
-                
-                    <% if(order.status === "DELIVERED"){ %>
-                
-                        <a
-                            href="/api/orders/return/<%= order.orderId %>"
-                            class="orders-btn"
-                        >
-                            Return Order
-                        </a>
-                
-                    <% } %>
+    <a
+        href="/api/orders/return/<%= order.orderId %>/<%= item._id %>"
+        class="orders-btn"
+    >
+        Return Item
+    </a>
+
+<% } %>
                 
                     <% if(order.status === "RETURN_REQUESTED"){ %>
                 

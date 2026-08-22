@@ -29,7 +29,7 @@
         <div class="orders-card">
 
             <h2>
-                <%= order.items[0].product.productName %>
+                <%= item.product.productName %>
             </h2>
 
             <p>
@@ -46,10 +46,13 @@
 
             <p>
                 Quantity:
-                <%= order.items[0].quantity %>
+                <%= item.quantity %>
             </p>
 
-            <form method="POST">
+            <form
+            method="POST"
+            action="/api/orders/return/<%= order.orderId %>/<%= item._id %>"
+        >
 
                 <label for="reason">
                     Return Reason

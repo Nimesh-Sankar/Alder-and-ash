@@ -201,9 +201,145 @@ export const deleteCoupon = async (req, res) => {
         });
     }
 };
-export const applyCoupon = async (req, res) => {
+export const updateCoupon = async (req, res) => {
     try {
 
+        const { id } = req.params;
+
+        const {
+            code,
+            name,
+            description,
+            discountType,
+            discountValue,
+            minimumOrderAmount,
+            maximumDiscount,
+            usageLimit,
+            startDate,
+            endDate,
+            status
+        } = req.body;
+
+        const coupon = await Coupon.findById(id);
+
+        if (!coupon) {
+            return res.status(404).json({
+                success: false,
+                message: "Coupon not found"
+            });
+        }
+
+        if (
+            !code ||
+            !name ||
+            !discountType ||
+            !discountValue ||
+            !startDate ||
+            !endDate
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please fill all required fields"
+            });
+        }
+
+        if (
+            discountType !== "PERCENTAGE" &&
+            discountType !== "FIXED"
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid discount type"
+            });
+        }
+
+        if (
+            discountType === "PERCENTAGE" &&
+            Number(discountValue) > 100
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Percentage discount cannot exceed 100%"
+            });
+        }
+
+        if (Number(discountValue) < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Discount value cannot be negative"
+            });
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (end <= start) {
+            return res.status(400).json({
+                success: false,
+                message: "End date must be after start date"
+            });
+        }
+
+        const duplicateCoupon = await Coupon.findOne({
+            code: code.trim().toUpperCase(),
+            _id: { $ne: id }
+        });
+
+        if (duplicateCoupon) {
+            return res.status(400).json({
+                success: false,
+                message: "Coupon code already exists"
+            });
+        }
+
+        coupon.code = code.trim().toUpperCase();
+        coupon.name = name.trim();
+        coupon.description = description || "";
+        coupon.discountType = discountType;
+        coupon.discountValue = Number(discountValue);
+        coupon.minimumOrderAmount =
+            Number(minimumOrderAmount) || 0;
+
+        coupon.maximumDiscount =
+            maximumDiscount
+                ? Number(maximumDiscount)
+                : null;
+
+        coupon.usageLimit =
+            usageLimit
+                ? Number(usageLimit)
+                : null;
+
+        coupon.startDate = start;
+        coupon.endDate = end;
+
+        if (status) {
+            coupon.status = status;
+        }
+
+        await coupon.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Coupon updated successfully",
+            coupon
+        });
+
+    } catch (error) {
+
+        console.log(
+            "UPDATE COUPON ERROR:",
+            error.message
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+};
+export const applyCoupon = async (req, res) => {
+    try {
         const userId = req.session.user.id;
         const { code } = req.body;
 
@@ -258,7 +394,8 @@ export const applyCoupon = async (req, res) => {
         ) {
             return res.status(400).json({
                 success: false,
-                message: "This coupon has expired or is not active yet"
+                message:
+                    "This coupon has expired or is not active yet"
             });
         }
 
@@ -268,12 +405,23 @@ export const applyCoupon = async (req, res) => {
         ) {
             return res.status(400).json({
                 success: false,
-                message: "This coupon usage limit has been reached"
+                message:
+                    "This coupon usage limit has been reached"
             });
         }
 
+        // Calculate subtotal again from current cart
+        const currentSubTotal = cart.items.reduce(
+            (total, item) =>
+                total + (item.price * item.quantity),
+            0
+        );
+
+        cart.subTotal = currentSubTotal;
+
         if (
-            cart.subTotal < coupon.minimumOrderAmount
+            currentSubTotal <
+            coupon.minimumOrderAmount
         ) {
             return res.status(400).json({
                 success: false,
@@ -284,59 +432,81 @@ export const applyCoupon = async (req, res) => {
 
         let discount = 0;
 
-        if (coupon.discountType === "PERCENTAGE") {
-
+        if (
+            coupon.discountType === "PERCENTAGE"
+        ) {
             discount =
-                (cart.subTotal * coupon.discountValue) / 100;
+                (
+                    currentSubTotal *
+                    coupon.discountValue
+                ) / 100;
 
             if (
                 coupon.maximumDiscount !== null &&
                 discount > coupon.maximumDiscount
             ) {
-                discount = coupon.maximumDiscount;
+                discount =
+                    coupon.maximumDiscount;
             }
 
-        } else if (coupon.discountType === "FIXED") {
-
+        } else if (
+            coupon.discountType === "FIXED"
+        ) {
             discount = coupon.discountValue;
-
-            if (discount > cart.subTotal) {
-                discount = cart.subTotal;
-            }
         }
 
-        discount = Math.round(discount * 100) / 100;
+        discount =
+            Math.round(discount * 100) / 100;
+
+        // Don't allow coupon discount to be equal to
+        // or greater than merchandise subtotal
+        if (discount >= currentSubTotal) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Coupon discount must be less than the cart subtotal"
+            });
+        }
 
         cart.coupon = coupon._id;
         cart.couponDiscount = discount;
 
+        cart.tax =
+            Math.round(currentSubTotal * 0.05);
+
+        cart.shipping =
+            currentSubTotal > 1000
+                ? 0
+                : 100;
+
         cart.grandTotal =
-            cart.subTotal +
+            currentSubTotal +
             cart.tax +
             cart.shipping -
             discount;
-           
 
         await cart.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Coupon applied successfully",
             data: {
                 couponCode: coupon.code,
                 discount: discount,
+                subTotal: cart.subTotal,
+                tax: cart.tax,
+                shipping: cart.shipping,
                 grandTotal: cart.grandTotal
             }
         });
 
     } catch (error) {
-
         console.log(
             "APPLY COUPON ERROR:",
             error.message
         );
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Server error"
         });
@@ -344,10 +514,11 @@ export const applyCoupon = async (req, res) => {
 };
 export const removeCoupon = async (req, res) => {
     try {
-
         const userId = req.session.user.id;
 
-        const cart = await Cart.findOne({ user: userId });
+        const cart = await Cart.findOne({
+            user: userId
+        });
 
         if (!cart) {
             return res.status(404).json({
@@ -356,13 +527,9 @@ export const removeCoupon = async (req, res) => {
             });
         }
 
-        // Remove coupon
         cart.coupon = null;
+        cart.couponDiscount = 0;
 
-        // Reset discount
-        cart.discount = 0;
-
-        // Recalculate total
         cart.grandTotal =
             cart.subTotal +
             cart.tax +
@@ -370,7 +537,7 @@ export const removeCoupon = async (req, res) => {
 
         await cart.save();
 
-        res.json({
+        return res.status(200).json({
             success: true,
             message: "Coupon removed successfully",
             data: {
@@ -383,10 +550,12 @@ export const removeCoupon = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(
+            "REMOVE COUPON ERROR:",
+            error.message
+        );
 
-        console.log("REMOVE COUPON ERROR:", error);
-
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Unable to remove coupon"
         });

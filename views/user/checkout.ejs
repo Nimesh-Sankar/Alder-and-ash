@@ -15,6 +15,12 @@
 <body>
 
     <%- include("../partials/products-navbar") %>
+    <div
+  id="alertBox"
+  class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3"
+  role="alert"
+  style="z-index: 9999;"
+></div>
 
     <div class="checkout-container">
 
@@ -150,6 +156,23 @@
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    function showAlert(message, type = "success") {
+  const alertBox =
+    document.getElementById("alertBox");
+
+  if (!alertBox) return;
+
+  alertBox.className =
+    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+
+  alertBox.textContent = message;
+
+  alertBox.classList.remove("d-none");
+
+  setTimeout(() => {
+    alertBox.classList.add("d-none");
+  }, 3000);
+}
   async function loadAddresses(){
     const user=JSON.parse(localStorage.getItem("user"));
 
@@ -390,7 +413,10 @@ document.getElementById("removeCouponBtn")
     const button = document.getElementById("placeOrderBtn");
 
     if (!selectedAddress) {
-      alert("Please select a shipping address.");
+        showAlert(
+  "Please select a shipping address.",
+  "danger"
+);
       return;
     }
 
@@ -483,23 +509,76 @@ if (!response.ok || !result.success) {
     );
 
 }
+let failedOrderId = null;
+let failedOrderPromise = null;
 
+async function saveFailedOrder(errorData = null) {
+
+    if (failedOrderId) {
+        return failedOrderId;
+    }
+
+    if (failedOrderPromise) {
+        return failedOrderPromise;
+    }
+
+    failedOrderPromise = (async () => {
+
+        const failedResponse = await fetch(
+            "/api/orders/payment-failed",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddress.value,
+                    razorpayOrderId:
+                        result.data.razorpayOrderId,
+                    error: errorData
+                })
+            }
+        );
+
+        const failedResult =
+            await failedResponse.json();
+
+        if (!failedResponse.ok || !failedResult.success) {
+            throw new Error(
+                failedResult.message ||
+                "Failed order could not be saved"
+            );
+        }
+
+        failedOrderId =
+            failedResult.data.orderId;
+
+        return failedOrderId;
+
+    })();
+
+    return failedOrderPromise;
+}
 const options = {
 
-    key: "rzp_test_TMkZpAZPvOVGIC",
+key: "rzp_test_TMkZpAZPvOVGIC",
 
-    amount: result.data.amount,
+amount: result.data.amount,
 
-    currency: result.data.currency,
+currency: result.data.currency,
 
-    name: "Alder & Ash",
+name: "Alder & Ash",
 
-    description: "Order Payment",
+description: "Order Payment",
 
-    order_id:
-        result.data.razorpayOrderId,
+order_id: result.data.razorpayOrderId,
 
-        handler: async function (response) {
+retry: {
+    enabled: false
+},
+
+handler: async function (response) {
+
 
 try {
 
@@ -548,13 +627,38 @@ try {
 
     console.error("PAYMENT ERROR:", error);
 
-    alert(error.message);
+    alert(error.message);showAlert(
+  error.message || "Payment verification failed",
+  "danger"
+);
 
     button.disabled = false;
     button.textContent = "Place Order";
 }
 },
+modal: {
+    ondismiss: async function () {
 
+        try {
+
+            const orderId =
+                await saveFailedOrder();
+
+            window.location.href =
+                `/api/orders/order-failed/${orderId}`;
+
+        } catch (error) {
+
+            console.error(
+                "FAILED ORDER REDIRECT ERROR:",
+                error
+            );
+
+            button.disabled = false;
+            button.textContent = "Place Order";
+        }
+    }
+},
     theme: {
         color: "#000000"
     }
@@ -564,11 +668,32 @@ try {
 const razorpay =
 new Razorpay(options);
 
-razorpay.on("payment.failed", function () {
+razorpay.on("payment.failed", async function (response) {
+
+console.log("PAYMENT.FAILED FIRED", response);
+
+try {
+
+    const orderId =
+        await saveFailedOrder(response.error);
+
+    console.log("FAILED ORDER SAVED:", orderId);
 
     window.location.href =
-        "/api/orders/order-failed";
+        `/api/orders/order-failed/${orderId}`;
 
+    console.log("REDIRECT LINE REACHED");
+
+} catch (error) {
+
+    console.error(
+        "FAILED PAYMENT RECORD ERROR:",
+        error
+    );
+
+    button.disabled = false;
+    button.textContent = "Place Order";
+}
 });
 
 razorpay.open();

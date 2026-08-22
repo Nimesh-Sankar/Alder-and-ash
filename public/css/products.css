@@ -1012,3 +1012,31 @@ body{
 .product-card{
   position: relative;
 }
+.image-zoom-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.zoom-preview {
+  display: none;
+
+  position: absolute;
+
+  top: 0;
+  left: calc(100% + 20px);
+
+  width: 450px;
+  height: 500px;
+
+  background-repeat: no-repeat;
+  background-size: 200%;
+
+  border: 1px solid #ddd;
+
+  background-color: white;
+
+  z-index: 1000;
+
+  box-shadow:
+      0 4px 15px rgba(0, 0, 0, 0.15);
+}

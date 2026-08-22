@@ -8,9 +8,40 @@
 </head>
 <link rel="stylesheet" href="/css/products.css">
 <link rel="stylesheet" href="/css/navbar.css">
-<link rel="stylesheet" href="/css/navbar.css">
   <link rel="stylesheet" href="/css/wishlist.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <style>
+    .wishlist-confirm-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .wishlist-confirm-modal.d-none {
+      display: none;
+    }
+
+    .wishlist-confirm-box {
+      width: min(100%, 400px);
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .wishlist-confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+  </style>
 
 <body>
 
@@ -19,6 +50,29 @@
       class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3"
       role="alert"
       style="z-index: 9999;">
+    </div>
+
+    <div
+      id="wishlistConfirmModal"
+      class="wishlist-confirm-modal d-none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wishlistConfirmTitle"
+    >
+      <div class="wishlist-confirm-box">
+        <h3 id="wishlistConfirmTitle">Remove item?</h3>
+        <p>This product will be removed from your wishlist.</p>
+
+        <div class="wishlist-confirm-actions">
+          <button type="button" id="cancelWishlistRemove">
+            Cancel
+          </button>
+
+          <button type="button" id="confirmWishlistRemove">
+            Remove
+          </button>
+        </div>
+      </div>
     </div>
 
     <h1>My Wishlist</h1>
@@ -150,11 +204,40 @@ container.innerHTML += `
       
       }
 
+      function confirmWishlistRemoval() {
+        return new Promise((resolve) => {
+          const modal = document.getElementById("wishlistConfirmModal");
+          const cancelButton = document.getElementById("cancelWishlistRemove");
+          const confirmButton = document.getElementById("confirmWishlistRemove");
+
+          function closeModal(result) {
+            modal.classList.add("d-none");
+            cancelButton.onclick = null;
+            confirmButton.onclick = null;
+            modal.onclick = null;
+            resolve(result);
+          }
+
+          cancelButton.onclick = () => closeModal(false);
+          confirmButton.onclick = () => closeModal(true);
+
+          modal.onclick = (event) => {
+            if (event.target === modal) {
+              closeModal(false);
+            }
+          };
+
+          modal.classList.remove("d-none");
+          cancelButton.focus();
+        });
+      }
+
 
       async function removeFromWishlist(productId) {
     const user = JSON.parse(localStorage.getItem("user"));
     
-    if (!confirm("Remove from wishlist?")) return;
+    const shouldRemove = await confirmWishlistRemoval();
+    if (!shouldRemove) return;
     
     try {
         const response = await fetch("/api/wishlist/remove", {
@@ -175,41 +258,80 @@ container.innerHTML += `
     }
 }
             loadWishlist();
-        async function addToCartFromWishlist(productId, size, color) {
-        const user = JSON.parse(localStorage.getItem("user"));
-      
-        const cartResponse = await fetch("/api/cart/add", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            userid: user.id || user._id,
-          },
-          body: JSON.stringify({
-            productId,
-            quantity: 1,
-            size,
-            color,
-          }),
-        });
-      const cartDate=await cartResponse.json();
-        if (cartResponse.ok) {
-            showAlert("Product added to cart successfully!","success");
-            } else {
-            showAlert("Failed to add product to cart.", "danger");
-        }
-        await fetch("/api/wishlist/remove", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            userid: user.id || user._id,
-          },
-          body: JSON.stringify({
-            productId,
-          }),
-        });
-        loadWishlist();
-        showAlert("Product added to cart successfully!", "success");
+            async function addToCartFromWishlist(productId, size, color) {
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
+  try {
+    const cartResponse = await fetch(
+      "/api/cart/add",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: user.id || user._id,
+        },
+        body: JSON.stringify({
+          productId,
+          quantity: 1,
+          size,
+          color,
+        }),
       }
+    );
+
+    const cartData = await cartResponse.json();
+
+    if (!cartResponse.ok) {
+      showAlert(
+        cartData.message || "Failed to add product to cart.",
+        "danger"
+      );
+      return;
+    }
+
+    const wishlistResponse = await fetch(
+      "/api/wishlist/remove",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: user.id || user._id,
+        },
+        body: JSON.stringify({
+          productId,
+        }),
+      }
+    );
+
+    if (!wishlistResponse.ok) {
+      showAlert(
+        "Product added to cart, but could not be removed from wishlist.",
+        "danger"
+      );
+      return;
+    }
+
+    showAlert(
+      "Product added to cart successfully!",
+      "success"
+    );
+
+    loadWishlist();
+
+  } catch (error) {
+    console.error(
+      "ADD TO CART FROM WISHLIST ERROR:",
+      error
+    );
+
+    showAlert(
+      "Something went wrong.",
+      "danger"
+    );
+  }
+}
       
     
       

@@ -3,7 +3,8 @@ import express from "express";
 import {
   toggleBlockUser,
   getUsersWithFilters,
-  adminLogin
+  adminLogin,
+  getDashboardStats
 } from "../controllers/adminController.js";
 
 import {
@@ -34,7 +35,8 @@ import {
 import {
   createCoupon,
   getCoupons,
-  deleteCoupon
+  deleteCoupon,
+  updateCoupon
 } from "../controllers/couponController.js";
 
 import {
@@ -43,6 +45,14 @@ import {
   deleteOffer,
   toggleOfferStatus
 } from "../controllers/offerController.js";
+
+import {
+  createBanner,
+  getBanners,
+  updateBanner,
+  toggleBannerStatus,
+  deleteBanner
+} from "../controllers/bannerController.js";
 
 import upload from "../config/multer.js";
 
@@ -78,6 +88,12 @@ router.patch(
   "/users/:userId/toggle-block",
   requireAdmin,
   toggleBlockUser
+);
+
+router.get(
+  "/dashboard-stats",
+  requireAdmin,
+  getDashboardStats
 );
 
 router.get(
@@ -203,6 +219,12 @@ router.delete(
   deleteCoupon
 );
 
+router.patch(
+  "/coupons/:id",
+  requireAdmin,
+  updateCoupon
+);
+
 
 router.get(
   "/",
@@ -326,6 +348,38 @@ router.patch(
   requireAdmin,
   toggleOfferStatus
 );
+// BANNER
+
+router.post(
+  "/banners",
+  requireAdmin,
+  upload.single("image"),
+  createBanner
+);
+
+router.get(
+  "/banners",
+  requireAdmin,
+  getBanners
+);
+
+router.patch(
+  "/banners/:id/status",
+  requireAdmin,
+  toggleBannerStatus
+);
+
+router.delete(
+  "/banners/:id",
+  requireAdmin,
+  deleteBanner
+);
+router.patch(
+  "/banners/:id",
+  requireAdmin,
+  upload.single("image"),
+  updateBanner
+);
 
 router.get(
   "/offers-page",
@@ -333,6 +387,13 @@ router.get(
   noCache,
   (req, res) => {
     res.render("admin/offers");
+  }
+);
+router.get(
+  "/banners-page",
+  requireAdmin,
+  (req, res) => {
+      res.render("admin/banners");
   }
 );
 

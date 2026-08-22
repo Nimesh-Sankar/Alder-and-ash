@@ -80,34 +80,175 @@ async function getDiscountedPrice(product, variantPrice) {
     offer: bestOffer
   };
 }
-function calculateTotals(cart) {
+async function calculateTotals(cart) {
 
+  // =========================
+  // SUBTOTAL
+  // =========================
   cart.subTotal = cart.items.reduce(
-    (total, item) =>
-      total + item.price * item.quantity,
-    0
+      (total, item) =>
+          total + item.price * item.quantity,
+      0
   );
 
-  cart.tax = Math.round(cart.subTotal * 0.05);
+  // =========================
+  // TAX
+  // =========================
+  cart.tax =
+      Math.round(cart.subTotal * 0.05);
 
+  // =========================
+  // SHIPPING
+  // =========================
   cart.shipping =
-    cart.subTotal > 1000 || cart.subTotal === 0
-      ? 0
-      : 100;
+      cart.subTotal > 1000 ||
+      cart.subTotal === 0
+          ? 0
+          : 100;
 
-  const discount = cart.coupon
-    ? (cart.couponDiscount || 0)
-    : 0;
+  // =========================
+  // COUPON RECALCULATION
+  // =========================
+  let discount = 0;
 
-  cart.grandTotal =
-    cart.subTotal +
-    cart.tax +
-    cart.shipping -
-    discount;
+  if (cart.coupon) {
 
-  if (cart.grandTotal < 0) {
-    cart.grandTotal = 0;
+      // Make sure coupon document is loaded
+      await cart.populate("coupon");
+
+      const coupon = cart.coupon;
+
+      const now = new Date();
+
+      let couponValid = true;
+
+      // Coupon deleted / missing
+      if (!coupon) {
+          couponValid = false;
+      }
+
+      // Coupon inactive
+      if (
+          couponValid &&
+          coupon.status !== "ACTIVE"
+      ) {
+          couponValid = false;
+      }
+
+      // Coupon date expired / not started
+      if (
+          couponValid &&
+          (
+              now < coupon.startDate ||
+              now > coupon.endDate
+          )
+      ) {
+          couponValid = false;
+      }
+
+      // Usage limit reached
+      if (
+          couponValid &&
+          coupon.usageLimit !== null &&
+          coupon.usedCount >= coupon.usageLimit
+      ) {
+          couponValid = false;
+      }
+
+      // Minimum order amount no longer satisfied
+      if (
+          couponValid &&
+          cart.subTotal <
+              coupon.minimumOrderAmount
+      ) {
+          couponValid = false;
+      }
+
+      if (couponValid) {
+
+          // =========================
+          // PERCENTAGE COUPON
+          // =========================
+          if (
+              coupon.discountType ===
+              "PERCENTAGE"
+          ) {
+
+              discount =
+                  (
+                      cart.subTotal *
+                      coupon.discountValue
+                  ) / 100;
+
+              if (
+                  coupon.maximumDiscount !== null &&
+                  discount >
+                      coupon.maximumDiscount
+              ) {
+                  discount =
+                      coupon.maximumDiscount;
+              }
+
+          }
+
+          // =========================
+          // FIXED COUPON
+          // =========================
+          else if (
+              coupon.discountType ===
+              "FIXED"
+          ) {
+
+              discount =
+                  coupon.discountValue;
+          }
+
+          discount =
+              Math.round(discount * 100) / 100;
+
+          /*
+           * Don't allow coupon to make
+           * merchandise total ₹0 or negative.
+           */
+          if (
+              discount >= cart.subTotal
+          ) {
+
+              cart.coupon = null;
+              cart.couponDiscount = 0;
+
+              discount = 0;
+
+          } else {
+
+              // IMPORTANT:
+              // save recalculated discount
+              cart.couponDiscount =
+                  discount;
+          }
+
+      } else {
+
+          // Coupon is no longer valid
+          cart.coupon = null;
+          cart.couponDiscount = 0;
+
+          discount = 0;
+      }
+
+  } else {
+
+      cart.couponDiscount = 0;
   }
+
+  // =========================
+  // GRAND TOTAL
+  // =========================
+  cart.grandTotal =
+      cart.subTotal +
+      cart.tax +
+      cart.shipping -
+      discount;
 }
 
 export const addToCart = async (req, res) => {
@@ -220,7 +361,7 @@ existingItem.price =
       });
     }
 
-    calculateTotals(cart);
+    await calculateTotals(cart);
 
     await cart.save();
 
@@ -288,7 +429,7 @@ export const getCart = async (req, res) => {
       }
     
     }
-    calculateTotals(cart);
+    await calculateTotals(cart);
     await cart.save();
 
     res.status(200).json(cart);
@@ -377,7 +518,7 @@ export const updateCartItem = async (req, res) => {
 
     item.quantity = Number(quantity);
 
-    calculateTotals(cart);
+    await calculateTotals(cart);
 
     await cart.save();
 
@@ -416,7 +557,7 @@ export const removeCartItem = async (req, res) => {
         item._id.toString() !== itemId
     );
 
-    calculateTotals(cart);
+    await calculateTotals(cart);
 
     await cart.save();
 
@@ -452,7 +593,7 @@ export const removeCoupon = async (req, res) => {
       cart.coupon = null;
       cart.couponDiscount = 0;
 
-      calculateTotals(cart);
+      await calculateTotals(cart);
 
       await cart.save();
 

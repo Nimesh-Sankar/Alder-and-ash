@@ -21,32 +21,53 @@
 <%- include("partials/user-navbar") %>
   
   <!-- Hero -->
-  <section class="hero-section">
-    <div class="hero-text">
-      <p class="small-text">Built for your best fit</p>
-      <h1>Elevate your shopping experience today!</h1>
-      <p class="hero-desc">
-        Discover timeless fashion crafted for comfort and confidence.
-      </p>
-      <a href="/api/users/products" class="hero-btn">Explore Now</a>
-    </div>
+ <!-- DYNAMIC BANNER -->
 
-    <div class="hero-image">
+<section
+class="hero-section"
+id="homeBanner"
+>
 
-      <% newProducts.slice(0, 3).forEach(product => { %>
-    
-        <% if (product.images && product.images.length > 0) { %>
-          <img
-            src="<%= product.images[0] %>"
-            alt="<%= product.productName %>"
-          >
-        <% } %>
-    
-      <% }) %>
-    
-    </div>
-  </section>
+<div class="hero-text">
 
+  <p class="small-text">
+    Featured
+  </p>
+
+  <h1 id="bannerTitle">
+    Discover our latest collection
+  </h1>
+
+  <p
+    class="hero-desc"
+    id="bannerSubtitle"
+  >
+    Shop the latest styles at Alder & Ash.
+  </p>
+
+  <a
+  href="/api/users/products"
+  class="hero-btn"
+  id="bannerButton"
+>
+  Explore Now
+</a>
+
+</div>
+
+
+<div class="hero-image">
+
+  <img
+    id="bannerImage"
+    src=""
+    alt="Home Banner"
+    style="display:none;"
+  >
+
+</div>
+
+</section>
   <!-- New Collection -->
   <section class="collection-banner">
     <h2>New Collection</h2>
@@ -126,17 +147,103 @@
       
       <% } %>
 
-      <div class="timer-box">
-        <div><strong>05</strong><span>Days</span></div>
-        <div><strong>15</strong><span>Hours</span></div>
-        <div><strong>40</strong><span>Min</span></div>
-      </div>
+      
 
       <a href="/api/users/products" class="hero-btn">
         Shop Now
       </a>
     </div>
   </section>
+  <script>
+
+    async function loadHomeBanner() {
+    
+      try {
+    
+        const response =
+          await fetch(
+            "/api/users/banner"
+          );
+    
+        const data =
+          await response.json();
+    
+    
+        if (
+          !response.ok ||
+          !data.success ||
+          !data.banner
+        ) {
+          return;
+        }
+    
+    
+        const banner =
+          data.banner;
+    
+    
+        const title =
+          document.getElementById(
+            "bannerTitle"
+          );
+    
+        const subtitle =
+          document.getElementById(
+            "bannerSubtitle"
+          );
+    
+        const button =
+          document.getElementById(
+            "bannerButton"
+          );
+    
+        const image =
+          document.getElementById(
+            "bannerImage"
+          );
+    
+    
+        title.textContent =
+          banner.title ||
+          "Discover our latest collection";
+    
+    
+        subtitle.textContent =
+          banner.subtitle || "";
+    
+    
+        button.textContent =
+          banner.buttonText ||
+          "Explore Now";
+    
+    
+        button.href =
+          banner.buttonLink ||
+          "/api/users/products";
+    
+    
+        if (banner.image) {
+    
+          image.src =
+            banner.image;
+    
+          image.style.display =
+            "block";
+        }
+    
+      } catch (error) {
+    
+        console.log(
+          "HOME BANNER ERROR:",
+          error
+        );
+      }
+    
+    }
+    
+    loadHomeBanner();
+    
+    </script>
   <script src="/js/auth.js"></script>
 
 </body>
