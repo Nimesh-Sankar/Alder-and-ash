@@ -12,8 +12,10 @@ import {
     requireUser,
     requireAdmin
 } from "../middlewares/authMiddleware.js";
-import { applyCoupon } from "../controllers/couponController.js";
-
+import {
+    applyCoupon,
+    getAvailableCoupons
+} from "../controllers/couponController.js";
 const router = express.Router();
 
 router.post("/", requireUser, placeOrder);
@@ -103,13 +105,20 @@ router.post(
 );
 
 router.get(
-    "/:orderId",
+    "/available-coupons",
     requireUser,
-    getOrderDetails
+    getAvailableCoupons
 );
+
 router.post(
     "/apply-coupon",
     requireUser,
     applyCoupon
+);
+
+router.get(
+    "/:orderId",
+    requireUser,
+    getOrderDetails
 );
 export default router;

@@ -338,6 +338,116 @@ export const updateCoupon = async (req, res) => {
         });
     }
 };
+export const getAvailableCoupons = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+
+        const cart = await Cart.findOne({
+            user: userId
+        });
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(200).json({
+                success: true,
+                coupons: []
+            });
+        }
+
+        const currentSubTotal = cart.items.reduce(
+            (total, item) =>
+                total + (item.price * item.quantity),
+            0
+        );
+
+        const now = new Date();
+
+        const coupons = await Coupon.find({
+            status: "ACTIVE",
+
+            startDate: {
+                $lte: now
+            },
+
+            endDate: {
+                $gte: now
+            },
+
+            minimumOrderAmount: {
+                $lte: currentSubTotal
+            },
+
+            $or: [
+                {
+                    usageLimit: null
+                },
+                {
+                    $expr: {
+                        $lt: [
+                            "$usedCount",
+                            "$usageLimit"
+                        ]
+                    }
+                }
+            ]
+        })
+        .sort({
+            createdAt: -1
+        });
+
+        const availableCoupons = coupons.filter(
+            coupon => {
+
+                let discount = 0;
+
+                if (
+                    coupon.discountType ===
+                    "PERCENTAGE"
+                ) {
+                    discount =
+                        (
+                            currentSubTotal *
+                            coupon.discountValue
+                        ) / 100;
+
+                    if (
+                        coupon.maximumDiscount !== null &&
+                        discount > coupon.maximumDiscount
+                    ) {
+                        discount =
+                            coupon.maximumDiscount;
+                    }
+
+                } else if (
+                    coupon.discountType ===
+                    "FIXED"
+                ) {
+                    discount =
+                        coupon.discountValue;
+                }
+
+                return discount < currentSubTotal;
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            coupons: availableCoupons
+        });
+
+    } catch (error) {
+
+        console.log(
+            "GET AVAILABLE COUPONS ERROR:",
+            error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Unable to load available coupons"
+        });
+    }
+};
 export const applyCoupon = async (req, res) => {
     try {
         const userId = req.session.user.id;

@@ -90,10 +90,11 @@ app.use((req, res) => {
 });
 connectDB()
   .then(() => {
-    app.listen(process.env.PORT, () => {
-      console.log(`Server running on http://localhost:${process.env.PORT}`);
-      console.log(`Admin login: http://localhost:${process.env.PORT}/admin/login`);
-    });
+    const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
   })
   .catch((err) => {
     console.error("DB connection failed:", err);

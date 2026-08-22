@@ -3,28 +3,48 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Checkout</title>
 
-    <link rel="stylesheet" href="/css/products.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-    <link rel="stylesheet" href="/css/checkout.css">
+    <link
+        rel="stylesheet"
+        href="/css/products.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/checkout.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    >
 </head>
 
 <body>
 
     <%- include("../partials/products-navbar") %>
+
     <div
-  id="alertBox"
-  class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3"
-  role="alert"
-  style="z-index: 9999;"
-></div>
+        id="alertBox"
+        class="alert d-none position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3"
+        role="alert"
+        style="z-index: 9999;"
+    ></div>
+
 
     <div class="checkout-container">
 
-        <!-- LEFT SIDE -->
         <div class="checkout-left">
 
             <h2>Checkout</h2>
@@ -32,60 +52,92 @@
             <div class="address-section">
 
                 <div class="section-header">
-                    <h3>Shipping Address</h3>
 
-                    <button id="addAddressBtn"
-                    onclick="location.href='/user/profile?tab=addresses'">
+                    <h3>
+                        Shipping Address
+                    </h3>
+
+                    <button
+                        id="addAddressBtn"
+                        onclick="location.href='/user/profile?tab=addresses'"
+                    >
                         + Add Address
                     </button>
-                </div>
-
-                <div id="addressContainer">
 
                 </div>
+
+                <div id="addressContainer"></div>
 
             </div>
 
         </div>
 
-        
+
         <div class="checkout-right">
 
-            <h3>Order Summary</h3>
+            <h3>
+                Order Summary
+            </h3>
 
-            <div id="cartItems">
+            <div id="cartItems"></div>
 
-            </div>
+
             <div class="coupon-section">
 
-                <h4>Have a coupon?</h4>
-            
+                <h4>
+                    Have a coupon?
+                </h4>
+
+                <div class="mb-3">
+
+                    <label for="availableCoupons">
+                        Available Coupons
+                    </label>
+
+                    <select
+                        id="availableCoupons"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Select a coupon
+                        </option>
+
+                    </select>
+
+                </div>
+
+
                 <div class="coupon-input">
-            
+
                     <input
                         type="text"
                         id="couponCode"
                         placeholder="Enter coupon code"
                     >
-            
+
                     <button
                         type="button"
-                        id="applyCouponBtn">
+                        id="applyCouponBtn"
+                    >
                         Apply
                     </button>
-            
+
                     <button
                         type="button"
                         id="removeCouponBtn"
-                        style="display: none;">
+                        style="display: none;"
+                    >
                         Remove
                     </button>
-            
+
                 </div>
-            
+
                 <p id="couponMessage"></p>
-            
+
             </div>
+
+
             <div class="summary">
 
                 <div class="summary-row">
@@ -102,6 +154,7 @@
                     <span>Shipping</span>
                     <span id="shipping">₹0</span>
                 </div>
+
                 <div class="summary-row">
                     <span>Discount</span>
                     <span id="discount">₹0</span>
@@ -114,602 +167,1170 @@
 
             </div>
 
+
             <div class="payment-method">
 
-              <h4>Payment Method</h4>
-          
-              <label>
-                  <input
-                      type="radio"
-                      checked
-                      name="payment"
-                      value="COD"
-                  >
-                  Cash On Delivery
-              </label>
-          
-              <label>
-                  <input
-                      type="radio"
-                      name="payment"
-                      value="RAZORPAY"
-                  >
-                  Razorpay
-              </label>
-              <label>
-                <input
-                    type="radio"
-                    name="payment"
-                    value="WALLET"
-                >
-                Wallet
-            </label>
-          
-          </div>
+                <h4>
+                    Payment Method
+                </h4>
 
-            <button id="placeOrderBtn" type="button">
+                <label>
+                    <input
+                        type="radio"
+                        checked
+                        name="payment"
+                        value="COD"
+                    >
+                    Cash On Delivery
+                </label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="payment"
+                        value="RAZORPAY"
+                    >
+                    Razorpay
+                </label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="payment"
+                        value="WALLET"
+                    >
+                    Wallet
+                </label>
+
+            </div>
+
+
+            <button
+                id="placeOrderBtn"
+                type="button"
+            >
                 Place Order
             </button>
 
         </div>
 
     </div>
+
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    function showAlert(message, type = "success") {
-  const alertBox =
-    document.getElementById("alertBox");
 
-  if (!alertBox) return;
+    <script>
 
-  alertBox.className =
-    `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
+        function showAlert(
+            message,
+            type = "success"
+        ) {
 
-  alertBox.textContent = message;
+            const alertBox =
+                document.getElementById(
+                    "alertBox"
+                );
 
-  alertBox.classList.remove("d-none");
+            if (!alertBox) {
+                return;
+            }
 
-  setTimeout(() => {
-    alertBox.classList.add("d-none");
-  }, 3000);
-}
-  async function loadAddresses(){
-    const user=JSON.parse(localStorage.getItem("user"));
+            alertBox.className =
+                `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 shadow rounded px-4 py-3`;
 
-    const response=await fetch(`/api/addresses/${user.id || user._id}`);
-    
-    
-    const data=await response.json();
-    
-    const container=document.getElementById("addressContainer");
-    
-    container.innerHTML="";
-    
-    data.addresses.forEach((address)=>{
-      container.innerHTML+=`
-        <div class="address-card">
-          <label>
-            <input
-              type="radio"
-              name="address"
-              value="${address._id}"${address.isDefault ? " checked" : ""}
-            >
-            <strong>${address.label}</strong><br>
-            ${address.fullName}<br>
-            ${address.phone}<br>
-            ${address.line1}, ${address.street}, ${address.city}, ${address.state} - ${address.pincode}<br>
-            </label>
-        </div>
-      `;
-    }); 
+            alertBox.textContent =
+                message;
 
-  }
-  async function loadCart() {
+            alertBox.classList.remove(
+                "d-none"
+            );
 
-const user = JSON.parse(localStorage.getItem("user"));
+            setTimeout(() => {
 
-const response = await fetch("/api/cart", {
-    headers: {
-        userid: user.id || user._id
-    }
-});
+                alertBox.classList.add(
+                    "d-none"
+                );
 
-const cart = await response.json();
-
-const container = document.getElementById("cartItems");
-
-container.innerHTML = "";
-
-cart.items.forEach((item) => {
-
-    container.innerHTML += `
-
-    <div class="cart-item">
-
-        <img src="${item.product.images[0]}">
-
-        <div class="cart-info">
-
-            <h4>${item.product.productName}</h4>
-
-            <p>Size: ${item.size}</p>
-
-            <p>Color: ${item.color}</p>
-
-            <p>Qty: ${item.quantity}</p>
-
-            <strong>₹${item.price * item.quantity}</strong>
-
-        </div>
-
-    </div>
-
-    `;
-
-});
-
-document.getElementById("subtotal").innerText =
-    `₹${cart.subTotal}`;
-
-document.getElementById("tax").innerText =
-    `₹${cart.tax}`;
-
-document.getElementById("shipping").innerText =
-    `₹${cart.shipping}`;
-
-document.getElementById("discount").innerText =
-    `₹${cart.couponDiscount || 0}`;
-
-document.getElementById("grandTotal").innerText =
-    `₹${cart.grandTotal}`;
-}
-
-  loadAddresses();
-  loadCart();
-  document.getElementById("applyCouponBtn").addEventListener("click", async () => {
-
-const couponInput = document.getElementById("couponCode");
-const message = document.getElementById("couponMessage");
-const applyButton = document.getElementById("applyCouponBtn");
-
-const code = couponInput.value.trim();
-
-if (!code) {
-    message.textContent = "Please enter a coupon code.";
-    return;
-}
-
-applyButton.disabled = true;
-applyButton.textContent = "Applying...";
-
-try {
-
-    const response = await fetch(
-        "/api/orders/apply-coupon",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                code: code
-            })
+            }, 3000);
         }
-    );
 
-    const result = await response.json();
 
-    if (!response.ok || !result.success) {
-        throw new Error(
-            result.message || "Unable to apply coupon"
-        );
-    }
+        async function loadAddresses() {
 
-    message.textContent =
-        "Coupon applied successfully!";
+            const user =
+                JSON.parse(
+                    localStorage.getItem(
+                        "user"
+                    )
+                );
 
-    document.getElementById("discount").innerText =
-        `₹${result.data.discount}`;
+            const response =
+                await fetch(
+                    `/api/addresses/${user.id || user._id}`
+                );
 
-    document.getElementById("grandTotal").innerText =
-        `₹${result.data.grandTotal}`;
+            const data =
+                await response.json();
 
-        couponInput.disabled = true;
-applyButton.style.display = "none";
+            const container =
+                document.getElementById(
+                    "addressContainer"
+                );
 
-document.getElementById("removeCouponBtn")
-    .style.display = "inline-block";
+            container.innerHTML =
+                "";
 
-} catch (error) {
+            data.addresses.forEach(
+                address => {
 
-    message.textContent = error.message;
+                    container.innerHTML += `
+                        <div class="address-card">
 
-    applyButton.disabled = false;
-    applyButton.textContent = "Apply";
-}
+                            <label>
 
-});
-document.getElementById("removeCouponBtn")
-    .addEventListener("click", async () => {
+                                <input
+                                    type="radio"
+                                    name="address"
+                                    value="${address._id}"
+                                    ${address.isDefault ? "checked" : ""}
+                                >
 
-        const couponInput =
-            document.getElementById("couponCode");
+                                <strong>
+                                    ${address.label}
+                                </strong>
 
-        const message =
-            document.getElementById("couponMessage");
+                                <br>
 
-        const applyButton =
-            document.getElementById("applyCouponBtn");
+                                ${address.fullName}
 
-        const removeButton =
-            document.getElementById("removeCouponBtn");
+                                <br>
 
-        const user =
-            JSON.parse(localStorage.getItem("user"));
+                                ${address.phone}
 
-        try {
+                                <br>
 
-            removeButton.disabled = true;
-            removeButton.textContent = "Removing...";
+                                ${address.line1},
+                                ${address.street},
+                                ${address.city},
+                                ${address.state}
+                                -
+                                ${address.pincode}
 
-            const response = await fetch(
-                "/api/cart/remove-coupon",
-                {
-                    method: "DELETE",
-                    headers: {
-                        userid: user.id || user._id
+                            </label>
+
+                        </div>
+                    `;
+                }
+            );
+        }
+
+
+        async function loadCart() {
+
+            const user =
+                JSON.parse(
+                    localStorage.getItem(
+                        "user"
+                    )
+                );
+
+            const response =
+                await fetch(
+                    "/api/cart",
+                    {
+                        headers: {
+                            userid:
+                                user.id ||
+                                user._id
+                        }
+                    }
+                );
+
+            const cart =
+                await response.json();
+
+            const container =
+                document.getElementById(
+                    "cartItems"
+                );
+
+            container.innerHTML =
+                "";
+
+            cart.items.forEach(
+                item => {
+
+                    container.innerHTML += `
+                        <div class="cart-item">
+
+                            <img
+                                src="${item.product.images[0]}"
+                            >
+
+                            <div class="cart-info">
+
+                                <h4>
+                                    ${item.product.productName}
+                                </h4>
+
+                                <p>
+                                    Size:
+                                    ${item.size}
+                                </p>
+
+                                <p>
+                                    Color:
+                                    ${item.color}
+                                </p>
+
+                                <p>
+                                    Qty:
+                                    ${item.quantity}
+                                </p>
+
+                                <strong>
+                                    ₹${item.price * item.quantity}
+                                </strong>
+
+                            </div>
+
+                        </div>
+                    `;
+                }
+            );
+
+            document.getElementById(
+                "subtotal"
+            ).innerText =
+                `₹${cart.subTotal}`;
+
+            document.getElementById(
+                "tax"
+            ).innerText =
+                `₹${cart.tax}`;
+
+            document.getElementById(
+                "shipping"
+            ).innerText =
+                `₹${cart.shipping}`;
+
+            document.getElementById(
+                "discount"
+            ).innerText =
+                `₹${cart.couponDiscount || 0}`;
+
+            document.getElementById(
+                "grandTotal"
+            ).innerText =
+                `₹${cart.grandTotal}`;
+        }
+
+
+        async function loadAvailableCoupons() {
+
+            const select =
+                document.getElementById(
+                    "availableCoupons"
+                );
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/orders/available-coupons"
+                    );
+
+                const result =
+                    await response.json();
+
+                select.innerHTML = `
+                    <option value="">
+                        Select a coupon
+                    </option>
+                `;
+
+                if (
+                    !response.ok ||
+                    !result.success
+                ) {
+
+                    return;
+                }
+
+                if (
+                    !result.coupons ||
+                    result.coupons.length === 0
+                ) {
+
+                    select.innerHTML += `
+                        <option
+                            value=""
+                            disabled
+                        >
+                            No coupons available
+                        </option>
+                    `;
+
+                    return;
+                }
+
+                result.coupons.forEach(
+                    coupon => {
+
+                        const discountText =
+                            coupon.discountType ===
+                            "PERCENTAGE"
+                                ? `${coupon.discountValue}% OFF`
+                                : `₹${coupon.discountValue} OFF`;
+
+                        select.innerHTML += `
+                            <option value="${coupon.code}">
+                                ${coupon.code} - ${discountText}
+                            </option>
+                        `;
+
+                    }
+                );
+
+            } catch (error) {
+
+                console.log(
+                    "LOAD AVAILABLE COUPONS ERROR:",
+                    error
+                );
+            }
+        }
+
+
+        document
+            .getElementById(
+                "availableCoupons"
+            )
+            .addEventListener(
+                "change",
+                function () {
+
+                    document.getElementById(
+                        "couponCode"
+                    ).value =
+                        this.value;
+
+                }
+            );
+
+
+        loadAddresses();
+        loadCart();
+        loadAvailableCoupons();
+
+
+        document
+            .getElementById(
+                "applyCouponBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    const couponInput =
+                        document.getElementById(
+                            "couponCode"
+                        );
+
+                    const message =
+                        document.getElementById(
+                            "couponMessage"
+                        );
+
+                    const applyButton =
+                        document.getElementById(
+                            "applyCouponBtn"
+                        );
+
+                    const availableCoupons =
+                        document.getElementById(
+                            "availableCoupons"
+                        );
+
+                    const code =
+                        couponInput.value.trim();
+
+                    if (!code) {
+
+                        message.textContent =
+                            "Please enter or select a coupon code.";
+
+                        return;
+                    }
+
+
+                    applyButton.disabled =
+                        true;
+
+                    applyButton.textContent =
+                        "Applying...";
+
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/api/orders/apply-coupon",
+                                {
+                                    method:
+                                        "POST",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body:
+                                        JSON.stringify({
+                                            code
+                                        })
+                                }
+                            );
+
+                        const result =
+                            await response.json();
+
+
+                        if (
+                            !response.ok ||
+                            !result.success
+                        ) {
+
+                            throw new Error(
+                                result.message ||
+                                "Unable to apply coupon"
+                            );
+                        }
+
+
+                        message.textContent =
+                            "Coupon applied successfully!";
+
+
+                        document.getElementById(
+                            "discount"
+                        ).innerText =
+                            `₹${result.data.discount}`;
+
+
+                        document.getElementById(
+                            "grandTotal"
+                        ).innerText =
+                            `₹${result.data.grandTotal}`;
+
+
+                        couponInput.disabled =
+                            true;
+
+
+                        availableCoupons.disabled =
+                            true;
+
+
+                        applyButton.style.display =
+                            "none";
+
+
+                        document.getElementById(
+                            "removeCouponBtn"
+                        ).style.display =
+                            "inline-block";
+
+
+                    } catch (error) {
+
+                        message.textContent =
+                            error.message;
+
+
+                        applyButton.disabled =
+                            false;
+
+
+                        applyButton.textContent =
+                            "Apply";
                     }
                 }
             );
 
-            const result = await response.json();
 
-            if (!response.ok || !result.success) {
-                throw new Error(
-                    result.message ||
-                    "Unable to remove coupon"
-                );
-            }
+        document
+            .getElementById(
+                "removeCouponBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
 
-            couponInput.value = "";
-            couponInput.disabled = false;
+                    const couponInput =
+                        document.getElementById(
+                            "couponCode"
+                        );
 
-            applyButton.style.display = "inline-block";
-            applyButton.disabled = false;
-            applyButton.textContent = "Apply";
+                    const availableCoupons =
+                        document.getElementById(
+                            "availableCoupons"
+                        );
 
-            removeButton.style.display = "none";
-            removeButton.disabled = false;
-            removeButton.textContent = "Remove";
+                    const message =
+                        document.getElementById(
+                            "couponMessage"
+                        );
 
-            document.getElementById("discount")
-                .innerText = "₹0";
+                    const applyButton =
+                        document.getElementById(
+                            "applyCouponBtn"
+                        );
 
-            document.getElementById("grandTotal")
-                .innerText =
-                `₹${result.cart.grandTotal}`;
+                    const removeButton =
+                        document.getElementById(
+                            "removeCouponBtn"
+                        );
 
-            message.textContent =
-                "Coupon removed successfully.";
+                    const user =
+                        JSON.parse(
+                            localStorage.getItem(
+                                "user"
+                            )
+                        );
 
-        } catch (error) {
 
-            console.error(
-                "REMOVE COUPON ERROR:",
-                error
+                    try {
+
+                        removeButton.disabled =
+                            true;
+
+                        removeButton.textContent =
+                            "Removing...";
+
+
+                        const response =
+                            await fetch(
+                                "/api/cart/remove-coupon",
+                                {
+                                    method:
+                                        "DELETE",
+
+                                    headers: {
+                                        userid:
+                                            user.id ||
+                                            user._id
+                                    }
+                                }
+                            );
+
+
+                        const result =
+                            await response.json();
+
+
+                        if (
+                            !response.ok ||
+                            !result.success
+                        ) {
+
+                            throw new Error(
+                                result.message ||
+                                "Unable to remove coupon"
+                            );
+                        }
+
+
+                        couponInput.value =
+                            "";
+
+                        couponInput.disabled =
+                            false;
+
+
+                        availableCoupons.value =
+                            "";
+
+                        availableCoupons.disabled =
+                            false;
+
+
+                        applyButton.style.display =
+                            "inline-block";
+
+                        applyButton.disabled =
+                            false;
+
+                        applyButton.textContent =
+                            "Apply";
+
+
+                        removeButton.style.display =
+                            "none";
+
+                        removeButton.disabled =
+                            false;
+
+                        removeButton.textContent =
+                            "Remove";
+
+
+                        document.getElementById(
+                            "discount"
+                        ).innerText =
+                            "₹0";
+
+
+                        document.getElementById(
+                            "grandTotal"
+                        ).innerText =
+                            `₹${result.data.grandTotal}`;
+
+
+                        message.textContent =
+                            "Coupon removed successfully.";
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "REMOVE COUPON ERROR:",
+                            error
+                        );
+
+
+                        message.textContent =
+                            error.message;
+
+
+                        removeButton.disabled =
+                            false;
+
+
+                        removeButton.textContent =
+                            "Remove";
+                    }
+                }
             );
 
-            message.textContent =
-                error.message;
 
-            removeButton.disabled = false;
-            removeButton.textContent = "Remove";
-        }
+        document
+            .getElementById(
+                "placeOrderBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
 
-    });
-  document.getElementById("placeOrderBtn").addEventListener("click", async () => {
-    const selectedAddress = document.querySelector('input[name="address"]:checked');
-    const selectedPayment = document.querySelector('input[name="payment"]:checked');
-    const button = document.getElementById("placeOrderBtn");
+                    const selectedAddress =
+                        document.querySelector(
+                            'input[name="address"]:checked'
+                        );
 
-    if (!selectedAddress) {
-        showAlert(
-  "Please select a shipping address.",
-  "danger"
-);
-      return;
-    }
+                    const selectedPayment =
+                        document.querySelector(
+                            'input[name="payment"]:checked'
+                        );
 
-    button.disabled = true;
-    button.textContent = "Placing Order...";
+                    const button =
+                        document.getElementById(
+                            "placeOrderBtn"
+                        );
 
-    try {
 
-const paymentMethod =
-    selectedPayment
-        ? selectedPayment.value
-        : "COD";
+                    if (!selectedAddress) {
 
-if (paymentMethod === "COD") {
+                        showAlert(
+                            "Please select a shipping address.",
+                            "danger"
+                        );
 
-    const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            addressId: selectedAddress.value,
-            paymentMethod: "COD"
-        })
-    });
+                        return;
+                    }
 
-    const result = await response.json();
 
-    if (!response.ok || !result.success) {
-        throw new Error(
-            result.message ||
-            "Unable to place your order."
-        );
-    }
+                    button.disabled =
+                        true;
 
-    window.location.href =
-        `/api/orders/success/${result.data.orderId}`;
+                    button.textContent =
+                        "Placing Order...";
 
-    return;
-}
-if (paymentMethod === "WALLET") {
 
-const response = await fetch("/api/orders", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        addressId: selectedAddress.value,
-        paymentMethod: "WALLET"
-    })
-});
+                    try {
 
-const result = await response.json();
+                        const paymentMethod =
+                            selectedPayment
+                                ? selectedPayment.value
+                                : "COD";
 
-if (!response.ok || !result.success) {
-    throw new Error(
-        result.message ||
-        "Unable to place wallet order."
-    );
-}
 
-window.location.href =
-    `/api/orders/success/${result.data.orderId}`;
+                        if (
+                            paymentMethod ===
+                            "COD"
+                        ) {
 
-return;
-}
-if (paymentMethod === "RAZORPAY") {
+                            const response =
+                                await fetch(
+                                    "/api/orders",
+                                    {
+                                        method:
+                                            "POST",
 
-const response = await fetch(
-    "/api/orders/create-payment",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            addressId: selectedAddress.value
-        })
-    }
-);
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
 
-const result = await response.json();
+                                        body:
+                                            JSON.stringify({
+                                                addressId:
+                                                    selectedAddress.value,
 
-if (!response.ok || !result.success) {
+                                                paymentMethod:
+                                                    "COD"
+                                            })
+                                    }
+                                );
 
-    throw new Error(
-        result.message ||
-        "Unable to create payment"
-    );
 
-}
-let failedOrderId = null;
-let failedOrderPromise = null;
+                            const result =
+                                await response.json();
 
-async function saveFailedOrder(errorData = null) {
 
-    if (failedOrderId) {
-        return failedOrderId;
-    }
+                            if (
+                                !response.ok ||
+                                !result.success
+                            ) {
 
-    if (failedOrderPromise) {
-        return failedOrderPromise;
-    }
+                                throw new Error(
+                                    result.message ||
+                                    "Unable to place your order."
+                                );
+                            }
 
-    failedOrderPromise = (async () => {
 
-        const failedResponse = await fetch(
-            "/api/orders/payment-failed",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    addressId: selectedAddress.value,
-                    razorpayOrderId:
-                        result.data.razorpayOrderId,
-                    error: errorData
-                })
-            }
-        );
+                            window.location.href =
+                                `/api/orders/success/${result.data.orderId}`;
 
-        const failedResult =
-            await failedResponse.json();
+                            return;
+                        }
 
-        if (!failedResponse.ok || !failedResult.success) {
-            throw new Error(
-                failedResult.message ||
-                "Failed order could not be saved"
+
+                        if (
+                            paymentMethod ===
+                            "WALLET"
+                        ) {
+
+                            const response =
+                                await fetch(
+                                    "/api/orders",
+                                    {
+                                        method:
+                                            "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
+
+                                        body:
+                                            JSON.stringify({
+                                                addressId:
+                                                    selectedAddress.value,
+
+                                                paymentMethod:
+                                                    "WALLET"
+                                            })
+                                    }
+                                );
+
+
+                            const result =
+                                await response.json();
+
+
+                            if (
+                                !response.ok ||
+                                !result.success
+                            ) {
+
+                                throw new Error(
+                                    result.message ||
+                                    "Unable to place wallet order."
+                                );
+                            }
+
+
+                            window.location.href =
+                                `/api/orders/success/${result.data.orderId}`;
+
+                            return;
+                        }
+
+
+                        if (
+                            paymentMethod ===
+                            "RAZORPAY"
+                        ) {
+
+                            const response =
+                                await fetch(
+                                    "/api/orders/create-payment",
+                                    {
+                                        method:
+                                            "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
+
+                                        body:
+                                            JSON.stringify({
+                                                addressId:
+                                                    selectedAddress.value
+                                            })
+                                    }
+                                );
+
+
+                            const result =
+                                await response.json();
+
+
+                            if (
+                                !response.ok ||
+                                !result.success
+                            ) {
+
+                                throw new Error(
+                                    result.message ||
+                                    "Unable to create payment"
+                                );
+                            }
+
+
+                            let failedOrderId =
+                                null;
+
+                            let failedOrderPromise =
+                                null;
+
+
+                            async function saveFailedOrder(
+                                errorData = null
+                            ) {
+
+                                if (
+                                    failedOrderId
+                                ) {
+
+                                    return failedOrderId;
+                                }
+
+
+                                if (
+                                    failedOrderPromise
+                                ) {
+
+                                    return failedOrderPromise;
+                                }
+
+
+                                failedOrderPromise =
+                                    (async () => {
+
+                                        const failedResponse =
+                                            await fetch(
+                                                "/api/orders/payment-failed",
+                                                {
+                                                    method:
+                                                        "POST",
+
+                                                    headers: {
+                                                        "Content-Type":
+                                                            "application/json"
+                                                    },
+
+                                                    body:
+                                                        JSON.stringify({
+                                                            addressId:
+                                                                selectedAddress.value,
+
+                                                            razorpayOrderId:
+                                                                result.data.razorpayOrderId,
+
+                                                            error:
+                                                                errorData
+                                                        })
+                                                }
+                                            );
+
+
+                                        const failedResult =
+                                            await failedResponse.json();
+
+
+                                        if (
+                                            !failedResponse.ok ||
+                                            !failedResult.success
+                                        ) {
+
+                                            throw new Error(
+                                                failedResult.message ||
+                                                "Failed order could not be saved"
+                                            );
+                                        }
+
+
+                                        failedOrderId =
+                                            failedResult.data.orderId;
+
+
+                                        return failedOrderId;
+
+                                    })();
+
+
+                                return failedOrderPromise;
+                            }
+
+
+                            const options = {
+
+                                key:
+                                    "rzp_test_TMkZpAZPvOVGIC",
+
+                                amount:
+                                    result.data.amount,
+
+                                currency:
+                                    result.data.currency,
+
+                                name:
+                                    "Alder & Ash",
+
+                                description:
+                                    "Order Payment",
+
+                                order_id:
+                                    result.data.razorpayOrderId,
+
+                                retry: {
+                                    enabled:
+                                        false
+                                },
+
+
+                                handler:
+                                    async function (
+                                        response
+                                    ) {
+
+                                        try {
+
+                                            console.log(
+                                                "RAZORPAY RESPONSE:",
+                                                response
+                                            );
+
+
+                                            const verifyResponse =
+                                                await fetch(
+                                                    "/api/orders/verify-payment",
+                                                    {
+                                                        method:
+                                                            "POST",
+
+                                                        headers: {
+                                                            "Content-Type":
+                                                                "application/json"
+                                                        },
+
+                                                        body:
+                                                            JSON.stringify({
+                                                                razorpay_order_id:
+                                                                    response.razorpay_order_id,
+
+                                                                razorpay_payment_id:
+                                                                    response.razorpay_payment_id,
+
+                                                                razorpay_signature:
+                                                                    response.razorpay_signature,
+
+                                                                addressId:
+                                                                    selectedAddress.value
+                                                            })
+                                                    }
+                                                );
+
+
+                                            const verifyResult =
+                                                await verifyResponse.json();
+
+
+                                            if (
+                                                !verifyResponse.ok ||
+                                                !verifyResult.success
+                                            ) {
+
+                                                throw new Error(
+                                                    verifyResult.message ||
+                                                    "Payment verification failed"
+                                                );
+                                            }
+
+
+                                            window.location.href =
+                                                `/api/orders/success/${verifyResult.data.orderId}`;
+
+
+                                        } catch (error) {
+
+                                            console.error(
+                                                "PAYMENT ERROR:",
+                                                error
+                                            );
+
+
+                                            showAlert(
+                                                error.message ||
+                                                "Payment verification failed",
+                                                "danger"
+                                            );
+
+
+                                            button.disabled =
+                                                false;
+
+
+                                            button.textContent =
+                                                "Place Order";
+                                        }
+                                    },
+
+
+                                modal: {
+
+                                    ondismiss:
+                                        async function () {
+
+                                            try {
+
+                                                const orderId =
+                                                    await saveFailedOrder();
+
+
+                                                window.location.href =
+                                                    `/api/orders/order-failed/${orderId}`;
+
+
+                                            } catch (error) {
+
+                                                console.error(
+                                                    "FAILED ORDER REDIRECT ERROR:",
+                                                    error
+                                                );
+
+
+                                                button.disabled =
+                                                    false;
+
+
+                                                button.textContent =
+                                                    "Place Order";
+                                            }
+                                        }
+                                },
+
+
+                                theme: {
+                                    color:
+                                        "#000000"
+                                }
+                            };
+
+
+                            const razorpay =
+                                new Razorpay(
+                                    options
+                                );
+
+
+                            razorpay.on(
+                                "payment.failed",
+                                async function (
+                                    response
+                                ) {
+
+                                    console.log(
+                                        "PAYMENT.FAILED FIRED",
+                                        response
+                                    );
+
+
+                                    try {
+
+                                        const orderId =
+                                            await saveFailedOrder(
+                                                response.error
+                                            );
+
+
+                                        window.location.href =
+                                            `/api/orders/order-failed/${orderId}`;
+
+
+                                    } catch (error) {
+
+                                        console.error(
+                                            "FAILED PAYMENT RECORD ERROR:",
+                                            error
+                                        );
+
+
+                                        button.disabled =
+                                            false;
+
+
+                                        button.textContent =
+                                            "Place Order";
+                                    }
+                                }
+                            );
+
+
+                            razorpay.open();
+                        }
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "PLACE ORDER ERROR:",
+                            error
+                        );
+
+
+                        showAlert(
+                            error.message ||
+                            "Unable to place your order",
+                            "danger"
+                        );
+
+
+                        button.disabled =
+                            false;
+
+
+                        button.textContent =
+                            "Place Order";
+                    }
+                }
             );
-        }
 
-        failedOrderId =
-            failedResult.data.orderId;
+    </script>
 
-        return failedOrderId;
-
-    })();
-
-    return failedOrderPromise;
-}
-const options = {
-
-key: "rzp_test_TMkZpAZPvOVGIC",
-
-amount: result.data.amount,
-
-currency: result.data.currency,
-
-name: "Alder & Ash",
-
-description: "Order Payment",
-
-order_id: result.data.razorpayOrderId,
-
-retry: {
-    enabled: false
-},
-
-handler: async function (response) {
-
-
-try {
-
-    console.log("RAZORPAY RESPONSE:", response);
-
-    const verifyResponse = await fetch(
-        "/api/orders/verify-payment",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                razorpay_order_id:
-                    response.razorpay_order_id,
-
-                razorpay_payment_id:
-                    response.razorpay_payment_id,
-
-                razorpay_signature:
-                    response.razorpay_signature,
-
-                addressId:
-                    selectedAddress.value
-            })
-        }
-    );
-
-    const result = await verifyResponse.json();
-
-    console.log("VERIFY RESPONSE:", result);
-
-    if (!verifyResponse.ok || !result.success) {
-        throw new Error(
-            result.message ||
-            "Payment verification failed"
-        );
-    }
-
-    console.log("ORDER ID:", result.data.orderId);
-
-    window.location.href =
-        `/api/orders/success/${result.data.orderId}`;
-
-} catch (error) {
-
-    console.error("PAYMENT ERROR:", error);
-
-    alert(error.message);showAlert(
-  error.message || "Payment verification failed",
-  "danger"
-);
-
-    button.disabled = false;
-    button.textContent = "Place Order";
-}
-},
-modal: {
-    ondismiss: async function () {
-
-        try {
-
-            const orderId =
-                await saveFailedOrder();
-
-            window.location.href =
-                `/api/orders/order-failed/${orderId}`;
-
-        } catch (error) {
-
-            console.error(
-                "FAILED ORDER REDIRECT ERROR:",
-                error
-            );
-
-            button.disabled = false;
-            button.textContent = "Place Order";
-        }
-    }
-},
-    theme: {
-        color: "#000000"
-    }
-
-};
-
-const razorpay =
-new Razorpay(options);
-
-razorpay.on("payment.failed", async function (response) {
-
-console.log("PAYMENT.FAILED FIRED", response);
-
-try {
-
-    const orderId =
-        await saveFailedOrder(response.error);
-
-    console.log("FAILED ORDER SAVED:", orderId);
-
-    window.location.href =
-        `/api/orders/order-failed/${orderId}`;
-
-    console.log("REDIRECT LINE REACHED");
-
-} catch (error) {
-
-    console.error(
-        "FAILED PAYMENT RECORD ERROR:",
-        error
-    );
-
-    button.disabled = false;
-    button.textContent = "Place Order";
-}
-});
-
-razorpay.open();
-
-}
-
-} catch (error) {
-
-alert(error.message);
-
-button.disabled = false;
-button.textContent = "Place Order";
-
-}
-  });
-</script>
 </body>
 
 </html>

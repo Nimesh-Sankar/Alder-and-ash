@@ -655,3 +655,37 @@
    
        box-sizing: border-box;
    }
+   #alertBox {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+  
+    min-width: 280px;
+    max-width: 500px;
+  
+    padding: 14px 22px;
+    border-radius: 10px;
+  
+    font-size: 14px;
+    text-align: center;
+  
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  #alertBox.alert-success {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+  }
+  
+  #alertBox.alert-danger {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+  }
+  
+  #alertBox.d-none {
+    display: none;
+  }
