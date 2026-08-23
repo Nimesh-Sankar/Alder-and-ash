@@ -5,9 +5,9 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-  "start": "node app.js",
-  "dev": "nodemon app.js"
-},
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -19,6 +19,7 @@
     "express-session": "^1.19.0",
     "mongoose": "^9.0.0",
     "multer": "^2.1.1",
+    "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.19.1",
