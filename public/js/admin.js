@@ -2001,7 +2001,6 @@ if (editProductForm) {
 
 }
 function openConfirm(message, onConfirm) {
-
   const modal =
     document.getElementById("confirmModal");
 
@@ -2017,7 +2016,6 @@ function openConfirm(message, onConfirm) {
   if (!modal || !text || !cancelBtn || !confirmBtn) {
     return;
   }
-}
 
   text.textContent = message;
 
@@ -2025,18 +2023,18 @@ function openConfirm(message, onConfirm) {
 
   cancelBtn.onclick = function () {
     modal.style.display = "none";
-  // };
+  };
 
   confirmBtn.onclick = function () {
     modal.style.display = "none";
     onConfirm();
   };
-  modal.onclick=function(e){
-    if(e.target===modal){
-      modal.style.display="none";
-    }
-  }
 
+  modal.onclick = function (e) {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
 }
 
 function deleteProduct(id) {
