@@ -22,7 +22,10 @@ export const signup = async (req, res) => {
     });
 
     await user.save();
-
+    req.session.user = {
+      id: user._id,
+      email: user.email,
+    };
   
     res.status(201).json({
       message: "User registered successfully",
