@@ -1152,32 +1152,37 @@ data.products.forEach((product, index) => {
                 ₹${product.variants?.[0]?.price || 0}
             </td>
 
-            <td>
+<td>
+    <div class="action-buttons">
 
-                <button
-                    onclick="window.location.href='/admin/edit-product?id=${product._id}'"
-                >
-                    Edit
-                </button>
+        <button
+            class="action-btn edit-btn"
+            onclick="window.location.href='/admin/edit-product?id=${product._id}'"
+        >
+            Edit
+        </button>
 
-                <button
-                    onclick="
-                        toggleProductStatus(
-                            '${product._id}',
-                            ${product.isListed}
-                        )
-                    "
-                >
-                    ${product.isListed ? "Unlist" : "List"}
-                </button>
+        <button
+            class="action-btn ${product.isListed ? "unlist-btn" : "list-btn"}"
+            onclick="
+                toggleProductStatus(
+                    '${product._id}',
+                    ${product.isListed}
+                )
+            "
+        >
+            ${product.isListed ? "Unlist" : "List"}
+        </button>
 
-                <button
-                    onclick="deleteProduct('${product._id}')"
-                >
-                    Delete
-                </button>
+        <button
+            class="action-btn delete-btn"
+            onclick="deleteProduct('${product._id}')"
+        >
+            Delete
+        </button>
 
-            </td>
+    </div>
+</td>
 
         </tr>
     `;

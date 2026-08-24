@@ -337,7 +337,7 @@ body {
   margin: 50px auto;
   padding: 0 20px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
 }
 
@@ -2033,7 +2033,7 @@ body{
 }
 #productsContainer {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   padding: 20px;
 }
@@ -2136,7 +2136,7 @@ body{
 
 .products-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
 }
 
@@ -2821,4 +2821,45 @@ CART PAGE
   #homeBanner .hero-image {
     aspect-ratio: 16 / 9;
   }
+}
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.edit-btn {
+  background: #111;
+  color: white;
+}
+
+.list-btn {
+  background: #e8f5e9;
+  color: #1b7a35;
+}
+
+.unlist-btn {
+  background: #fff3cd;
+  color: #8a6500;
+}
+
+.delete-btn {
+  background: #fde8e8;
+  color: #c62828;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
 }

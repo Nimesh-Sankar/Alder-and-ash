@@ -368,7 +368,7 @@ try {
 
   const response =
     await fetch(
-`/admin/products?search=${currentSearch}&category=${currentCategory}&sort=${currentSort}&minPrice=${currentMinPrice}&maxPrice=${currentMaxPrice}&page=${currentPage}&brand=${currentBrand}`
+`/admin/products?search=${currentSearch}&category=${currentCategory}&sort=${currentSort}&minPrice=${currentMinPrice}&maxPrice=${currentMaxPrice}&page=${currentPage}&brand=${currentBrand}&onlyListed=true`
     );
 
   const data =
