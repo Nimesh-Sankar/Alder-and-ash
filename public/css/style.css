@@ -2863,3 +2863,87 @@ CART PAGE
   transform: translateY(-1px);
   opacity: 0.85;
 }
+.user-confirm-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10000;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.user-confirm-modal.show {
+  display: flex;
+}
+
+.user-confirm-box {
+  width: 400px;
+  max-width: 90%;
+  background: white;
+  border-radius: 14px;
+  padding: 30px;
+  text-align: center;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #f3f3f3;
+
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.user-confirm-box h3 {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.user-confirm-box p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.user-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-cancel-btn,
+.confirm-action-btn {
+  padding: 10px 24px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.confirm-cancel-btn {
+  background: #eeeeee;
+  color: #222;
+}
+
+.confirm-action-btn {
+  background: #111;
+  color: white;
+}
+
+.confirm-cancel-btn:hover {
+  background: #dddddd;
+}
+
+.confirm-action-btn:hover {
+  background: #333;
+}

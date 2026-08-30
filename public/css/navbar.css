@@ -113,3 +113,28 @@
       padding-bottom: 4px;
   }
 }
+@media (max-width: 480px) {
+
+  .products-navbar {
+    width: calc(100% - 24px);
+    margin: 10px auto;
+    padding: 12px 0;
+  }
+
+  .products-logo {
+    font-size: 20px;
+  }
+
+  .products-nav-icons {
+    gap: 10px;
+  }
+
+  .products-nav-links {
+    gap: 18px;
+  }
+
+  .products-nav-links a {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+}

@@ -1,6 +1,7 @@
 import Order from "../models/orderModel.js";
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 const SALES_STATUSES = [
     "DELIVERED",
@@ -201,7 +202,7 @@ export const getSalesReport = async (req, res) => {
         });
 
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
 
             success: true,
 
@@ -242,7 +243,7 @@ export const getSalesReport = async (req, res) => {
             error
         );
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message:
                 "Unable to generate sales report"
@@ -510,7 +511,7 @@ async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Unable to generate PDF report"
         );
 
@@ -792,7 +793,7 @@ async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Unable to generate Excel report"
         );
 

@@ -1,54 +1,43 @@
 import express from "express";
+import { requireUser } from "../middlewares/authMiddleware.js";
 
-import {addToCart,getCart,updateCartItem,removeCartItem,removeCoupon} from "../controllers/cartController.js";
+import {
+  addToCart,
+  getCart,
+  updateCartItem,
+  removeCartItem,
+  removeCoupon
+} from "../controllers/cartController.js";
 
 const router = express.Router();
-const setUserFromHeader = (req, res, next) => {
-
-  const userId =
-    req.headers.userid;
-
-  if (!userId) {
-
-    return res.status(401).json({
-      message: "User not logged in"
-    });
-
-  }
-
-  req.user = {
-    id: userId
-  };
-
-  next();
-
-};
 
 router.post(
   "/add",
-  setUserFromHeader,
+  requireUser,
   addToCart
 );
 
 router.get(
   "/",
- setUserFromHeader,
+  requireUser,
   getCart
 );
 
 router.patch(
-  "/items/:itemId",setUserFromHeader,
+  "/items/:itemId",
+  requireUser,
   updateCartItem
 );
 
 router.delete(
   "/items/:itemId",
-  setUserFromHeader,
+  requireUser,
   removeCartItem
 );
+
 router.delete(
   "/remove-coupon",
-  setUserFromHeader,
+  requireUser,
   removeCoupon
 );
 

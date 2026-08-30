@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import Product from "../models/productModel.js";
 import Brand from "../models/brandModel.js";
 import Offer from "../models/offerModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 
 export const getUserProfile = async (req, res) => {
@@ -12,7 +13,7 @@ export const getUserProfile = async (req, res) => {
     const user = await User.findById(userId).select("-password");
     
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
     
     res.json({
@@ -30,7 +31,7 @@ export const getUserProfile = async (req, res) => {
     });
   } catch (error) {
     console.log("GET PROFILE ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -56,7 +57,7 @@ export const updateProfile = async (req, res) => {
     ).select("-password");
     
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
     
     res.json({
@@ -65,11 +66,11 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.log("UPDATE PROFILE ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
-// Change password
+
 export const changePassword = async (req, res) => {
   try {
     const { userId, currentPassword, newPassword } = req.body;
@@ -77,17 +78,17 @@ export const changePassword = async (req, res) => {
     const user = await User.findById(userId);
     
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
     
-    // Verify current password
+    
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     
     if (!isMatch) {
-      return res.status(401).json({ message: "Current password is incorrect" });
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Current password is incorrect" });
     }
     
-    // Hash and save new password
+    
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
@@ -95,11 +96,10 @@ export const changePassword = async (req, res) => {
     res.json({ message: "Password changed successfully" });
   } catch (error) {
     console.log("CHANGE PASSWORD ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
-// Send email verification OTP
 export const sendEmailVerification = async (req, res) => {
   try {
     const { userId, newEmail } = req.body;
@@ -107,10 +107,10 @@ export const sendEmailVerification = async (req, res) => {
     
     const existingUser = await User.findOne({ email: newEmail });
     if (existingUser && existingUser._id.toString() !== userId) {
-      return res.status(400).json({ message: "Email already in use" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Email already in use" });
     }
     
-    // OTP generate
+    
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
   
@@ -123,13 +123,13 @@ export const sendEmailVerification = async (req, res) => {
     });
   } catch (error) {
     console.log("SEND EMAIL VERIFICATION ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
 export const verifyEmailChange = async (req, res) => {
   try {
-    const { userId, newEmail, otp } = req.body;
+    const { userId, newEmail } = req.body;
     
 
     
@@ -145,7 +145,7 @@ export const verifyEmailChange = async (req, res) => {
     });
   } catch (error) {
     console.log("VERIFY EMAIL CHANGE ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 export const renderWallet = (req, res) => {
@@ -184,6 +184,6 @@ export const getHome = async (req, res) => {
 
     console.log("HOME ERROR:", error.message);
 
-    res.status(500).send("Server error");
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };

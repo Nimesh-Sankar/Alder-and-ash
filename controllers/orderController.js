@@ -8,6 +8,7 @@ import PDFDocument from "pdfkit";
 import razorpay from "../config/razorpay.js";
 import crypto from "crypto";
 import Wallet from "../models/walletModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 export const placeOrder = async (req, res) => {
     try {
@@ -17,7 +18,7 @@ export const placeOrder = async (req, res) => {
         const address = await Address.findById(addressId);
 
         if (!address) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Address not found"
             });
@@ -28,7 +29,7 @@ export const placeOrder = async (req, res) => {
         .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cart is empty"
             });
@@ -45,7 +46,7 @@ export const placeOrder = async (req, res) => {
 
 if (!category || !category.isListed) {
 
-    return res.status(400).json({
+    return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message:
             `${product.productName} category is unavailable`
@@ -60,7 +61,7 @@ const brand =
 
 if (!brand || brand.isBlocked) {
 
-    return res.status(400).json({
+    return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message:
             `${product.productName} brand is unavailable`
@@ -70,7 +71,7 @@ if (!brand || brand.isBlocked) {
         
             if (product.isBlocked) {
         
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} NO LONGER AVAILABLE`
@@ -80,7 +81,7 @@ if (!brand || brand.isBlocked) {
         
             if (!product.isListed) {
         
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is currently unavailable`
@@ -96,7 +97,7 @@ if (!brand || brand.isBlocked) {
         
             if (!variant || variant.stock < item.quantity) {
         
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is out of stock`
@@ -113,14 +114,14 @@ if (paymentMethod === "WALLET") {
     });
 
     if (!wallet) {
-        return res.status(400).json({
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
             message: "Wallet not found"
         });
     }
 
     if (wallet.balance < cart.grandTotal) {
-        return res.status(400).json({
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
             message: "Insufficient wallet balance"
         });
@@ -208,7 +209,7 @@ if (paymentMethod === "WALLET") {
         await cart.save();
 
         
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 orderId: order.orderId,
@@ -219,7 +220,7 @@ if (paymentMethod === "WALLET") {
     } catch (error) {
         console.log("PLACE ORDER ERROR:", error.message);
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server Error"
         });
@@ -235,7 +236,7 @@ export const createRazorpayOrder = async (req, res) => {
         const address = await Address.findById(addressId);
 
         if (!address) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Address not found"
             });
@@ -248,7 +249,7 @@ export const createRazorpayOrder = async (req, res) => {
         .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cart is empty"
             });
@@ -265,7 +266,7 @@ export const createRazorpayOrder = async (req, res) => {
                 );
 
             if (!category || !category.isListed) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} category is unavailable`
@@ -278,7 +279,7 @@ export const createRazorpayOrder = async (req, res) => {
                 );
 
             if (!brand || brand.isBlocked) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} brand is unavailable`
@@ -286,7 +287,7 @@ export const createRazorpayOrder = async (req, res) => {
             }
 
             if (product.isBlocked) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is unavailable`
@@ -294,7 +295,7 @@ export const createRazorpayOrder = async (req, res) => {
             }
 
             if (!product.isListed) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is currently unavailable`
@@ -312,7 +313,7 @@ export const createRazorpayOrder = async (req, res) => {
                 !variant ||
                 variant.stock < item.quantity
             ) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is out of stock`
@@ -333,7 +334,7 @@ export const createRazorpayOrder = async (req, res) => {
         const razorpayOrder =
             await razorpay.orders.create(options);
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 razorpayOrderId:
@@ -354,7 +355,7 @@ export const createRazorpayOrder = async (req, res) => {
             error
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message:
                 "Unable to create payment order"
@@ -388,7 +389,7 @@ export const verifyRazorpayPayment = async (req, res) => {
                 .digest("hex");
 
         if (expectedSignature !== razorpay_signature) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Payment verification failed"
             });
@@ -397,7 +398,7 @@ export const verifyRazorpayPayment = async (req, res) => {
         const address = await Address.findById(addressId);
 
         if (!address) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Address not found"
             });
@@ -410,7 +411,7 @@ export const verifyRazorpayPayment = async (req, res) => {
         .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cart is empty"
             });
@@ -498,7 +499,7 @@ export const verifyRazorpayPayment = async (req, res) => {
         
         await cart.save();
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Payment verified successfully",
             data: {
@@ -514,7 +515,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             error
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Payment verification failed"
         });
@@ -525,11 +526,6 @@ export const handlePaymentFailed = async (req, res) => {
 
         const userId = req.session.user.id;
 
-        const {
-            razorpayOrderId,
-            error
-        } = req.body;
-
         const cart = await Cart.findOne({
             user: userId
         })
@@ -537,7 +533,7 @@ export const handlePaymentFailed = async (req, res) => {
         .populate("coupon");
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Cart is empty"
             });
@@ -588,7 +584,7 @@ export const handlePaymentFailed = async (req, res) => {
             status: "ORDER_FAILED"
         });
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Payment failure recorded",
             data: {
@@ -603,7 +599,7 @@ export const handlePaymentFailed = async (req, res) => {
             error
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to record failed payment"
         });
@@ -621,7 +617,7 @@ export const retryPayment = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Order not found"
             });
@@ -631,7 +627,7 @@ export const retryPayment = async (req, res) => {
             order.status !== "ORDER_FAILED" ||
             order.paymentStatus !== "FAILED"
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "This order cannot be retried"
             });
@@ -647,7 +643,7 @@ export const retryPayment = async (req, res) => {
                 receipt: `retry_${order.orderId}_${Date.now()}`
             });
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 orderId: order.orderId,
@@ -664,7 +660,7 @@ export const retryPayment = async (req, res) => {
             error
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to retry payment"
         });
@@ -695,7 +691,7 @@ export const verifyRetryPayment = async (req, res) => {
                 .digest("hex");
 
         if (expectedSignature !== razorpay_signature) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Payment verification failed"
             });
@@ -709,7 +705,7 @@ export const verifyRetryPayment = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Failed order not found"
             });
@@ -723,7 +719,7 @@ export const verifyRetryPayment = async (req, res) => {
             );
 
             if (!product) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: "Product not available"
                 });
@@ -739,7 +735,7 @@ export const verifyRetryPayment = async (req, res) => {
                 !variant ||
                 variant.stock < item.quantity
             ) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message:
                         `${product.productName} is out of stock`
@@ -798,7 +794,7 @@ export const verifyRetryPayment = async (req, res) => {
             await cart.save();
         }
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Retry payment successful",
             data: {
@@ -813,7 +809,7 @@ export const verifyRetryPayment = async (req, res) => {
             error
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to verify retry payment"
         });
@@ -832,7 +828,7 @@ export const renderPaymentFailed = async (req, res) => {
 
         console.log(error);
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -843,13 +839,13 @@ export const getMyOrders = async (req, res) => {
 
     const orders = await Order.find({ user: userId })
     .sort({ createdAt: -1 });
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       success: true,
       data: orders
     });
   }catch(error){
     console.error(error);
-    res.status(500).json({message: "Internal server error"});
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({message: "Internal server error"});
   }
 }
 export const getOrderDetails = async (req, res) => {
@@ -868,14 +864,14 @@ export const getOrderDetails = async (req, res) => {
 
       if (!order) {
 
-          return res.status(404).json({
+          return res.status(STATUS_CODES.NOT_FOUND).json({
               success: false,
               message: "Order not found"
           });
 
       }
 
-      res.status(200).json({
+      res.status(STATUS_CODES.OK).json({
           success: true,
           order
       });
@@ -887,7 +883,7 @@ export const getOrderDetails = async (req, res) => {
           error.message
       );
 
-      res.status(500).json({
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Server Error"
       });
@@ -901,12 +897,12 @@ async(req,res)=>{
     const {orderId}=req.params;
    const order=await Order.findOne({orderId}).populate("address").populate("items.product");
     if(!order){
-      return res.status(404).send("Order not found");
+      return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
     }
     res.render("user/order-success",{order});
   }catch(error){
     console.error(error);
-    res.status(500).send("Internal server error");
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Internal server error");
   }
 }
 export const renderMyOrders = async (req, res) => {
@@ -942,7 +938,7 @@ export const renderMyOrders = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server Error");
     }
 };
 
@@ -957,7 +953,7 @@ export const renderOrderDetails = async(req,res)=>{
     .populate("address");
 
     if(!order){
-        return res.status(404).send("Order not found");
+        return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
     }
 
     res.render(
@@ -979,12 +975,12 @@ export const renderCancelPage = async (req, res) => {
         }).populate("items.product");
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
         }
         const item = order.items.id(req.params.itemId);
 
 if (!item) {
-    return res.status(404).send(
+    return res.status(STATUS_CODES.NOT_FOUND).send(
         "Order item not found"
     );
 }
@@ -996,7 +992,7 @@ res.render("user/cancel-order", {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Server Error");
     }
 };
 export const renderReturnPage = async (req, res) => {
@@ -1013,7 +1009,7 @@ export const renderReturnPage = async (req, res) => {
         }).populate("items.product");
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1023,7 +1019,7 @@ export const renderReturnPage = async (req, res) => {
         );
 
         if (!item) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order item not found"
             );
         }
@@ -1037,7 +1033,7 @@ export const renderReturnPage = async (req, res) => {
 
         console.log(error);
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1051,7 +1047,7 @@ export const cancelOrder = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1070,7 +1066,7 @@ export const cancelOrder = async (req, res) => {
         );
 
         if (!item) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order item not found"
             );
         }
@@ -1172,7 +1168,7 @@ export const cancelOrder = async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1186,7 +1182,7 @@ export const returnOrder = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1202,7 +1198,7 @@ export const returnOrder = async (req, res) => {
         );
 
         if (!item) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order item not found"
             );
         }
@@ -1211,7 +1207,7 @@ export const returnOrder = async (req, res) => {
             item.status === "RETURN_REQUESTED" ||
             item.status === "RETURNED"
         ) {
-            return res.status(400).send(
+            return res.status(STATUS_CODES.BAD_REQUEST).send(
                 "This item has already been returned or requested for return."
             );
         }
@@ -1227,18 +1223,18 @@ export const returnOrder = async (req, res) => {
         );
 
         if (new Date() > returnDeadline) {
-            return res.status(400).send(
+            return res.status(STATUS_CODES.BAD_REQUEST).send(
                 "Return period has expired."
             );
         }
 
         if (!req.body.reason) {
-            return res.status(400).send(
+            return res.status(STATUS_CODES.BAD_REQUEST).send(
                 "Return reason is required."
             );
         }
 
-        // Only this item
+        
         item.status = "RETURN_REQUESTED";
 
         order.returnReason =
@@ -1276,7 +1272,7 @@ export const returnOrder = async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1301,7 +1297,7 @@ console.log("USER:", req.session.user);
         .populate("items.product");
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
         }
 
         const doc = new PDFDocument({
@@ -1526,7 +1522,7 @@ console.log("USER:", req.session.user);
 
         console.log(error);
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1614,7 +1610,7 @@ export const renderAdminOrders = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 export const renderAdminOrderDetails = async (req, res) => {
@@ -1628,7 +1624,7 @@ export const renderAdminOrderDetails = async (req, res) => {
         .populate("items.product");
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1642,7 +1638,7 @@ export const renderAdminOrderDetails = async (req, res) => {
 
         console.log(error);
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1659,7 +1655,7 @@ export const updateOrderStatus = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1678,7 +1674,7 @@ export const updateOrderStatus = async (req, res) => {
                 );
 
             if (returnItems.length === 0) {
-                return res.status(400).send(
+                return res.status(STATUS_CODES.BAD_REQUEST).send(
                     "No items are waiting for return approval."
                 );
             }
@@ -1865,7 +1861,7 @@ export const updateOrderStatus = async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }
@@ -1879,7 +1875,7 @@ export const approveReturn = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).send(
+            return res.status(STATUS_CODES.NOT_FOUND).send(
                 "Order not found"
             );
         }
@@ -1891,7 +1887,7 @@ export const approveReturn = async (req, res) => {
         );
 
         if (returnItems.length === 0) {
-            return res.status(400).send(
+            return res.status(STATUS_CODES.BAD_REQUEST).send(
                 "No items are waiting for return approval."
             );
         }
@@ -2072,7 +2068,7 @@ export const approveReturn = async (req, res) => {
             error
         );
 
-        res.status(500).send(
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
             "Server Error"
         );
     }

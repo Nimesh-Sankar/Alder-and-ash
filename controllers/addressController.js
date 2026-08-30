@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Address from "../models/addressModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 
 const isValidObjectId = (id) => {
@@ -25,7 +26,7 @@ export const addAddress = async (req, res) => {
     
 
     if (!userId || !isValidObjectId(userId)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Invalid or missing userId. Please provide a valid MongoDB ObjectId"
       });
@@ -60,14 +61,14 @@ export const addAddress = async (req, res) => {
     
     await address.save();
     
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       success: true,
       message: "Address added successfully",
       address,
     });
   } catch (error) {
     console.log("ADD ADDRESS ERROR:", error.message);
-    res.status(500).json({ 
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
       success: false,
       message: "Server error",
       error: error.message 
@@ -82,7 +83,7 @@ export const updateAddress = async (req, res) => {
     
     
     if (!isValidObjectId(addressId)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Invalid address ID format"
       });
@@ -106,7 +107,7 @@ export const updateAddress = async (req, res) => {
     const currentAddress = await Address.findById(addressId);
     
     if (!currentAddress) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
         message: "Address not found"
       });
@@ -147,7 +148,7 @@ export const updateAddress = async (req, res) => {
     });
   } catch (error) {
     console.log("UPDATE ADDRESS ERROR:", error.message);
-    res.status(500).json({ 
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
       success: false,
       message: "Server error",
       error: error.message 
@@ -162,7 +163,7 @@ export const deleteAddress = async (req, res) => {
     
     
     if (!isValidObjectId(addressId)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Invalid address ID format"
       });
@@ -171,7 +172,7 @@ export const deleteAddress = async (req, res) => {
     const address = await Address.findById(addressId);
     
     if (!address) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
         message: "Address not found"
       });
@@ -200,7 +201,7 @@ export const deleteAddress = async (req, res) => {
     });
   } catch (error) {
     console.log("DELETE ADDRESS ERROR:", error.message);
-    res.status(500).json({ 
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
       success: false,
       message: "Server error",
       error: error.message 
@@ -213,7 +214,7 @@ export const getUserAddresses = async (req, res) => {
     const { userId } = req.params;
 
     if (!isValidObjectId(userId)) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
         message: "Invalid user ID format"
       });
@@ -228,7 +229,7 @@ export const getUserAddresses = async (req, res) => {
 
   } catch (error) {
     console.log("GET ADDRESSES ERROR:", error.message);
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server error"
     });

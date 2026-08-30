@@ -1,6 +1,7 @@
 import "dotenv/config";
 import OTP from "../models/otpModel.js";
 import nodemailer from "nodemailer";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -47,7 +48,7 @@ export const sendOTP = async (req, res) => {
     });
   } catch (error) {
     console.log("SEND OTP ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -72,7 +73,7 @@ export const verifyOTP = async (req, res) => {
     });
 
     if (!otpRecord) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Invalid or expired OTP",
       });
     }
@@ -85,7 +86,7 @@ export const verifyOTP = async (req, res) => {
     });
   } catch (error) {
     console.log("VERIFY OTP ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -122,6 +123,6 @@ export const resendOTP = async (req, res) => {
     });
   } catch (error) {
     console.log("RESEND OTP ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };

@@ -1,7 +1,7 @@
 import Cart from "../models/cartModel.js";
 import Product from "../models/productModel.js";
-import Coupon from "../models/couponModel.js";
 import Offer from "../models/offerModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 const MAX_CART_QUANTITY = 5;
 
@@ -265,7 +265,7 @@ export const addToCart = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product || product.isDeleted) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Product not available"
       });
     }
@@ -277,24 +277,24 @@ export const addToCart = async (req, res) => {
     );
 
     if (!variant) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Variant not found"
       });
     }
     if(variant.stock <= 0) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Out of stock"
       });
     }
 
     if (quantity > variant.stock) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Not enough stock"
       });
     }
     if (quantity > MAX_CART_QUANTITY) {
 
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message:
           `Maximum ${MAX_CART_QUANTITY} quantity allowed`
       });
@@ -329,13 +329,13 @@ export const addToCart = async (req, res) => {
         existingItem.quantity + Number(quantity);
 
       if (newQuantity > variant.stock) {
-        return res.status(400).json({
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
           message: "Only limited stock available"
         });
       }
       if (newQuantity > MAX_CART_QUANTITY) {
 
-        return res.status(400).json({
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
           message:
             `Maximum ${MAX_CART_QUANTITY} quantity allowed`
         });
@@ -365,7 +365,7 @@ existingItem.price =
 
     await cart.save();
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: "Product added to cart",
       cart
     });
@@ -373,7 +373,7 @@ existingItem.price =
   } catch (error) {
     console.log("ADD TO CART ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
   }
@@ -390,7 +390,7 @@ export const getCart = async (req, res) => {
    
 
     if (!cart) {
-      return res.status(200).json({
+      return res.status(STATUS_CODES.OK).json({
         items: [],
         subTotal: 0,
         tax: 0,
@@ -432,12 +432,12 @@ export const getCart = async (req, res) => {
     await calculateTotals(cart);
     await cart.save();
 
-    res.status(200).json(cart);
+    res.status(STATUS_CODES.OK).json(cart);
 
   } catch (error) {
     console.log("GET CART ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
   }
@@ -456,7 +456,7 @@ export const updateCartItem = async (req, res) => {
     });
 
     if (!cart) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Cart not found"
       });
     }
@@ -464,19 +464,19 @@ export const updateCartItem = async (req, res) => {
     const item = cart.items.id(itemId);
 
     if (!item) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Item not found"
       });
     }
 
     if (quantity < 1) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Quantity must be at least 1"
       });
     }
     if (quantity > MAX_CART_QUANTITY) {
 
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message:
           `Maximum ${MAX_CART_QUANTITY} quantity allowed`
       });
@@ -488,7 +488,7 @@ export const updateCartItem = async (req, res) => {
     );
 
     if (!product || product.isDeleted) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Product not available"
       });
     }
@@ -500,18 +500,18 @@ export const updateCartItem = async (req, res) => {
     );
 
     if (!variant) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Variant not found"
       });
     }
     if(variant.stock <= 0) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Out of stock"
       });
     }
 
     if (quantity > variant.stock) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Only limited stock available"
       });
     }
@@ -522,7 +522,7 @@ export const updateCartItem = async (req, res) => {
 
     await cart.save();
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: "Cart updated",
       cart
     });
@@ -530,7 +530,7 @@ export const updateCartItem = async (req, res) => {
   } catch (error) {
     console.log("UPDATE CART ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
   }
@@ -547,7 +547,7 @@ export const removeCartItem = async (req, res) => {
     });
 
     if (!cart) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Cart not found"
       });
     }
@@ -561,7 +561,7 @@ export const removeCartItem = async (req, res) => {
 
     await cart.save();
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: "Item removed",
       cart
     });
@@ -569,7 +569,7 @@ export const removeCartItem = async (req, res) => {
   } catch (error) {
     console.log("REMOVE CART ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
   }
@@ -584,7 +584,7 @@ export const removeCoupon = async (req, res) => {
       });
 
       if (!cart) {
-          return res.status(404).json({
+          return res.status(STATUS_CODES.NOT_FOUND).json({
               success: false,
               message: "Cart not found"
           });
@@ -597,7 +597,7 @@ export const removeCoupon = async (req, res) => {
 
       await cart.save();
 
-      res.status(200).json({
+      res.status(STATUS_CODES.OK).json({
           success: true,
           message: "Coupon removed successfully",
           cart
@@ -610,7 +610,7 @@ export const removeCoupon = async (req, res) => {
           error.message
       );
 
-      res.status(500).json({
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Server error"
       });

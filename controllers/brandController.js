@@ -1,4 +1,5 @@
 import Brand from "../models/brandModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 
 // =========================
@@ -17,7 +18,7 @@ export const addBrand = async (req, res) => {
 
     if (existingBrand) {
 
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Brand already exists"
       });
 
@@ -30,7 +31,7 @@ export const addBrand = async (req, res) => {
 
     await brand.save();
 
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       message: "Brand added successfully",
       brand
     });
@@ -42,7 +43,7 @@ export const addBrand = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -89,7 +90,7 @@ export const getBrands = async (req, res) => {
 
         .limit(limit);
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
 
       brands,
 
@@ -114,7 +115,7 @@ export const getBrands = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -145,7 +146,7 @@ export const updateBrand = async (req, res) => {
 
     if (!updatedBrand) {
 
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Brand not found"
       });
 
@@ -163,7 +164,7 @@ export const updateBrand = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -196,7 +197,7 @@ export const deleteBrand = async (req, res) => {
 
     if (!deletedBrand) {
 
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Brand not found"
       });
 
@@ -213,16 +214,14 @@ export const deleteBrand = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
   }
 
 };
-// =========================
-// BLOCK / UNBLOCK BRAND
-// =========================
+
 export const toggleBrandStatus = async (req, res) => {
 
   try {
@@ -233,7 +232,7 @@ export const toggleBrandStatus = async (req, res) => {
 
     if (!brand) {
 
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Brand not found"
       });
 
@@ -257,7 +256,7 @@ export const toggleBrandStatus = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 

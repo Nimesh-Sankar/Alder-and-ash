@@ -3,7 +3,7 @@ import { getUserProfile, updateProfile, changePassword } from "../controllers/us
 import {getActiveBanner} from "../controllers/bannerController.js";
 import User from "../models/userModel.js";
 
-import path from "path";
+import STATUS_CODES from "../constants/statusCodes.js";
 import { requireUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -38,7 +38,7 @@ router.get(
       const user = await User.findById(req.params.id);
 
       if (!user || user.isBlocked) {
-        return res.status(401).json({
+        return res.status(STATUS_CODES.UNAUTHORIZED).json({
           success: false,
           message: "User blocked"
         });
@@ -48,7 +48,7 @@ router.get(
         success: true
       });
 
-    } catch (error) {
+    } catch {
       res.status(500).json({
         success: false,
         message: "Server error"

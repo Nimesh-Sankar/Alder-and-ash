@@ -1,4 +1,5 @@
 import Wallet from "../models/walletModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 export const getWallet = async (req, res) => {
     try {
@@ -18,7 +19,7 @@ export const getWallet = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             wallet
         });
@@ -30,7 +31,7 @@ export const getWallet = async (req, res) => {
             error.message
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to load wallet"
         });
@@ -43,7 +44,7 @@ export const creditWallet = async (req, res) => {
       const { amount, description, orderId } = req.body;
 
       if (!amount || amount <= 0) {
-          return res.status(400).json({
+          return res.status(STATUS_CODES.BAD_REQUEST).json({
               success: false,
               message: "Invalid amount"
           });
@@ -74,7 +75,7 @@ export const creditWallet = async (req, res) => {
 
       await wallet.save();
 
-      res.status(200).json({
+      res.status(STATUS_CODES.OK).json({
           success: true,
           message: "Amount added to wallet",
           balance: wallet.balance
@@ -87,7 +88,7 @@ export const creditWallet = async (req, res) => {
           error.message
       );
 
-      res.status(500).json({
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Unable to credit wallet"
       });
@@ -100,7 +101,7 @@ export const debitWallet = async (req, res) => {
       const { amount, description, orderId } = req.body;
 
       if (!amount || amount <= 0) {
-          return res.status(400).json({
+          return res.status(STATUS_CODES.BAD_REQUEST).json({
               success: false,
               message: "Invalid amount"
           });
@@ -111,14 +112,14 @@ export const debitWallet = async (req, res) => {
       });
 
       if (!wallet) {
-          return res.status(404).json({
+          return res.status(STATUS_CODES.NOT_FOUND).json({
               success: false,
               message: "Wallet not found"
           });
       }
 
       if (wallet.balance < Number(amount)) {
-          return res.status(400).json({
+          return res.status(STATUS_CODES.BAD_REQUEST).json({
               success: false,
               message: "Insufficient wallet balance"
           });
@@ -136,7 +137,7 @@ export const debitWallet = async (req, res) => {
 
       await wallet.save();
 
-      res.status(200).json({
+      res.status(STATUS_CODES.OK).json({
           success: true,
           message: "Payment successful",
           balance: wallet.balance
@@ -149,7 +150,7 @@ export const debitWallet = async (req, res) => {
           error.message
       );
 
-      res.status(500).json({
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           success: false,
           message: "Unable to process wallet payment"
       });

@@ -150,6 +150,7 @@
                 <th>Email</th>
                 <th>Status</th>
                 <th>Action</th>
+                <th>orders</th>
               </tr>
             </thead>
             <tbody id="usersTableBody"></tbody>
@@ -221,5 +222,40 @@
     
       loadDashboardStats();
     </script>
+    <div id="userConfirmModal" class="user-confirm-modal">
+
+      <div class="user-confirm-box">
+    
+        <div class="confirm-icon">!</div>
+    
+        <h3>Confirm Action</h3>
+    
+        <p id="userConfirmText">
+          Are you sure?
+        </p>
+    
+        <div class="user-confirm-actions">
+    
+          <button
+            type="button"
+            id="userConfirmCancel"
+            class="confirm-cancel-btn"
+          >
+            Cancel
+          </button>
+    
+          <button
+            type="button"
+            id="userConfirmButton"
+            class="confirm-action-btn"
+          >
+            Confirm
+          </button>
+    
+        </div>
+    
+      </div>
+    
+    </div>
   </body>
   </html>

@@ -1,5 +1,6 @@
 import Coupon from "../models/couponModel.js";
 import Cart from "../models/cartModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 export const createCoupon = async (req, res) => {
     try {
@@ -17,7 +18,7 @@ export const createCoupon = async (req, res) => {
             endDate
         } = req.body;
 
-        // Check required fields
+        
         if (
             !code ||
             !name ||
@@ -26,66 +27,66 @@ export const createCoupon = async (req, res) => {
             !startDate ||
             !endDate
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Please fill all required fields"
             });
         }
 
-        // Check discount type
+        
         if (
             discountType !== "PERCENTAGE" &&
             discountType !== "FIXED"
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Invalid discount type"
             });
         }
 
-        // Percentage cannot be more than 100
+        
         if (
             discountType === "PERCENTAGE" &&
             Number(discountValue) > 100
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Percentage discount cannot exceed 100%"
             });
         }
 
-        // Discount cannot be negative
+        
         if (Number(discountValue) < 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Discount value cannot be negative"
             });
         }
 
-        // Check dates
+        
         const start = new Date(startDate);
         const end = new Date(endDate);
 
         if (end <= start) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "End date must be after start date"
             });
         }
 
-        // Check if coupon already exists
+        
         const existingCoupon = await Coupon.findOne({
             code: code.trim().toUpperCase()
         });
 
         if (existingCoupon) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Coupon code already exists"
             });
         }
 
-        // Create coupon
+        
         const coupon = await Coupon.create({
 
             code: code.trim().toUpperCase(),
@@ -120,7 +121,7 @@ export const createCoupon = async (req, res) => {
             status: "ACTIVE"
         });
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Coupon created successfully",
             coupon
@@ -133,7 +134,7 @@ export const createCoupon = async (req, res) => {
             error.message
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -147,7 +148,7 @@ export const getCoupons = async (req, res) => {
         const coupons = await Coupon.find()
             .sort({ createdAt: -1 });
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             coupons
         });
@@ -159,7 +160,7 @@ export const getCoupons = async (req, res) => {
             error.message
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -175,7 +176,7 @@ export const deleteCoupon = async (req, res) => {
         const coupon = await Coupon.findById(id);
 
         if (!coupon) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Coupon not found"
             });
@@ -183,7 +184,7 @@ export const deleteCoupon = async (req, res) => {
 
         await Coupon.findByIdAndDelete(id);
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Coupon deleted successfully"
         });
@@ -195,7 +196,7 @@ export const deleteCoupon = async (req, res) => {
             error.message
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -223,7 +224,7 @@ export const updateCoupon = async (req, res) => {
         const coupon = await Coupon.findById(id);
 
         if (!coupon) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Coupon not found"
             });
@@ -237,7 +238,7 @@ export const updateCoupon = async (req, res) => {
             !startDate ||
             !endDate
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Please fill all required fields"
             });
@@ -247,7 +248,7 @@ export const updateCoupon = async (req, res) => {
             discountType !== "PERCENTAGE" &&
             discountType !== "FIXED"
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Invalid discount type"
             });
@@ -257,14 +258,14 @@ export const updateCoupon = async (req, res) => {
             discountType === "PERCENTAGE" &&
             Number(discountValue) > 100
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Percentage discount cannot exceed 100%"
             });
         }
 
         if (Number(discountValue) < 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Discount value cannot be negative"
             });
@@ -274,7 +275,7 @@ export const updateCoupon = async (req, res) => {
         const end = new Date(endDate);
 
         if (end <= start) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "End date must be after start date"
             });
@@ -286,7 +287,7 @@ export const updateCoupon = async (req, res) => {
         });
 
         if (duplicateCoupon) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Coupon code already exists"
             });
@@ -319,7 +320,7 @@ export const updateCoupon = async (req, res) => {
 
         await coupon.save();
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Coupon updated successfully",
             coupon
@@ -332,7 +333,7 @@ export const updateCoupon = async (req, res) => {
             error.message
         );
 
-        res.status(500).json({
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -347,7 +348,7 @@ export const getAvailableCoupons = async (req, res) => {
         });
 
         if (!cart || cart.items.length === 0) {
-            return res.status(200).json({
+            return res.status(STATUS_CODES.OK).json({
                 success: true,
                 coupons: []
             });
@@ -429,7 +430,7 @@ export const getAvailableCoupons = async (req, res) => {
             }
         );
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             coupons: availableCoupons
         });
@@ -441,7 +442,7 @@ export const getAvailableCoupons = async (req, res) => {
             error.message
         );
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message:
                 "Unable to load available coupons"
@@ -454,7 +455,7 @@ export const applyCoupon = async (req, res) => {
         const { code } = req.body;
 
         if (!code) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Please enter a coupon code"
             });
@@ -465,14 +466,14 @@ export const applyCoupon = async (req, res) => {
         });
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Your cart is empty"
             });
         }
 
         if (cart.coupon) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "A coupon is already applied"
             });
@@ -483,14 +484,14 @@ export const applyCoupon = async (req, res) => {
         });
 
         if (!coupon) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Invalid coupon code"
             });
         }
 
         if (coupon.status !== "ACTIVE") {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "This coupon is inactive"
             });
@@ -502,7 +503,7 @@ export const applyCoupon = async (req, res) => {
             now < coupon.startDate ||
             now > coupon.endDate
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message:
                     "This coupon has expired or is not active yet"
@@ -513,14 +514,14 @@ export const applyCoupon = async (req, res) => {
             coupon.usageLimit !== null &&
             coupon.usedCount >= coupon.usageLimit
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message:
                     "This coupon usage limit has been reached"
             });
         }
 
-        // Calculate subtotal again from current cart
+
         const currentSubTotal = cart.items.reduce(
             (total, item) =>
                 total + (item.price * item.quantity),
@@ -533,7 +534,7 @@ export const applyCoupon = async (req, res) => {
             currentSubTotal <
             coupon.minimumOrderAmount
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message:
                     `Minimum order amount is ₹${coupon.minimumOrderAmount}`
@@ -568,10 +569,9 @@ export const applyCoupon = async (req, res) => {
         discount =
             Math.round(discount * 100) / 100;
 
-        // Don't allow coupon discount to be equal to
-        // or greater than merchandise subtotal
+        
         if (discount >= currentSubTotal) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message:
                     "Coupon discount must be less than the cart subtotal"
@@ -597,7 +597,7 @@ export const applyCoupon = async (req, res) => {
 
         await cart.save();
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Coupon applied successfully",
             data: {
@@ -616,7 +616,7 @@ export const applyCoupon = async (req, res) => {
             error.message
         );
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Server error"
         });
@@ -631,7 +631,7 @@ export const removeCoupon = async (req, res) => {
         });
 
         if (!cart) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
                 message: "Cart not found"
             });
@@ -647,7 +647,7 @@ export const removeCoupon = async (req, res) => {
 
         await cart.save();
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Coupon removed successfully",
             data: {
@@ -665,7 +665,7 @@ export const removeCoupon = async (req, res) => {
             error.message
         );
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to remove coupon"
         });

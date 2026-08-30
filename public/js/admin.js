@@ -37,7 +37,32 @@ window.location.pathname !== "/admin/login") {
 
   });
 }
+function openUserConfirm(message, onConfirm) {
 
+  const modal = document.getElementById("userConfirmModal");
+  const text = document.getElementById("userConfirmText");
+  const cancelBtn = document.getElementById("userConfirmCancel");
+  const confirmBtn = document.getElementById("userConfirmButton");
+
+  text.textContent = message;
+
+  modal.classList.add("show");
+
+  cancelBtn.onclick = () => {
+    modal.classList.remove("show");
+  };
+
+  confirmBtn.onclick = () => {
+    modal.classList.remove("show");
+    onConfirm();
+  };
+
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.classList.remove("show");
+    }
+  };
+}
 // =========================
 // ADMIN LOGIN
 // =========================
@@ -193,6 +218,7 @@ async function loadUsers(page = 1) {
             ${user.isBlocked ? "Unblock" : "Block"}
           </button>
         </td>
+        <td>${user.orders}</td>
       `;
 
       usersTableBody.appendChild(row);
@@ -243,9 +269,6 @@ async function loadUsers(page = 1) {
 
 }
 
-// =========================
-// CLEAR SEARCH
-// =========================
 function clearSearch() {
 
   const searchInput = document.getElementById("searchInput");
@@ -257,69 +280,54 @@ function clearSearch() {
   loadUsers(1);
 }
 
-
 async function toggleBlock(userId, isBlocked) {
 
-  const action =
-    isBlocked
-      ? "unblock"
-      : "block";
+  const action = isBlocked ? "unblock" : "block";
 
-  openConfirm(
+  openUserConfirm(
     `Are you sure you want to ${action} this user?`,
-    async function () {
-
+    async () => {
       try {
-
-        const res =
-          await fetch(
-            `${API_BASE}/admin/users/${userId}/toggle-block`,
-            {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                action
-              })
-            }
-          );
-
-        const data =
-          await res.json();
-
-        showAlert(
-          data.message ||
-          `User ${action}ed successfully`,
-          res.ok
-            ? "success"
-            : "danger"
+        const res = await fetch(
+          `/admin/users/${userId}/toggle-block`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ action })
+          }
         );
 
-        if (res.ok) {
-          loadUsers();
+        const data = await res.json();
+
+        if (!res.ok) {
+          showAlert(
+            data.message || "Something went wrong",
+            "danger"
+          );
+          return;
         }
 
-      } catch (error) {
+        showAlert(data.message, "success");
 
-        console.error(
-          "TOGGLE BLOCK ERROR:",
-          error
-        );
+        loadUsers();
+
+      } catch (error) {
+        console.error("TOGGLE BLOCK ERROR:", error);
 
         showAlert(
           "Something went wrong",
           "danger"
         );
       }
-
     }
   );
 }
 
-// =========================
-// ADMIN LOGOUT
-// =========================
+
+
+
 function adminLogout() {
 
   localStorage.removeItem("admin");
@@ -1066,132 +1074,124 @@ function deleteBrand(id) {
 // =========================
 
 async function loadProducts(page = 1) {
-
-  const productContainer = document.getElementById("productContainer");
+  const productContainer =
+    document.getElementById("productContainer");
 
   if (!productContainer) return;
 
-  const searchInput = document.getElementById("productSearchInput");
-  const search = searchInput ? searchInput.value.trim() : "";
-  const fromDate = document.getElementById("fromDate").value;
-  const toDate = document.getElementById("toDate").value;
+  const searchInput =
+    document.getElementById("productSearchInput");
+
+  const search =
+    searchInput ? searchInput.value.trim() : "";
+
+  const fromDate =
+    document.getElementById("fromDate")?.value || "";
+
+  const toDate =
+    document.getElementById("toDate")?.value || "";
 
   try {
-
     const response = await fetch(
-      `${API_BASE}/admin/products?page=${page}&search=${search}&fromDate=${fromDate}&toDate=${toDate}`
+      `${API_BASE}/admin/products?page=${page}&search=${encodeURIComponent(search)}&fromDate=${fromDate}&toDate=${toDate}`
     );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to load products: ${response.status}`
+      );
+    }
 
     const data = await response.json();
-    let wishlistIds = [];
 
-const user =
-    JSON.parse(
-        localStorage.getItem("user")
-    );
-
-if (user) {
-
-    const wishlistResponse =
-        await fetch("/api/wishlist");
-
-    const wishlistData =
-        await wishlistResponse.json();
-
-    if (wishlistData.wishlist) {
-
-        wishlistIds =
-            wishlistData.wishlist.products
-                .map(product =>
-                    product._id.toString()
-                );
-
-    }
-}
-    
     productContainer.innerHTML = "";
 
-data.products.forEach((product, index) => {
-  console.log(product.images);
-  
-
-    productContainer.innerHTML += `
+    data.products.forEach((product, index) => {
+      productContainer.innerHTML += `
         <tr>
+          <td>
+            ${(page - 1) * 5 + index + 1}
+          </td>
 
-            <td>
-                ${(page - 1) * 5 + index + 1}
-            </td>
+          <td>
+            <img
+              src="${product.images?.[0] || ""}"
+              width="60"
+              height="60"
+              alt="${product.productName}"
+            >
+          </td>
 
-            <td>
-                <img
-    src="${product.images[0]}"
-    width="60"
-    height="60"
->
-                    
-                
-            </td>
+          <td>
+            ${product.productName}
+          </td>
 
-            <td>
-                ${product.productName}
-            </td>
+          <td>
+            ${product.category?.name || "-"}
+          </td>
 
-            <td>
-                ${product.category?.name || "-"}
-            </td>
+          <td>
+            ${product.brand?.brandName || "-"}
+          </td>
 
-            <td>
-                ${product.brand?.brandName || "-"}
-            </td>
+          <td>
+            ${product.variants?.[0]?.stock || 0}
+          </td>
 
-            <td>
-                ${product.variants?.[0]?.stock || 0}
-            </td>
+          <td>
+            ₹${product.variants?.[0]?.price || 0}
+          </td>
 
-            <td>
-                ₹${product.variants?.[0]?.price || 0}
-            </td>
+          <td>
+            <div class="action-buttons">
 
-<td>
-    <div class="action-buttons">
+              <button
+                class="action-btn edit-btn"
+                onclick="window.location.href='/admin/edit-product?id=${product._id}'"
+              >
+                Edit
+              </button>
 
-        <button
-            class="action-btn edit-btn"
-            onclick="window.location.href='/admin/edit-product?id=${product._id}'"
-        >
-            Edit
-        </button>
+              <button
+                class="action-btn ${
+                  product.isListed
+                    ? "unlist-btn"
+                    : "list-btn"
+                }"
+                onclick="toggleProductStatus(
+                  '${product._id}',
+                  ${product.isListed}
+                )"
+              >
+                ${
+                  product.isListed
+                    ? "Unlist"
+                    : "List"
+                }
+              </button>
 
-        <button
-            class="action-btn ${product.isListed ? "unlist-btn" : "list-btn"}"
-            onclick="
-                toggleProductStatus(
-                    '${product._id}',
-                    ${product.isListed}
-                )
-            "
-        >
-            ${product.isListed ? "Unlist" : "List"}
-        </button>
+              <button
+                class="action-btn delete-btn"
+                onclick="deleteProduct('${product._id}')"
+              >
+                Delete
+              </button>
 
-        <button
-            class="action-btn delete-btn"
-            onclick="deleteProduct('${product._id}')"
-        >
-            Delete
-        </button>
-
-    </div>
-</td>
-
+            </div>
+          </td>
         </tr>
-    `;
-});
+      `;
+    });
 
-    // Pagination code
-    const pagination = document.getElementById("productPagination");
+    // Pagination
+    const pagination =
+      document.getElementById(
+        "productPagination"
+      );
+
     if (pagination) {
       pagination.innerHTML = "";
+
       if (data.hasPrevPage) {
         pagination.innerHTML += `
           <button onclick="loadProducts(${page - 1})">
@@ -1199,11 +1199,14 @@ data.products.forEach((product, index) => {
           </button>
         `;
       }
+
       pagination.innerHTML += `
         <span>
-          Page ${data.currentPage} of ${data.totalPages}
+          Page ${data.currentPage}
+          of ${data.totalPages}
         </span>
       `;
+
       if (data.hasNextPage) {
         pagination.innerHTML += `
           <button onclick="loadProducts(${page + 1})">
@@ -1214,7 +1217,10 @@ data.products.forEach((product, index) => {
     }
 
   } catch (error) {
-    console.log("LOAD PRODUCTS ERROR:", error);
+    console.log(
+      "LOAD PRODUCTS ERROR:",
+      error
+    );
   }
 }
 
@@ -1230,9 +1236,7 @@ function clearProductSearch() {
   loadProducts(1);
 }
 
-// =========================
-// INITIAL LOAD
-// =========================
+
 
 if (
   document.getElementById(
@@ -1957,22 +1961,14 @@ if (editProductForm) {
           JSON.stringify(existingImages)
         );
 
-        const images =
-          document.getElementById(
-            "productImages"
-          ).files;
-
-        for (
-          let i = 0;
-          i < images.length;
-          i++
-        ) {
+        for (let i = 0; i < croppedImages.length; i++) {
 
           formData.append(
             "images",
-            images[i]
+            croppedImages[i],
+            `cropped-${Date.now()}-${i}.jpg`
           );
-
+        
         }
 
         const response =

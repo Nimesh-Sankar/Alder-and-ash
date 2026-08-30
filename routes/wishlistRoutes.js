@@ -1,15 +1,30 @@
 import express from "express";
-import { addToWishlist, getWishlist, removeFromWishlist } from "../controllers/wishlistController.js";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist
+} from "../controllers/wishlistController.js";
+
+import { requireUser } from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const setUserFromHeader = (req, res, next) => {
-  const userId=req.headers.userid;
-  if(!userId){
-    return res.status(401).json({ message: "User not logged in" });
-  }
- req.user={_id:userId};
-  next();
-};
-router.post("/add", setUserFromHeader, addToWishlist);
-router.post("/remove", setUserFromHeader, removeFromWishlist);
-router.get("/", setUserFromHeader, getWishlist);
+
+router.post(
+  "/add",
+  requireUser,
+  addToWishlist
+);
+
+router.post(
+  "/remove",
+  requireUser,
+  removeFromWishlist
+);
+
+router.get(
+  "/",
+  requireUser,
+  getWishlist
+);
+
 export default router;

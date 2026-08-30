@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import OTP from "../models/otpModel.js";
 import bcrypt from "bcrypt";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 
 export const forgotPassword = async (req, res) => {
@@ -10,7 +11,7 @@ export const forgotPassword = async (req, res) => {
     
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
 
     
@@ -38,20 +39,20 @@ export const forgotPassword = async (req, res) => {
     res.json({
       success: true,
       message: "Password reset OTP sent successfully",
-      otp: otp // Remove in production
+      otp: otp 
     });
   } catch (error) {
     console.log("FORGOT PASSWORD ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
-// Reset Password - Verify OTP and update password
+
 export const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
 
-    // Find valid OTP
+  
     const otpRecord = await OTP.findOne({
       email,
       otp,
@@ -60,21 +61,21 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!otpRecord) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: "Invalid or expired OTP" });
     }
 
-    // Find user and update password
+    
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
 
-    // Hash password
+    
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
 
-    // Delete OTP
+    
     await OTP.deleteOne({ _id: otpRecord._id });
 
     res.json({
@@ -83,6 +84,6 @@ export const resetPassword = async (req, res) => {
     });
   } catch (error) {
     console.log("RESET PASSWORD ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };

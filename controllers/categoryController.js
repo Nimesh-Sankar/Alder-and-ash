@@ -1,4 +1,5 @@
 import Category from "../models/categoryModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 export const addCategory = async (req, res) => {
 
@@ -18,7 +19,7 @@ export const addCategory = async (req, res) => {
       });
 
     if (existingCategory) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Category already exists"
       });
     }
@@ -30,7 +31,7 @@ export const addCategory = async (req, res) => {
 
     await category.save();
 
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       message: "Category added successfully",
       category
     });
@@ -42,7 +43,7 @@ export const addCategory = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -76,7 +77,7 @@ export const updateCategory = async (req, res) => {
       });
 
     if (existingCategory) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         message: "Category already exists"
       });
     }
@@ -95,7 +96,7 @@ export const updateCategory = async (req, res) => {
       );
 
     if (!updatedCategory) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Category not found"
       });
     }
@@ -112,7 +113,7 @@ export const updateCategory = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -151,7 +152,7 @@ export const getCategories = async (req, res) => {
 
         .limit(limit);
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
 
       categories,
 
@@ -176,7 +177,7 @@ export const getCategories = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -206,7 +207,7 @@ export const deleteCategory = async (req, res) => {
 
     if (!deletedCategory) {
 
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Category not found"
       });
 
@@ -223,7 +224,7 @@ export const deleteCategory = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 
@@ -241,7 +242,7 @@ export const toggleCategoryStatus = async (req, res) => {
 
     if (!category) {
 
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         message: "Category not found"
       });
 
@@ -252,7 +253,7 @@ export const toggleCategoryStatus = async (req, res) => {
 
     await category.save();
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: category.isListed
         ? "Category activated"
         : "Category blocked",
@@ -266,7 +267,7 @@ export const toggleCategoryStatus = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error"
     });
 

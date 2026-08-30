@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/userModel.js";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 export const signup = async (req, res) => {
   try {
@@ -7,7 +8,7 @@ export const signup = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: "User already exists" });
     }
 
     
@@ -27,7 +28,7 @@ export const signup = async (req, res) => {
       email: user.email,
     };
   
-    res.status(201).json({
+    res.status(STATUS_CODES.CREATED).json({
       message: "User registered successfully",
       user: {
         _id: user._id,
@@ -39,7 +40,7 @@ export const signup = async (req, res) => {
   } catch (error) {
     console.log("SIGNUP ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error",
     });
   }
@@ -52,19 +53,19 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: "User not found" });
     }
 
     
     if (user.isBlocked) {
-      return res.status(403).json({ message: "User is blocked" });
+      return res.status(STATUS_CODES.FORBIDDEN).json({ message: "User is blocked" });
     }
 
   
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({ message: "Invalid credentials" });
     }
     req.session.user = {
       id: user._id,
@@ -72,7 +73,7 @@ export const login = async (req, res) => {
     };
 
     
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: "Login successful",
       user: {
         _id: user._id,
@@ -84,7 +85,7 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log("LOGIN ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error",
     });
   }
@@ -93,7 +94,7 @@ export const getUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       message: "Users fetched successfully",
       users,
     });
@@ -101,7 +102,7 @@ export const getUsers = async (req, res) => {
   } catch (error) {
     console.log("GET USERS ERROR:", error.message);
 
-    res.status(500).json({
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       message: "Server error",
     });
   }

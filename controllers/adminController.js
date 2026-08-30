@@ -2,35 +2,54 @@ import User from "../models/userModel.js";
 import Order from "../models/orderModel.js";
 import Product from "../models/productModel.js";
 import bcrypt from "bcrypt";
+import STATUS_CODES from "../constants/statusCodes.js";
 
 // Block/Unblock 
 export const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { action } = req.body; 
+    const { action } = req.body;
 
     const user = await User.findById(userId);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({
+        message: "User not found"
+      });
     }
 
     if (action === "block") {
       user.isBlocked = true;
       await user.save();
-      res.json({ message: "User blocked successfully", isBlocked: true });
-    } else if (action === "unblock") {
+
+      return res.status(STATUS_CODES.OK).json({
+        message: "User blocked successfully",
+        isBlocked: true
+      });
+    }
+
+    if (action === "unblock") {
       user.isBlocked = false;
       await user.save();
-      res.json({ message: "User unblocked successfully", isBlocked: false });
-    } else {
-      res.status(400).json({ message: "Invalid action" });
+
+      return res.status(STATUS_CODES.OK).json({
+        message: "User unblocked successfully",
+        isBlocked: false
+      });
     }
+
+    return res.status(STATUS_CODES.BAD_REQUEST).json({
+      message: "Invalid action"
+    });
+
   } catch (error) {
     console.log("TOGGLE BLOCK ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      message: "Server error"
+    });
   }
 };
-
 
 export const getUsersWithFilters = async (req, res) => {
   try {
@@ -69,7 +88,7 @@ export const getUsersWithFilters = async (req, res) => {
     });
   } catch (error) {
     console.log("GET USERS FILTER ERROR:", error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -84,7 +103,7 @@ export const adminLogin = async (req, res) => {
       });
 
       if (!admin) {
-          return res.status(401).json({
+          return res.status(STATUS_CODES.UNAUTHORIZED).json({
               message: "Admin not found"
           });
       }
@@ -95,7 +114,7 @@ export const adminLogin = async (req, res) => {
       );
 
       if (!isMatch) {
-          return res.status(401).json({
+          return res.status(STATUS_CODES.UNAUTHORIZED).json({
               message: "Invalid credentials"
           });
       }
@@ -114,7 +133,7 @@ export const adminLogin = async (req, res) => {
                   err
               );
 
-              return res.status(500).json({
+              return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
                   message: "Session error"
               });
           }
@@ -137,7 +156,7 @@ export const adminLogin = async (req, res) => {
           error.message
       );
 
-      res.status(500).json({
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           message: "Server error"
       });
   }
@@ -204,7 +223,7 @@ export const getDashboardStats = async (req, res) => {
       })
       .limit(5);
 
-    return res.status(200).json({
+    return res.status(STATUS_CODES.OK).json({
       success: true,
 
       data: {
@@ -223,7 +242,7 @@ export const getDashboardStats = async (req, res) => {
       error
     );
 
-    return res.status(500).json({
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Unable to load dashboard"
     });
