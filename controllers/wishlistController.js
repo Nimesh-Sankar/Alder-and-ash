@@ -4,8 +4,7 @@ import STATUS_CODES from "../constants/statusCodes.js";
 
 export const addToWishlist = async (req, res) => {
   try {
-
-      const userId = req.user._id;
+    const userId = req.user.id;
       const { productId } = req.body;
 
       const product = await Product.findById(productId);
@@ -57,9 +56,9 @@ export const addToWishlist = async (req, res) => {
   }
 };
 
-export const removeFromWishlist=async(req,res)=>{
-  try{
-    const userId=req.user._id;
+export const removeFromWishlist = async (req, res) => {
+  try {
+    const userId = req.user.id;
     const {productId}=req.body;
 
     const wishlist=await Wishlist.findOne({user:userId});
@@ -75,9 +74,9 @@ export const removeFromWishlist=async(req,res)=>{
   }
 };
 
-export const getWishlist=async(req,res)=>{
-  try{
-    const userId=req.user._id;
+export const getWishlist = async (req, res) => {
+  try {
+    const userId = req.user.id;
     const wishlist=await Wishlist.findOne({user:userId}).populate("products");
     if(!wishlist){
       return res.status(STATUS_CODES.NOT_FOUND).json({ message: "Wishlist not found" });

@@ -4,7 +4,7 @@ import Product from "../models/productModel.js";
 import bcrypt from "bcrypt";
 import STATUS_CODES from "../constants/statusCodes.js";
 
-// Block/Unblock 
+
 export const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -164,6 +164,8 @@ export const adminLogin = async (req, res) => {
 export const getDashboardStats = async (req, res) => {
   try {
 
+   
+
     const totalUsers =
       await User.countDocuments({
         isAdmin: { $ne: true }
@@ -181,6 +183,8 @@ export const getDashboardStats = async (req, res) => {
         }
       });
 
+
+
     const revenueData =
       await Order.aggregate([
         {
@@ -191,6 +195,7 @@ export const getDashboardStats = async (req, res) => {
         {
           $group: {
             _id: null,
+
             totalRevenue: {
               $sum: {
                 $subtract: [
@@ -217,23 +222,315 @@ export const getDashboardStats = async (req, res) => {
           $ne: "ORDER_FAILED"
         }
       })
-      .populate("user")
-      .sort({
-        createdAt: -1
-      })
-      .limit(5);
+        .populate(
+          "user",
+          "firstName lastName email"
+        )
+        .sort({
+          createdAt: -1
+        })
+        .limit(5);
 
-    return res.status(STATUS_CODES.OK).json({
-      success: true,
 
-      data: {
-        totalUsers,
-        totalProducts,
-        totalOrders,
-        totalRevenue,
-        recentOrders
+// -------------------------
+// SALES - LAST 7 DAYS
+// -------------------------
+
+const sevenDaysAgo = new Date();
+
+sevenDaysAgo.setDate(
+  sevenDaysAgo.getDate() - 6
+);
+
+sevenDaysAgo.setHours(
+  0,
+  0,
+  0,
+  0
+);
+
+
+const salesData =
+  await Order.aggregate([
+
+    {
+      $match: {
+
+        status: {
+          $nin: [
+            "ORDER_FAILED",
+            "CANCELLED"
+          ]
+        },
+
+        createdAt: {
+          $gte: sevenDaysAgo
+        }
       }
-    });
+    },
+
+    {
+      $group: {
+
+        _id: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: "$createdAt",
+            timezone: "+05:30"
+          }
+        },
+
+        revenue: {
+          $sum: "$grandTotal"
+        }
+      }
+    },
+
+    {
+      $sort: {
+        _id: 1
+      }
+    }
+  ]);
+
+
+console.log(
+  "SALES DATA:",
+  salesData
+);
+
+
+// -------------------------
+// CREATE ALL 7 DAYS
+// -------------------------
+
+const salesLast7Days = [];
+
+
+for (let i = 0; i < 7; i++) {
+
+  const date =
+    new Date(sevenDaysAgo);
+
+  date.setDate(
+    sevenDaysAgo.getDate() + i
+  );
+
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(2, "0");
+
+
+  const dateKey =
+    `${year}-${month}-${day}`;
+
+
+  const found =
+    salesData.find(
+      item =>
+        item._id === dateKey
+    );
+
+
+  salesLast7Days.push({
+
+    date: dateKey,
+
+    label:
+      date.toLocaleDateString(
+        "en-US",
+        {
+          weekday: "short"
+        }
+      ),
+
+    revenue:
+      found?.revenue || 0
+  });
+}
+
+
+console.log(
+  "FINAL SALES:",
+  salesLast7Days
+);
+
+
+
+    const topBrands =
+      await Order.aggregate([
+
+        {
+          $match: {
+            status: "DELIVERED"
+          }
+        },
+
+        {
+          $unwind: "$items"
+        },
+
+        {
+          $match: {
+            "items.status": {
+              $nin: [
+                "CANCELLED",
+                "RETURNED"
+              ]
+            }
+          }
+        },
+
+        {
+          $lookup: {
+            from: "products",
+            localField: "items.product",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+
+        {
+          $unwind: "$product"
+        },
+
+        {
+          $lookup: {
+            from: "brands",
+            localField: "product.brand",
+            foreignField: "_id",
+            as: "brand"
+          }
+        },
+
+        {
+          $unwind: "$brand"
+        },
+
+        {
+          $group: {
+            _id: "$brand._id",
+
+            brandName: {
+              $first:
+                "$brand.brandName"
+            },
+
+            quantitySold: {
+              $sum:
+                "$items.quantity"
+            }
+          }
+        },
+
+        {
+          $sort: {
+            quantitySold: -1
+          }
+        },
+
+        {
+          $limit: 5
+        }
+      ]);
+
+
+    // -------------------------
+    // LOW STOCK PRODUCTS
+    // -------------------------
+
+    const lowStockProducts =
+      await Product.aggregate([
+
+        {
+          $match: {
+            isDeleted: {
+              $ne: true
+            }
+          }
+        },
+
+        {
+          $unwind:
+            "$variants"
+        },
+
+        {
+          $match: {
+            "variants.stock": {
+              $lte: 5
+            }
+          }
+        },
+
+        {
+          $group: {
+
+            _id: "$_id",
+
+            productName: {
+              $first:
+                "$productName"
+            },
+
+            lowestStock: {
+              $min:
+                "$variants.stock"
+            }
+          }
+        },
+
+        {
+          $sort: {
+            lowestStock: 1
+          }
+        },
+
+        {
+          $limit: 5
+        }
+      ]);
+
+
+    // -------------------------
+    // RESPONSE
+    // -------------------------
+
+    return res
+      .status(STATUS_CODES.OK)
+      .json({
+
+        success: true,
+
+        data: {
+
+          totalUsers,
+
+          totalProducts,
+
+          totalOrders,
+
+          totalRevenue,
+
+          recentOrders,
+
+          salesLast7Days,
+
+          topBrands,
+
+          lowStockProducts
+        }
+      });
 
   } catch (error) {
 
@@ -242,9 +539,17 @@ export const getDashboardStats = async (req, res) => {
       error
     );
 
-    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Unable to load dashboard"
-    });
+    return res
+      .status(
+        STATUS_CODES
+          .INTERNAL_SERVER_ERROR
+      )
+      .json({
+
+        success: false,
+
+        message:
+          "Unable to load dashboard"
+      });
   }
 };

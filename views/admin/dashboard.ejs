@@ -21,8 +21,7 @@
   <div class="admin-layout">
 
     
-    <!-- SIDEBAR -->
-<!-- DASHBOARD SIDEBAR -->
+ 
 
 <aside class="admin-sidebar">
 
@@ -122,8 +121,96 @@
           </div>
         
         </div>
-        <div class="dashboard-placeholder">
-          Dashboard
+        <div class="dashboard-analytics">
+
+          <div class="dashboard-chart-row">
+        
+            <!-- SALES CHART -->
+            <div class="dashboard-panel">
+              <div class="dashboard-panel-header">
+                <h3>Sales Over Time</h3>
+                <span>Last 7 days</span>
+              </div>
+        
+              <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+              </div>
+            </div>
+        
+        
+            <!-- TOP BRANDS -->
+            <div class="dashboard-panel">
+              <div class="dashboard-panel-header">
+                <h3>Top Selling Brands</h3>
+              </div>
+        
+              <div class="chart-container">
+                <canvas id="brandsChart"></canvas>
+              </div>
+            </div>
+        
+          </div>
+        
+        
+          <div class="dashboard-bottom-row">
+        
+            <!-- RECENT ORDERS -->
+            <div class="dashboard-panel">
+        
+              <div class="dashboard-panel-header">
+                <h3>Recent Orders</h3>
+        
+                <a href="/api/orders/admin/orders">
+                  View All Orders
+                </a>
+              </div>
+        
+              <div class="table-responsive">
+        
+                <table class="table align-middle">
+        
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Customer</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+        
+                  <tbody id="recentOrdersBody">
+                    <tr>
+                      <td colspan="4">
+                        Loading...
+                      </td>
+                    </tr>
+                  </tbody>
+        
+                </table>
+        
+              </div>
+        
+            </div>
+        
+        
+            <!-- LOW STOCK -->
+            <div class="dashboard-panel">
+        
+              <div class="dashboard-panel-header">
+                <h3>Low Stock Products</h3>
+              </div>
+        
+              <div
+                id="lowStockProducts"
+                class="low-stock-list"
+              >
+                Loading...
+              </div>
+        
+            </div>
+        
+          </div>
+        
         </div>
       </section>
 
@@ -170,57 +257,423 @@
     }
   </script>
   
-    <script src="/js/admin.js"></script>
-    <script>
-      async function loadDashboardStats() {
-        try {
-          const response =
-            await fetch("/admin/dashboard-stats");
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/admin.js"></script>
+  <script>
+
+    let salesChart = null;
+    let brandsChart = null;
     
-          const result =
-            await response.json();
     
-          if (!response.ok || !result.success) {
-            throw new Error(
-              result.message ||
-              "Unable to load dashboard"
-            );
-          }
+    async function loadDashboardStats() {
     
-          const data = result.data;
+      try {
     
-          document.getElementById(
-            "dashboardOrders"
-          ).textContent =
-            data.totalOrders;
+        const response =
+          await fetch(
+            "/admin/dashboard-stats"
+          );
     
-          document.getElementById(
-            "dashboardUsers"
-          ).textContent =
-            data.totalUsers;
+        const result =
+          await response.json();
     
-          document.getElementById(
-            "dashboardProducts"
-          ).textContent =
-            data.totalProducts;
     
-          document.getElementById(
-            "dashboardRevenue"
-          ).textContent =
-            "₹" +
-            Number(
-              data.totalRevenue || 0
-            ).toLocaleString("en-IN");
+        if (
+          !response.ok ||
+          !result.success
+        ) {
     
-        } catch (error) {
-          console.log(
-            "DASHBOARD LOAD ERROR:",
-            error
+          throw new Error(
+            result.message ||
+            "Unable to load dashboard"
           );
         }
-      }
     
-      loadDashboardStats();
+    
+        const data =
+          result.data;
+    
+    
+        // ======================
+        // CARDS
+        // ======================
+    
+        document.getElementById(
+          "dashboardOrders"
+        ).textContent =
+          data.totalOrders;
+    
+    
+        document.getElementById(
+          "dashboardUsers"
+        ).textContent =
+          data.totalUsers;
+    
+    
+        document.getElementById(
+          "dashboardProducts"
+        ).textContent =
+          data.totalProducts;
+    
+    
+        document.getElementById(
+          "dashboardRevenue"
+        ).textContent =
+          "₹" +
+          Number(
+            data.totalRevenue || 0
+          ).toLocaleString("en-IN");
+    
+    
+    
+        // ======================
+        // SALES CHART
+        // ======================
+    
+        const salesLabels =
+          data.salesLast7Days.map(
+            item => item.label
+          );
+    
+    
+        const salesValues =
+          data.salesLast7Days.map(
+            item => item.revenue
+          );
+    
+    
+        const salesCanvas =
+          document.getElementById(
+            "salesChart"
+          );
+    
+    
+        if (salesChart) {
+          salesChart.destroy();
+        }
+    
+    
+        salesChart =
+          new Chart(
+            salesCanvas,
+            {
+    
+              type: "line",
+    
+              data: {
+    
+                labels:
+                  salesLabels,
+    
+                datasets: [
+                  {
+    
+                    label:
+                      "Revenue",
+    
+                    data:
+                      salesValues,
+    
+                    borderWidth: 2,
+    
+                    tension: 0.3,
+    
+                    fill: true
+                  }
+                ]
+              },
+    
+    
+              options: {
+    
+                responsive: true,
+    
+                maintainAspectRatio:
+                  false,
+    
+                plugins: {
+    
+                  legend: {
+                    display: false
+                  }
+                },
+    
+                scales: {
+    
+                  y: {
+    
+                    beginAtZero:
+                      true,
+    
+                    ticks: {
+    
+                      callback:
+                        value =>
+                          "₹" +
+                          Number(
+                            value
+                          ).toLocaleString(
+                            "en-IN"
+                          )
+                    }
+                  }
+                }
+              }
+            }
+          );
+    
+    
+    
+        // ======================
+        // TOP BRANDS CHART
+        // ======================
+    
+        const brandLabels =
+          data.topBrands.map(
+            item =>
+              item.brandName
+          );
+    
+    
+        const brandValues =
+          data.topBrands.map(
+            item =>
+              item.quantitySold
+          );
+    
+    
+        const brandsCanvas =
+          document.getElementById(
+            "brandsChart"
+          );
+    
+    
+        if (brandsChart) {
+          brandsChart.destroy();
+        }
+    
+    
+        brandsChart =
+          new Chart(
+            brandsCanvas,
+            {
+    
+              type: "doughnut",
+    
+              data: {
+    
+                labels:
+                  brandLabels,
+    
+                datasets: [
+                  {
+    
+                    data:
+                      brandValues
+                  }
+                ]
+              },
+    
+    
+              options: {
+    
+                responsive:
+                  true,
+    
+                maintainAspectRatio:
+                  false,
+    
+                plugins: {
+    
+                  legend: {
+    
+                    position:
+                      "bottom"
+                  }
+                }
+              }
+            }
+          );
+    
+    
+    
+        // ======================
+        // RECENT ORDERS
+        // ======================
+    
+        const recentOrdersBody =
+          document.getElementById(
+            "recentOrdersBody"
+          );
+    
+    
+        if (
+          !data.recentOrders ||
+          data.recentOrders.length === 0
+        ) {
+    
+          recentOrdersBody.innerHTML = `
+    
+            <tr>
+    
+              <td colspan="4">
+                No recent orders
+              </td>
+    
+            </tr>
+    
+          `;
+    
+        } else {
+    
+          recentOrdersBody.innerHTML =
+    
+            data.recentOrders
+              .map(order => {
+    
+    
+                const customerName =
+    
+                  order.user
+    
+                    ? `${
+                        order.user
+                          .firstName || ""
+                      } ${
+                        order.user
+                          .lastName || ""
+                      }`
+    
+                    : "Unknown User";
+    
+    
+                return `
+    
+                  <tr>
+    
+                    <td>
+                      ${order.orderId}
+                    </td>
+    
+    
+                    <td>
+                      ${customerName}
+                    </td>
+    
+    
+                    <td>
+    
+                      ₹${Number(
+                        order.grandTotal || 0
+                      ).toLocaleString(
+                        "en-IN"
+                      )}
+    
+                    </td>
+    
+    
+                    <td>
+    
+                      <span class="
+                        dashboard-status
+                        status-${order.status.toLowerCase()}
+                      ">
+    
+                        ${order.status}
+    
+                      </span>
+    
+                    </td>
+    
+                  </tr>
+    
+                `;
+    
+              })
+              .join("");
+        }
+    
+    
+    
+        // ======================
+        // LOW STOCK
+        // ======================
+    
+        const lowStockContainer =
+          document.getElementById(
+            "lowStockProducts"
+          );
+    
+    
+        if (
+          !data.lowStockProducts ||
+          data.lowStockProducts
+            .length === 0
+        ) {
+    
+          lowStockContainer.innerHTML = `
+    
+            <p class="no-low-stock">
+              No low stock products
+            </p>
+    
+          `;
+    
+        } else {
+    
+          lowStockContainer.innerHTML =
+    
+            data.lowStockProducts
+              .map(product => {
+    
+                return `
+    
+                  <div class="low-stock-item">
+    
+                    <div>
+    
+                      <strong>
+                        ${product.productName}
+                      </strong>
+    
+                      <p>
+    
+                        Only
+                        ${product.lowestStock}
+                        left in stock
+    
+                      </p>
+    
+                    </div>
+    
+    
+                    <span class="stock-badge">
+    
+                      ${product.lowestStock}
+    
+                    </span>
+    
+                  </div>
+    
+                `;
+    
+              })
+              .join("");
+        }
+    
+    
+      } catch (error) {
+    
+        console.log(
+          "DASHBOARD LOAD ERROR:",
+          error
+        );
+      }
+    }
+    
+    
+    loadDashboardStats();
+    
     </script>
     <div id="userConfirmModal" class="user-confirm-modal">
 

@@ -2947,3 +2947,251 @@ CART PAGE
 .confirm-action-btn:hover {
   background: #333;
 }
+.nav-icon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-icon a {
+  color: #111;
+  text-decoration: none;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon a:visited {
+  color: #111;
+}
+
+.nav-icon a:hover {
+  color: #555;
+}
+
+.wishlist-nav {
+  font-size: 25px !important;
+}
+.brand-link {
+  color: #111;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.brand-link:hover {
+  text-decoration: underline;
+}
+.no-offer {
+  width: 100%;
+  text-align: center;
+}
+.deal-section:has(.no-offer) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.deal-section .no-offer {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+  margin: 0 auto;
+}
+.dashboard-content-grid {
+  margin-top: 30px;
+}
+
+.dashboard-panel {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.panel-header a {
+  color: #111;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.panel-header a:hover {
+  text-decoration: underline;
+}
+.dashboard-analytics {
+  margin-top: 28px;
+}
+
+.dashboard-chart-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 22px;
+}
+
+.dashboard-bottom-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.dashboard-panel {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.dashboard-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.dashboard-panel-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dashboard-panel-header span {
+  font-size: 13px;
+  color: #777;
+  background: #f5f5f5;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.dashboard-panel-header a {
+  text-decoration: none;
+  color: #555;
+  font-size: 13px;
+}
+
+.dashboard-panel-header a:hover {
+  color: #000;
+}
+
+.chart-container {
+  height: 300px;
+  width: 100%;
+}
+
+.brand-chart-container {
+  height: 300px;
+}
+
+.low-stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.low-stock-item {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.low-stock-item strong {
+  font-size: 14px;
+}
+
+.low-stock-item p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #777;
+}
+
+.stock-badge {
+  min-width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f5f5;
+  border-radius: 50%;
+
+  font-weight: 600;
+}
+
+.dashboard-status {
+  display: inline-block;
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 12px;
+  background: #f1f1f1;
+}
+
+.no-low-stock {
+  color: #777;
+  text-align: center;
+  padding: 30px 0;
+}
+
+
+
+@media (max-width: 1000px) {
+
+  .dashboard-chart-row,
+  .dashboard-bottom-row {
+    grid-template-columns: 1fr;
+  }
+
+}
+.pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #111;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 40px;
+}
+
+.pagination button:hover {
+  background: #f2f2f2;
+}
+
+.pagination button.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

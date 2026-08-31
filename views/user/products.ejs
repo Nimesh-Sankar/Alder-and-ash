@@ -627,114 +627,102 @@ return;
 
 }
 async function addToWishlist(productId, isOutOfStock) {
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
 
-const user =
-    JSON.parse(
-        localStorage.getItem("user")
-    );
-
-if (!user) {
-
+  if (!user) {
     showAlert(
-        "Please login first",
-        "danger"
+      "Please login first",
+      "danger"
     );
 
     setTimeout(() => {
-        window.location.href = "/login";
+      window.location.href = "/login";
     }, 900);
 
     return;
-}
+  }
 
-if (isOutOfStock) {
-
+  if (isOutOfStock) {
     showAlert(
-        "This product is out of stock",
-        "danger"
+      "This product is out of stock",
+      "danger"
     );
-
     return;
-}
+  }
 
-try {
+  try {
+    if (wishlistIds.includes(productId)) {
 
-    if (
-        wishlistIds.includes(productId)
-    ) {
+      // REMOVE FROM WISHLIST
+      const response = await fetch(
+        "/api/wishlist/remove",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            productId
+          })
+        }
+      );
 
-        const response =
-            await fetch(
-                "/api/wishlist/remove",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        userid:
-                            user.id || user._id
-                    },
-                    body: JSON.stringify({
-                        productId
-                    })
-                }
-            );
+      const data = await response.json();
 
-        const data =
-            await response.json();
+      showAlert(
+        data.message || "Removed from wishlist",
+        response.ok ? "success" : "danger"
+      );
 
-        showAlert(
-            data.message ||
-            "Removed from wishlist",
-            "success"
+      if (response.ok) {
+        wishlistIds = wishlistIds.filter(
+          id => id !== productId
         );
-
-        wishlistIds =
-            wishlistIds.filter(
-                id => id !== productId
-            );
+      }
 
     } else {
 
-        const response =
-            await fetch(
-                "/api/wishlist/add",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        userid:
-                            user.id || user._id
-                    },
-                    body: JSON.stringify({
-                        productId
-                    })
-                }
-            );
+      // ADD TO WISHLIST
+      const response = await fetch(
+        "/api/wishlist/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            productId
+          })
+        }
+      );
 
-        const data =
-            await response.json();
+      const data = await response.json();
 
-            showAlert(
-    data.message,
-    response.ok
-        ? "success"
-        : "danger"
-);
+      showAlert(
+        data.message || "Unable to update wishlist",
+        response.ok ? "success" : "danger"
+      );
 
-if (response.ok) {
-    wishlistIds.push(productId);
-}
+      if (response.ok) {
+        wishlistIds.push(productId);
+      }
     }
 
     loadProducts();
 
-} catch (error) {
+  } catch (error) {
+    console.log(
+      "WISHLIST ERROR:",
+      error
+    );
 
-    console.log(error);
-
-}
+    showAlert(
+      "Something went wrong",
+      "danger"
+    );
+  }
 }
 
 

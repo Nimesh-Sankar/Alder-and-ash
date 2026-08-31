@@ -111,48 +111,65 @@ id="homeBanner"
   
     <div class="brands-row">
       <% brands.forEach(brand => { %>
-  
-        <span>
+        <a
+          href="/api/users/products?brand=<%= brand._id %>"
+          class="brand-link"
+        >
           <%= brand.brandName %>
-        </span>
-  
+        </a>
       <% }) %>
     </div>
   </section>
 
-  <!-- Deal Section -->
   <section class="deal-section">
-    <img
-    class="deal-image"
-    src="/images/PngItem_4001105.png"
-    alt="Exclusive Deal"
-  />
 
-    <div class="deal-content">
-      <% if (offer) { %>
-
-        <h3><%= offer.name %></h3>
-      
+    <% if (offer) { %>
+  
+      <img
+        class="deal-image"
+        src="/images/PngItem_4001105.png"
+        alt="Exclusive Deal"
+      />
+  
+      <div class="deal-content">
+        <h3>
+          <%= offer.name %>
+        </h3>
+  
         <p>
           <%= offer.discountType === "PERCENTAGE"
             ? `${offer.discountValue}% OFF`
             : `₹${offer.discountValue} OFF`
           %>
         </p>
-      
-      <% } else { %>
-      
+  
+        <a
+          href="/api/users/products"
+          class="hero-btn"
+        >
+          Shop Now
+        </a>
+      </div>
+  
+    <% } else { %>
+  
+      <div class="deal-content no-offer">
         <h3>No Active Offer</h3>
-        <p>Check back soon for our latest deals.</p>
-      
-      <% } %>
-
-      
-
-      <a href="/api/users/products" class="hero-btn">
-        Shop Now
-      </a>
-    </div>
+  
+        <p>
+          Check back soon for our latest deals.
+        </p>
+  
+        <a
+          href="/api/users/products"
+          class="hero-btn"
+        >
+          Browse Products
+        </a>
+      </div>
+  
+    <% } %>
+  
   </section>
   <script>
 
