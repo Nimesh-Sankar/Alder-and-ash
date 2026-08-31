@@ -163,9 +163,6 @@ function showSection(sectionId) {
   }
 }
 
-// =========================
-// LOAD USERS
-// =========================
 async function loadUsers(page = 1) {
 
   const usersTableBody = document.getElementById("usersTableBody");
@@ -218,7 +215,7 @@ async function loadUsers(page = 1) {
             ${user.isBlocked ? "Unblock" : "Block"}
           </button>
         </td>
-        <td>${user.orders}</td>
+      
       `;
 
       usersTableBody.appendChild(row);
