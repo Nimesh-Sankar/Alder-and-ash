@@ -39,7 +39,7 @@ async function validateUser() {
 validateUser();
 
 
-// CHECK LOGIN STATUS
+
 
 const currentUser = localStorage.getItem('user');
 
@@ -56,7 +56,6 @@ const profileLink = document.getElementById('profileLink');
 if (profileLink && currentUser) {
   profileLink.href = '/user/profile';
 }
-// SIGNUP WITH OTP
 if (document.getElementById('signupForm')) {
 
   const signupForm = document.getElementById('signupForm');

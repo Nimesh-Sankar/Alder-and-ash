@@ -194,6 +194,12 @@ if (paymentMethod === "WALLET") {
             variant.stock -= item.quantity;
             await product.save();
         }
+        
+
+            if (cart.coupon) {
+                cart.coupon.usedCount += 1;
+                await cart.coupon.save();
+                }
 
         
         cart.items = [];

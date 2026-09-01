@@ -66,6 +66,31 @@ export const createCoupon = async (req, res) => {
         
         const start = new Date(startDate);
         const end = new Date(endDate);
+        
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        
+        if (
+            isNaN(start.getTime()) ||
+            isNaN(end.getTime())
+        ) {
+            return res
+                .status(STATUS_CODES.BAD_REQUEST)
+                .json({
+                    success: false,
+                    message: "Invalid coupon dates"
+                });
+        }
+        
+        if (end <= start) {
+            return res
+                .status(STATUS_CODES.BAD_REQUEST)
+                .json({
+                    success: false,
+                    message:
+                        "End date must be after start date"
+                });
+        }
 
         if (end <= start) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -273,6 +298,31 @@ export const updateCoupon = async (req, res) => {
 
         const start = new Date(startDate);
         const end = new Date(endDate);
+        
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        
+        if (
+            isNaN(start.getTime()) ||
+            isNaN(end.getTime())
+        ) {
+            return res
+                .status(STATUS_CODES.BAD_REQUEST)
+                .json({
+                    success: false,
+                    message: "Invalid coupon dates"
+                });
+        }
+        
+        if (end <= start) {
+            return res
+                .status(STATUS_CODES.BAD_REQUEST)
+                .json({
+                    success: false,
+                    message:
+                        "End date must be after start date"
+                });
+        }
 
         if (end <= start) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
